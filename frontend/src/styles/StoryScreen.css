@@ -1,0 +1,75 @@
+body {
+  background-color: black;
+  color: lime;
+  font-family: "Courier New", Courier, monospace;
+  overflow: hidden;
+}
+
+#title {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3em;
+  font-weight: bold;
+  text-align: center;
+  animation: type 4s steps(30, end), fadein 2s;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 24ch;
+  margin: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#start-button {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 1.5em;
+  animation: blink 1.5s infinite, fadein 4s;
+  cursor: pointer;
+  transition: color 0.3s, transform 0.3s, background-color 0.3s;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#start-button:hover {
+  color: white;
+  transform: translate(-50%, -50%) scale(1.2);
+  background-color: rgba(0, 255, 0, 0.6);
+}
+
+@keyframes type {
+  0% {
+    width: 0ch;
+  }
+  100% {
+    width: 24ch;
+  }
+}
+
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+  50% {
+    color: transparent;
+  }
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}

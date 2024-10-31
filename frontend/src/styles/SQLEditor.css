@@ -1,0 +1,87 @@
+/* src/components/SQLEditor.scss */
+
+.sql-editor-container {
+  display: flex;
+  justify-content: space-between; /* Aligns left and right sidebars */
+  align-items: stretch;
+  padding: 0;
+  margin: 0;
+  height: 100vh; /* Full viewport height */
+  width: 100vw; /* Full viewport width */
+  background-color: #f7f7f7;
+}
+
+.sidebar {
+  width: 20%; /* Adjust the width as needed */
+  background-color: #e9ecef;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.main-editor {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+}
+
+.editor {
+  position: relative;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+  width: 100%;
+  /* Make sure editor takes full width of main area */
+  /* width: 20vw; */
+}
+
+.CodeMirror {
+  height: 300px;
+  width: 50%; /* Set editor width to 50% */
+  font-size: 1rem;
+}
+
+.buttons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.button {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+}
+
+.clear {
+  background-color: #d9534f;
+}
+
+.run {
+  background-color: #5cb85c;
+}
+
+.result {
+  padding: 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.result pre {
+  font-family: "Courier New", Courier, monospace;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
