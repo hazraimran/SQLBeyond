@@ -85,3 +85,68 @@
   border-radius: 5px;
   border: 1px solid #ddd;
 }
+
+/* src/styles/SQLEditor.css */
+.question-box {
+  background-color: #f1f1f1;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+}
+.question-box h3 {
+  margin: 0;
+}
+
+.result.correct {
+  border: 2px solid #4caf50; /* Green border for correct answer */
+  box-shadow: 0 0 10px #4caf50;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.result.incorrect {
+  border: 2px solid red; /* Red border for incorrect answer */
+  box-shadow: 0 0 10px red;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* SQL Editor Styles */
+.sql-editor-container {
+  display: flex;
+}
+
+.left-sidebar {
+  flex: 1;
+}
+
+.main-editor {
+  flex: 2;
+}
+
+.right-sidebar {
+  flex: 1;
+}
+
+.table-container {
+  max-height: 300px; /* Set the desired height for vertical scrolling */
+  overflow-x: auto;
+  overflow-y: auto;
+  border: 1px solid #ddd; /* Optional: Add a border around the table */
+}
+
+.table-container table {
+  width: 100%; /* Ensure the table takes full width of the container */
+  border-collapse: collapse;
+}
+
+.table-container th,
+.table-container td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.table-container th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  text-align: left;
+}

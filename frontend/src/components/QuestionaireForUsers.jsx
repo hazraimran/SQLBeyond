@@ -1,173 +1,122 @@
-import React from "react";
-import { CSSTransition } from "react-transition-group";
-import "../styles/styles.css";
-import { useLocation } from "react-router-dom";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "../styles/styles.css";
 
 const quiz = {
-  topic: "Javascript",
-  level: "Beginner",
-  totalQuestions: 10,
+  totalQuestions: 4,
   perQuestionScore: 5,
-  totalTime: 60, // in seconds
   questions: [
     {
-      question:
-        "Which function is used to serialize an object into a JSON string in Javascript?",
-      choices: ["stringify()", "parse()", "convert()", "None of the above"],
-      type: "MCQs",
-      correctAnswer: "stringify()",
+      question: "Which SQL statement is used to retrieve data from a database?",
+      choices: ["SELECT", "GET", "FETCH", "RETRIEVE"],
+      correctAnswer: "SELECT",
     },
     {
-      question:
-        "Which of the following keywords is used to define a variable in Javascript?",
-      choices: ["var", "let", "var and let", "None of the above"],
-      type: "MCQs",
-      correctAnswer: "var and let",
+      question: "Which clause is used to filter records in SQL?",
+      choices: ["WHERE", "FILTER", "GROUP BY", "ORDER BY"],
+      correctAnswer: "WHERE",
     },
     {
-      question:
-        "Which of the following methods can be used to display data in some form using Javascript?",
-      choices: [
-        "document.write()",
-        "console.log()",
-        "window.alert",
-        "All of the above",
-      ],
-      type: "MCQs",
-      correctAnswer: "All of the above",
+      question: "How do you sort results in ascending order in SQL?",
+      choices: ["ORDER BY ASC", "SORT ASC", "ASCENDING", "SORT BY ASC"],
+      correctAnswer: "ORDER BY ASC",
     },
     {
-      question: "How can a datatype be declared to be a constant type?",
-      choices: ["const", "var", "let", "constant"],
-      type: "MCQs",
-      correctAnswer: "const",
+      question: "Which SQL statement is used to insert new data into a table?",
+      choices: ["INSERT INTO", "ADD INTO", "INSERT NEW", "ADD RECORD"],
+      correctAnswer: "INSERT INTO",
     },
   ],
 };
 
+function mapInitialScoreToStartingPoint(score, maxScore) {
+  if (score <= 0.25 * maxScore) return 0.2;
+  else if (score <= 0.5 * maxScore) return 0.4;
+  else if (score <= 0.75 * maxScore) return 0.6;
+  return 0.8;
+}
+
 function QuestionaireForUsers() {
   const navigate = useNavigate();
-  const [activeQuestion, setActiveQuestion] = React.useState(0);
-  const [selectedAnswer, setSelectedAnswer] = React.useState("");
-  const [showResult, setShowResult] = React.useState(false);
-  const [selectedAnswerIndex, setSelectedAnswerIndex] = React.useState(null);
-  const [result, setResult] = React.useState({
+  const [activeQuestion, setActiveQuestion] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState("");
+  const [showResult, setShowResult] = useState(false);
+  const [result, setResult] = useState({
     score: 0,
     correctAnswers: 0,
     wrongAnswers: 0,
   });
-  const location = useLocation();
-  const { name, company, position } = location.state || {};
-
-  React.useEffect(() => {
-    console.log(name, company, position);
-  });
 
   const { questions } = quiz;
-  const { question, choices, correctAnswer } = questions[activeQuestion];
+  const maxScore = questions.length * quiz.perQuestionScore;
 
   const onClickNext = () => {
-    setSelectedAnswerIndex(null);
     setResult((prev) =>
-      selectedAnswer
+      selectedAnswer === questions[activeQuestion].correctAnswer
         ? {
             ...prev,
-            score: prev.score + 5,
+            score: prev.score + quiz.perQuestionScore,
             correctAnswers: prev.correctAnswers + 1,
           }
         : { ...prev, wrongAnswers: prev.wrongAnswers + 1 }
     );
-    if (activeQuestion !== questions.length - 1) {
+
+    if (activeQuestion < questions.length - 1) {
       setActiveQuestion((prev) => prev + 1);
+      setSelectedAnswer("");
     } else {
-      setActiveQuestion(0);
       setShowResult(true);
     }
   };
 
-  const onAnswerSelected = (answer, index) => {
-    setSelectedAnswerIndex(index);
-    setSelectedAnswer(answer === correctAnswer);
+  const onAnswerSelected = (answer) => {
+    setSelectedAnswer(answer);
   };
 
-  const addLeadingZero = (number) => (number > 9 ? number : `0${number}`);
-
-  const continueGame = () => {
-    // Send data to the "/query" route
-    navigate("/SQLeditor", {
-      state: {
-        name,
-        company,
-        position,
-      },
-    });
+  const continueToSQL = () => {
+    const initialPerformance = mapInitialScoreToStartingPoint(
+      result.score,
+      maxScore
+    );
+    const userData = JSON.parse(localStorage.getItem("userData")) || {};
+    localStorage.setItem(
+      "userData",
+      JSON.stringify({ ...userData, initialPerformance })
+    );
+    navigate("/SQLEditor");
   };
 
   return (
-    <CSSTransition
-      in={!showResult || (showResult && activeQuestion === 0)}
-      timeout={500} // Match this with your CSS transition
-      classNames="container-fade" // Ensure this matches your CSS classes
-      unmountOnExit
-    >
-      <div className="quiz-container">
-        {!showResult ? (
-          <div>
-            <div>
-              <span className="active-question-no">
-                {addLeadingZero(activeQuestion + 1)}
-              </span>
-              <span className="total-question">
-                /{addLeadingZero(questions.length)}
-              </span>
-            </div>
-            <h2>{question}</h2>
-            <ul>
-              {choices.map((answer, index) => (
-                <li
-                  onClick={() => onAnswerSelected(answer, index)}
-                  key={answer}
-                  className={
-                    selectedAnswerIndex === index ? "selected-answer" : null
-                  }
-                >
-                  {answer}
-                </li>
-              ))}
-            </ul>
-            <div className="flex-right">
-              <button
-                onClick={onClickNext}
-                disabled={selectedAnswerIndex === null}
+    <div className="quiz-container">
+      {!showResult ? (
+        <div>
+          <h2>{questions[activeQuestion].question}</h2>
+          <ul>
+            {questions[activeQuestion].choices.map((choice, index) => (
+              <li
+                key={index}
+                onClick={() => onAnswerSelected(choice)}
+                className={selectedAnswer === choice ? "selected-answer" : null}
               >
-                {activeQuestion === questions.length - 1 ? "Finish" : "Next"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="result">
-            <h3>Result</h3>
-            <div>
-              <p>
-                Total Question: <span>{questions.length}</span>
-              </p>
-              <p>
-                Total Score:<span> {result.score}</span>
-              </p>
-              <p>
-                Correct Answers:<span> {result.correctAnswers}</span>
-              </p>
-              <p>
-                Wrong Answers:<span> {result.wrongAnswers}</span>
-              </p>
-              {/* <button onClick={continueGame}>Continue</button> */}
-            </div>
-            <button onClick={continueGame}>Continue</button>
-          </div>
-        )}
-      </div>
-    </CSSTransition>
+                {choice}
+              </li>
+            ))}
+          </ul>
+          <button onClick={onClickNext} disabled={!selectedAnswer}>
+            {activeQuestion === questions.length - 1 ? "Finish" : "Next"}
+          </button>
+        </div>
+      ) : (
+        <div className="result">
+          <h3>Quiz Completed</h3>
+          <p>Total Questions: {questions.length}</p>
+          <p>Score: {result.score}</p>
+          <p>Correct Answers: {result.correctAnswers}</p>
+          <p>Wrong Answers: {result.wrongAnswers}</p>
+          <button onClick={continueToSQL}>Continue to SQL Practice</button>
+        </div>
+      )}
+    </div>
   );
 }
 

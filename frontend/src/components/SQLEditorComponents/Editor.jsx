@@ -5,7 +5,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import "../../styles/Editor.css";
 
-const Editor = ({ setQuery, query, executeQuery }) => {
+const Editor = ({ setQuery, query, executeQuery, buttonsDisabled }) => {
   const [content, setContent] = useState(query);
 
   return (
@@ -18,6 +18,7 @@ const Editor = ({ setQuery, query, executeQuery }) => {
               setQuery("");
               setContent(""); // Clear the editor content as well
             }}
+            disabled={buttonsDisabled} // Disable Clear button
           >
             Clear
           </button>
@@ -27,6 +28,7 @@ const Editor = ({ setQuery, query, executeQuery }) => {
               setQuery(content);
               executeQuery(content);
             }}
+            disabled={buttonsDisabled} // Disable Run button
           >
             Run
           </button>
@@ -47,6 +49,7 @@ Editor.propTypes = {
   setQuery: PropTypes.func.isRequired,
   query: PropTypes.string.isRequired,
   executeQuery: PropTypes.func.isRequired,
+  buttonsDisabled: PropTypes.bool.isRequired, // Add prop validation for buttonsDisabled
 };
 
 export default memo(Editor);

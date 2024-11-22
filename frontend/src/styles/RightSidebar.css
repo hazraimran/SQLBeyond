@@ -1,0 +1,173 @@
+/* src/styles/RightSidebar.css */
+
+.right-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Distribute items evenly */
+  width: 20%; /* Equal width for left and right sidebar */
+  background-color: #f8f9fa;
+  padding: 1rem;
+  overflow-y: auto;
+  height: 100vh; /* Full height of the viewport */
+  box-sizing: border-box;
+}
+
+/* Adjusting spacing and layout for the individual sections */
+
+.progress-container,
+.achievements,
+.hints,
+.performance-summary,
+.ai-assistant-container {
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  position: relative;
+  height: 10px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+}
+
+.progress {
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  position: absolute;
+  top: -20px;
+  right: 5px;
+  font-size: 0.8rem;
+  color: #333;
+}
+
+.achievements {
+  margin-bottom: 1rem;
+}
+
+.badge {
+  background-color: #ffd700;
+  color: #333;
+  padding: 0.5rem;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* .hints { */
+/* margin-bottom: 1rem; */
+/* } */
+
+.hint-progress {
+  display: flex;
+  gap: 5px;
+  margin: 0.5rem 0;
+}
+
+.hint-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+}
+
+.hint-dot.used {
+  background-color: #4caf50;
+}
+
+.hint-button {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.hint-button:hover {
+  background-color: #45a049;
+}
+
+.performance-summary p {
+  margin: 0.5rem 0;
+}
+
+.performance-summary strong {
+  color: #333;
+}
+
+/* AI Assistant container styling */
+
+.ai-assistant-container {
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-assistant-container h4 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.ai-assistant-container .assistant-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.ai-assistant-container .assistant-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.ai-assistant-container .assistant-button:hover {
+  background-color: #45a049;
+}
+
+.progress-bar-container {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 15px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #4caf50; /* Green color */
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.5s ease;
+}

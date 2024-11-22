@@ -1,0 +1,72 @@
+.ai-assistant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; /* Adjusts content spacing */
+  background-color: #f3f4f6; /* Light grey to match the sidebar */
+  border-radius: 8px;
+  padding: 1rem;
+  height: auto; /* Automatic height to prevent it from taking excessive space */
+  max-height: 250px; /* Set max height to keep it compact */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.assistant-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.assistant-icon {
+  font-size: 1.5rem;
+  color: #4caf50;
+  margin-bottom: 0.3rem;
+}
+
+h4 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+.assistant-message {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.assistant-message p {
+  color: #555;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.assistant-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.help-button,
+.encourage-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.help-button:hover,
+.encourage-button:hover {
+  background-color: #45a049;
+}

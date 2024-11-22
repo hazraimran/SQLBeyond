@@ -1,25 +1,124 @@
-// src/components/SQLEditor.jsx
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
+import confetti from "canvas-confetti";
+import LeftSidebar from "./Sidebar/LeftSidebar";
+import RightSidebar from "./Sidebar/RightSidebar";
 import Editor from "./SQLEditorComponents/Editor";
+import questions from "../data/questions";
 import "../styles/SQLEditor.css";
 
-const SQLEditor = () => {
-  const [query, setQuery] = useState("SELECT * FROM Customers");
-  const [result, setResult] = useState([]);
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-  const executeQuery = async (query) => {
+function generateLearningCurve(tasksCompleted, initialPerformance) {
+  const m = 0.02;
+  const b = initialPerformance;
+  return m * tasksCompleted + b;
+}
+
+function getQuestionBasedOnPerformance(tasksCompleted, initialPerformance) {
+  const performance = generateLearningCurve(tasksCompleted, initialPerformance);
+  let difficulty;
+
+  if (performance < 0.4) difficulty = "easy";
+  else if (performance < 0.7) difficulty = "medium";
+  else difficulty = "hard";
+
+  const questionList = questions["Select"][difficulty];
+  return questionList[Math.floor(Math.random() * questionList.length)];
+}
+
+const SQLEditor = () => {
+  const location = useLocation();
+  const savedUserData = JSON.parse(localStorage.getItem("userData")) || {};
+  const {
+    name = savedUserData.name,
+    company = savedUserData.company,
+    position = savedUserData.position,
+    initialPerformance = savedUserData.initialPerformance || 0,
+  } = location.state || {};
+
+  const [query, setQuery] = useState("SELECT * FROM Patient");
+  const [result, setResult] = useState([]);
+  const [tasksCompleted, setTasksCompleted] = useState(1);
+  const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
+  const [imageState, setImageState] = useState("thinking");
+  const [message, setMessage] = useState("");
+  const [buttonsDisabled, setButtonsDisabled] = useState(true);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [startTime, setStartTime] = useState(null);
+  const [points, setPoints] = useState(0);
+  const [badges, setBadges] = useState(["Query Novice", "JOIN Master"]);
+  const [hasExecuted, setHasExecuted] = useState(false); // Guard for first-time execution
+
+  const loadQuestion = useCallback(async () => {
+    setImageState("thinking");
+    setButtonsDisabled(true);
+
+    const question = getQuestionBasedOnPerformance(
+      tasksCompleted,
+      initialPerformance
+    );
+
+    if (question) {
+      setCurrentQuestion(question);
+      setStartTime(Date.now());
+      const correctAnswerQuery = question.answer;
+      const correctResult = await fetchCorrectAnswerResult(correctAnswerQuery);
+      setCorrectAnswerResult(correctResult);
+      setMessage(`Current Task: ${question.question}`);
+      setTimeout(() => setButtonsDisabled(false), 2000);
+    }
+  }, [tasksCompleted, initialPerformance]);
+
+  useEffect(() => {
+    if (!hasExecuted) {
+      setHasExecuted(true); // Mark execution as complete
+      setMessage(
+        `Hi ${name || "User"}, I'm Joe from ${
+          company || "your company"
+        }, manager for ${
+          position || "your position"
+        }. Let's start your assessment.`
+      );
+      setImageState("happy");
+      setButtonsDisabled(true);
+      setTimeout(() => {
+        loadQuestion();
+      }, 5000); // Adjusted timeout for the introductory message
+    }
+  }, [hasExecuted, loadQuestion, name, company, position]);
+
+  const fetchCorrectAnswerResult = async (correctQuery) => {
     try {
-      const response = await fetch("http://localhost:5001/execute-query", {
+      const response = await fetch(`${apiUrl}/execute-query`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query: correctQuery }),
+      });
+      const data = await response.json();
+      return response.ok ? data.results : null;
+    } catch (error) {
+      console.error("Error fetching correct answer:", error);
+      return null;
+    }
+  };
+
+  const executeQuery = async (userQuery) => {
+    try {
+      const response = await fetch(`${apiUrl}/execute-query`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: userQuery }),
       });
 
       const data = await response.json();
       if (response.ok) {
         setResult(data.results);
+        checkAnswer(data.results);
       } else {
         setResult([{ error: "Error executing query" }]);
       }
@@ -29,44 +128,86 @@ const SQLEditor = () => {
     }
   };
 
+  const checkAnswer = (userResult) => {
+    if (JSON.stringify(userResult) === JSON.stringify(correctAnswerResult)) {
+      const timeTaken = (Date.now() - startTime) / 1000;
+      console.log(`Time taken to complete question: ${timeTaken} seconds`);
+
+      setImageState("helpful");
+      setMessage("Good job!");
+
+      setPoints((prevPoints) => {
+        const newPoints = prevPoints + 50;
+        if (newPoints >= 100) {
+          const newBadge = `Achievement ${badges.length + 1}`;
+          setBadges((prevBadges) => [...prevBadges, newBadge]);
+          return 0;
+        }
+        return newPoints;
+      });
+
+      triggerConfetti();
+      setTimeout(() => {
+        setTasksCompleted((prev) => prev + 1);
+        loadQuestion();
+      }, 3000);
+    } else {
+      setImageState("happy");
+      setMessage("Try again");
+      setTimeout(() => {
+        setMessage(`Current Task: ${currentQuestion.question}`);
+      }, 2000);
+    }
+  };
+
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  };
+
   return (
     <div className="sql-editor-container">
-      <div className="sidebar left-sidebar">
-        <h1>Left Sidebar</h1>
-      </div>
+      <LeftSidebar imageState={imageState} message={message} />
       <div className="main-editor">
-        <h2>SQL Editor</h2>
-        <Editor setQuery={setQuery} query={query} executeQuery={executeQuery} />
+        <Editor
+          setQuery={setQuery}
+          query={query}
+          executeQuery={executeQuery}
+          buttonsDisabled={buttonsDisabled}
+        />
         <div className="result">
           <h3>Query Result:</h3>
-          {Array.isArray(result) ? (
-            <table>
-              <thead>
-                <tr>
-                  {result.length > 0 &&
-                    Object.keys(result[0]).map((key) => (
-                      <th key={key}>{key}</th>
-                    ))}
-                </tr>
-              </thead>
-              <tbody>
-                {result.map((row, index) => (
-                  <tr key={index}>
-                    {Object.values(row).map((value, i) => (
-                      <td key={i}>{value}</td>
-                    ))}
+          <div className="table-container">
+            {Array.isArray(result) ? (
+              <table>
+                <thead>
+                  <tr>
+                    {result.length > 0 &&
+                      Object.keys(result[0]).map((key) => (
+                        <th key={key}>{key}</th>
+                      ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <pre>{result}</pre>
-          )}
+                </thead>
+                <tbody>
+                  {result.map((row, index) => (
+                    <tr key={index}>
+                      {Object.values(row).map((value, i) => (
+                        <td key={i}>{value}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <pre>{result}</pre>
+            )}
+          </div>
         </div>
       </div>
-      <div className="sidebar right-sidebar">
-        <h1>Right Sidebar</h1>
-      </div>
+      <RightSidebar progress={points} badges={badges} />
     </div>
   );
 };
