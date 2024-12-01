@@ -1,8 +1,6 @@
-/* src/components/SQLEditor.scss */
-
 .sql-editor-container {
   display: flex;
-  justify-content: space-between; /* Aligns left and right sidebars */
+  justify-content: space-between;
   align-items: stretch;
   padding: 0;
   margin: 0;
@@ -19,7 +17,7 @@
 }
 
 .main-editor {
-  flex: 1;
+  flex: 2;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -35,14 +33,12 @@
   border: 1px solid #ddd;
   border-radius: 5px;
   overflow: hidden;
-  width: 100%;
-  /* Make sure editor takes full width of main area */
-  /* width: 20vw; */
+  width: 100%; /* Ensures editor takes the full width of the container */
 }
 
 .CodeMirror {
   height: 300px;
-  width: 50%; /* Set editor width to 50% */
+  width: 100%; /* Ensures editor width matches container */
   font-size: 1rem;
 }
 
@@ -72,6 +68,10 @@
 }
 
 .result {
+  display: flex;
+  flex-direction: column; /* Ensures child elements stack vertically */
+  flex-grow: 1; /* Allows it to take up available vertical space */
+  height: 100%; /* Ensure full height of parent container */
   padding: 10px;
   background-color: #f8f9fa;
   border: 1px solid #ddd;
@@ -86,7 +86,33 @@
   border: 1px solid #ddd;
 }
 
-/* src/styles/SQLEditor.css */
+.table-container {
+  flex-grow: 1; /* Allows the table container to grow and fill available space */
+  height: 100%; /* Ensures the height fills the parent container */
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: auto; /* Enable horizontal scrolling */
+  border: 1px solid #ddd;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+.table-container table {
+  width: 100%; /* Ensures the table takes up the full width */
+  border-collapse: collapse;
+}
+
+.table-container th,
+.table-container td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.table-container th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  text-align: left;
+}
+
 .question-box {
   background-color: #f1f1f1;
   padding: 10px;
@@ -94,6 +120,7 @@
   margin-bottom: 20px;
   border: 1px solid #ccc;
 }
+
 .question-box h3 {
   margin: 0;
 }
@@ -110,43 +137,10 @@
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* SQL Editor Styles */
-.sql-editor-container {
-  display: flex;
-}
-
 .left-sidebar {
   flex: 1;
 }
 
-.main-editor {
-  flex: 2;
-}
-
 .right-sidebar {
   flex: 1;
-}
-
-.table-container {
-  max-height: 300px; /* Set the desired height for vertical scrolling */
-  overflow-x: auto;
-  overflow-y: auto;
-  border: 1px solid #ddd; /* Optional: Add a border around the table */
-}
-
-.table-container table {
-  width: 100%; /* Ensure the table takes full width of the container */
-  border-collapse: collapse;
-}
-
-.table-container th,
-.table-container td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-.table-container th {
-  background-color: #f4f4f4;
-  font-weight: bold;
-  text-align: left;
 }

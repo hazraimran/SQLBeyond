@@ -45,33 +45,35 @@ const SQLEditor = () => {
   const [message, setMessage] = useState("");
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [generatedQuery, setGeneratedQuery] = useState(""); // Store the AI-generated query
+  // const [generatedQuery, setGeneratedQuery] = useState(""); // Store the AI-generated query
   const [startTime, setStartTime] = useState(null);
   const [points, setPoints] = useState(0);
   const [badges, setBadges] = useState(["Query Novice", "JOIN Master"]);
   const [hasExecuted, setHasExecuted] = useState(false);
 
-  const fetchGeneratedQuery = async (question) => {
-    try {
-      const response = await fetch(`${apiUrl}/generate-sql`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question }),
-      });
-      const data = await response.json();
+  // const fetchGeneratedQuery = async (question) => {
+  //   try {
+  //     const response = await fetch(`${apiUrl}/generate-sql`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ prompt: question }), // Ensure `prompt` is correct
+  //     });
 
-      if (response.ok) {
-        setGeneratedQuery(data.query || "No query generated."); // Update the generated query
-      } else {
-        setGeneratedQuery("Error generating query. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error generating SQL query:", error);
-      setGeneratedQuery("Error generating query. Please try again.");
-    }
-  };
+  //     const data = await response.json();
+
+  //     if (response.ok) {
+  //       setGeneratedQuery(data.response); // Assuming `data.response` contains the query
+  //     } else {
+  //       console.error("Error generating query:", data.error);
+  //       setGeneratedQuery("Error generating query. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error generating query:", error);
+  //     setGeneratedQuery("Error generating query. Please try again.");
+  //   }
+  // };
 
   const loadQuestion = useCallback(async () => {
     setImageState("thinking");
@@ -91,7 +93,7 @@ const SQLEditor = () => {
       const correctResult = await fetchCorrectAnswerResult(correctAnswerQuery);
       setCorrectAnswerResult(correctResult);
       setMessage(`Current Task: ${question.question}`);
-      await fetchGeneratedQuery(question.question); // Fetch the AI-generated query
+      // await fetchGeneratedQuery(question.question); // Fetch the AI-generated query
       setTimeout(() => setButtonsDisabled(false), 2000);
     }
   }, [tasksCompleted, initialPerformance]);
@@ -204,6 +206,34 @@ const SQLEditor = () => {
           executeQuery={executeQuery}
           buttonsDisabled={buttonsDisabled}
         />
+        {/* <div className="result">
+          <h3>Query Result:</h3>
+          <div className="table-container">
+            {Array.isArray(result) ? (
+              <table>
+                <thead>
+                  <tr>
+                    {result.length > 0 &&
+                      Object.keys(result[0]).map((key) => (
+                        <th key={key}>{key}</th>
+                      ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.map((row, index) => (
+                    <tr key={index}>
+                      {Object.values(row).map((value, i) => (
+                        <td key={i}>{value}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <pre>{result}</pre>
+            )}
+          </div>
+        </div> */}
         <div className="result">
           <h3>Query Result:</h3>
           <div className="table-container">
@@ -236,7 +266,8 @@ const SQLEditor = () => {
       <RightSidebar
         progress={points}
         badges={badges}
-        generatedQuery={generatedQuery}
+        question={currentQuestion?.question}
+        // generatedQuery={generatedQuery}
       />
     </div>
   );

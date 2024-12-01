@@ -53,45 +53,144 @@ app.post("/execute-query", async (req, res) => {
   }
 });
 
-// Route to handle generating SQL query using Hugging Face
-app.post("/generate-sql", async (req, res) => {
-  const { question } = req.body;
+// // Route to handle generating SQL query using Hugging Face
+// app.post("/generate-sql", async (req, res) => {
+//   const { question } = req.body;
 
-  if (!question) {
-    return res.status(400).json({ error: "Question is required." });
+//   if (!question) {
+//     return res.status(400).json({ error: "Question is required." });
+//   }
+
+//   try {
+//     const response = await axios.post(
+//       "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B", // Replace with your desired Hugging Face model
+//       {
+//         inputs: question,
+//         parameters: { max_length: 150, temperature: 0.7 },
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
+//         },
+//       }
+//     );
+
+//     console.log("Hugging Face Response:", response.data);
+
+//     res.json({
+//       success: true,
+//       query:
+//         response.data.generated_text ||
+//         response.data[0]?.generated_text ||
+//         "No query generated.",
+//     });
+//   } catch (err) {
+//     console.error(
+//       "Error interacting with Hugging Face:",
+//       err.response?.data || err.message
+//     );
+//     res
+//       .status(500)
+//       .json({ success: false, error: "Failed to generate SQL query." });
+//   }
+// });
+
+app.post("/chat", async (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({ error: "Prompt is required." });
   }
-
+  console.log(prompt);
   try {
     const response = await axios.post(
-      "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B", // Replace with your desired Hugging Face model
+      "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B",
       {
-        inputs: question,
-        parameters: { max_length: 150, temperature: 0.7 },
+        inputs: prompt,
+        parameters: { max_length: 50, temperature: 0.7 },
       },
       {
         headers: {
-          Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
+          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
         },
       }
     );
 
-    console.log("Hugging Face Response:", response.data);
+    res.json({
+      success: true,
+      response: response.data.generated_text || "No response generated.",
+    });
+  } catch (err) {
+    console.error("Error interacting with Hugging Face:", err);
+    res.status(500).json({ error: "Failed to interact with Hugging Face." });
+  }
+});
+
+// app.post("/generate-sql", async (req, res) => {
+//   const { prompt } = req.body;
+
+//   if (!prompt) {
+//     return res.status(400).json({ error: "Prompt is required." });
+//   }
+//   console.log(prompt);
+//   try {
+//     const response = await axios.post(
+//       "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B",
+//       {
+//         inputs: prompt,
+//         parameters: { max_length: 50, temperature: 0.7 },
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+//         },
+//       }
+//     );
+
+//     res.json({
+//       success: true,
+//       response:
+//         response.data.generated_text ||
+//         response.data[0]?.generated_text ||
+//         "No response generated.",
+//     });
+//   } catch (err) {
+//     console.error("Error interacting with Hugging Face:", err.message);
+//     res.status(500).json({ error: "Failed to generate SQL." });
+//   }
+// });
+
+app.post("/generate-sql", async (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({ error: "Prompt is required." });
+  }
+
+  try {
+    const response = await axios.post(
+      "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B",
+      {
+        inputs: prompt,
+        parameters: { max_length: 50, temperature: 0.7 },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+        },
+      }
+    );
 
     res.json({
       success: true,
-      query:
+      response:
         response.data.generated_text ||
         response.data[0]?.generated_text ||
-        "No query generated.",
+        "No response generated.",
     });
   } catch (err) {
-    console.error(
-      "Error interacting with Hugging Face:",
-      err.response?.data || err.message
-    );
-    res
-      .status(500)
-      .json({ success: false, error: "Failed to generate SQL query." });
+    console.error("Error interacting with Hugging Face:", err.message);
+    res.status(500).json({ error: "Failed to generate SQL." });
   }
 });
 

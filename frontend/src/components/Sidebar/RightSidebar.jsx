@@ -3,7 +3,8 @@ import PropTypes from "prop-types";
 import "../../styles/RightSidebar.css";
 import AIAssistant from "./AIAssistant";
 
-const RightSidebar = ({ progress, badges, generatedQuery }) => {
+// const RightSidebar = ({ progress, badges, generatedQuery }) => {
+const RightSidebar = ({ progress, badges, question }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
 
@@ -64,6 +65,7 @@ const RightSidebar = ({ progress, badges, generatedQuery }) => {
         handleUseHint={handleUseHint}
         hintsUsed={hintsUsed}
         maxHints={3}
+        question={question}
       />
     </div>
   );
@@ -72,7 +74,7 @@ const RightSidebar = ({ progress, badges, generatedQuery }) => {
 RightSidebar.propTypes = {
   progress: PropTypes.number.isRequired,
   badges: PropTypes.arrayOf(PropTypes.string).isRequired,
-  currentQuestion: PropTypes.object,
+  question: PropTypes.object.isRequired,
 };
 
 export default RightSidebar;
