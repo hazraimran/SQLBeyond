@@ -45,10 +45,33 @@ const SQLEditor = () => {
   const [message, setMessage] = useState("");
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [generatedQuery, setGeneratedQuery] = useState(""); // Store the AI-generated query
   const [startTime, setStartTime] = useState(null);
   const [points, setPoints] = useState(0);
   const [badges, setBadges] = useState(["Query Novice", "JOIN Master"]);
-  const [hasExecuted, setHasExecuted] = useState(false); // Guard for first-time execution
+  const [hasExecuted, setHasExecuted] = useState(false);
+
+  const fetchGeneratedQuery = async (question) => {
+    try {
+      const response = await fetch(`${apiUrl}/generate-sql`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setGeneratedQuery(data.query || "No query generated."); // Update the generated query
+      } else {
+        setGeneratedQuery("Error generating query. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error generating SQL query:", error);
+      setGeneratedQuery("Error generating query. Please try again.");
+    }
+  };
 
   const loadQuestion = useCallback(async () => {
     setImageState("thinking");
@@ -59,6 +82,8 @@ const SQLEditor = () => {
       initialPerformance
     );
 
+    console.log(question);
+
     if (question) {
       setCurrentQuestion(question);
       setStartTime(Date.now());
@@ -66,6 +91,7 @@ const SQLEditor = () => {
       const correctResult = await fetchCorrectAnswerResult(correctAnswerQuery);
       setCorrectAnswerResult(correctResult);
       setMessage(`Current Task: ${question.question}`);
+      await fetchGeneratedQuery(question.question); // Fetch the AI-generated query
       setTimeout(() => setButtonsDisabled(false), 2000);
     }
   }, [tasksCompleted, initialPerformance]);
@@ -84,7 +110,7 @@ const SQLEditor = () => {
       setButtonsDisabled(true);
       setTimeout(() => {
         loadQuestion();
-      }, 5000); // Adjusted timeout for the introductory message
+      }, 5000);
     }
   }, [hasExecuted, loadQuestion, name, company, position]);
 
@@ -207,7 +233,11 @@ const SQLEditor = () => {
           </div>
         </div>
       </div>
-      <RightSidebar progress={points} badges={badges} />
+      <RightSidebar
+        progress={points}
+        badges={badges}
+        generatedQuery={generatedQuery}
+      />
     </div>
   );
 };

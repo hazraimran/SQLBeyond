@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import "../../styles/RightSidebar.css";
 import AIAssistant from "./AIAssistant";
 
-const RightSidebar = ({ progress, badges, currentQuestion }) => {
+const RightSidebar = ({ progress, badges, generatedQuery }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
 
