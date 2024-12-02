@@ -70,3 +70,83 @@ h4 {
 .encourage-button:hover {
   background-color: #45a049;
 }
+
+/* AI Assistant Container */
+.ai-assistant {
+  position: relative;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Animated Hint Card */
+.hint-card {
+  position: absolute;
+  top: -10%;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 90%;
+  max-width: 400px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.5s ease-out;
+  z-index: 10;
+}
+
+.hint-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hint-card-content h5 {
+  margin: 0;
+}
+
+.hint-card .close-button {
+  align-self: flex-end;
+  padding: 8px 12px;
+  background-color: #d9534f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Slide-In Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Buttons */
+.help-button,
+.show-hint-button {
+  padding: 10px 20px;
+  background-color: #5cb85c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.encourage-button {
+  padding: 10px 20px;
+  background-color: #0275d8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
