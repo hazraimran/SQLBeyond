@@ -27,7 +27,7 @@ const RightSidebar = ({ progress, badges, question }) => {
 
       return () => clearTimeout(timer);
     }
-  }, [progress]);
+  }, [progress, badges]);
 
   return (
     <div className="right-sidebar">
@@ -71,10 +71,11 @@ const RightSidebar = ({ progress, badges, question }) => {
   );
 };
 
+// Prop validation
 RightSidebar.propTypes = {
   progress: PropTypes.number.isRequired,
   badges: PropTypes.arrayOf(PropTypes.string).isRequired,
-  question: PropTypes.object.isRequired,
+  question: PropTypes.string.isRequired,
 };
 
 export default RightSidebar;

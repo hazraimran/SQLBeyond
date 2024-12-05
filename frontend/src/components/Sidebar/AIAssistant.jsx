@@ -31,7 +31,7 @@ const AIAssistant = ({ question }) => {
         prompt,
       });
 
-      console.log("AI Full Response:", res.data.response);
+      // console.log("AI Full Response:", res.data.response);
 
       const fullResponse = res.data.response;
       const cleanResponse = fullResponse.replace(prompt, "").trim();
