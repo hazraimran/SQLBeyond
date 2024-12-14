@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import "../../styles/RightSidebar.css";
 import AIAssistant from "./AIAssistant";
+import DifficultyChart from "../DifficultyChart"; // Import the chart
 
-// const RightSidebar = ({ progress, badges, generatedQuery }) => {
-const RightSidebar = ({ progress, badges, question }) => {
+const RightSidebar = ({ progress, badges, question, pointsData }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
 
@@ -50,6 +50,12 @@ const RightSidebar = ({ progress, badges, question }) => {
         </div>
       </div>
 
+      {/* Difficulty Chart */}
+      <div className="difficulty-chart">
+        <h3>Performance</h3>
+        <DifficultyChart pointsData={pointsData} />
+      </div>
+
       {/* Achievements */}
       <div className="achievements">
         <h3>Achievements</h3>
@@ -76,6 +82,7 @@ RightSidebar.propTypes = {
   progress: PropTypes.number.isRequired,
   badges: PropTypes.arrayOf(PropTypes.string).isRequired,
   question: PropTypes.string.isRequired,
+  pointsData: PropTypes.object.isRequired, // Add validation for pointsData
 };
 
 export default RightSidebar;
