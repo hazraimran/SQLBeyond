@@ -13,6 +13,7 @@ function IntroQuestion() {
   const positions = ["Software Developer", "Data Analyst", "Product Manager"];
 
   const handleSubmit = (e) => {
+
     e.preventDefault();
     if (name && company && position) {
       setSubmitted(true);

@@ -5,6 +5,10 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const axios = require("axios");
 
+//import the account router 
+const accountRouter = require('./routes/account');
+const cookieParser = require("cookie-parser");
+
 // Load and validate environment variables
 const PORT = process.env.PORT || 3000;
 const MYSQL_URL = process.env.MYSQL_URL;
@@ -18,8 +22,15 @@ if (!MYSQL_URL || !HUGGINGFACE_API_KEY) {
 // Express app setup
 const app = express();
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
 app.use(express.json());
+
+// Express cookie-parser - cors was changed as well
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
 
 // MySQL Connection Pool
 const pool = mysql.createPool(MYSQL_URL);
@@ -193,6 +204,10 @@ app.post("/generate-sql", async (req, res) => {
     res.status(500).json({ error: "Failed to generate SQL." });
   }
 });
+
+// ---------------------- login -------------------
+// account route (developed in the routes/account.js)
+app.use("/account", accountRouter);
 
 // Start the server
 app.listen(PORT, () => {
