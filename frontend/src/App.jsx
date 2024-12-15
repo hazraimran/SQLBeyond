@@ -3,11 +3,13 @@ import IntroQuestion from "./components/IntroQuestion";
 import QuestionaireForUsers from "./components/QuestionaireForUsers";
 import SQLEditor from "./components/SQLEditor";
 import Authentication from "./components/Authentication";
+import Register from "./components/Register";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Authentication />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/intro" element={<IntroQuestion />} />
       <Route path="/query" element={<QuestionaireForUsers />} />
       <Route path="/SQLEditor" element={<SQLEditor />} />
