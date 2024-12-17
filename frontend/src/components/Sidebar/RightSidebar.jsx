@@ -4,15 +4,28 @@ import "../../styles/RightSidebar.css";
 import AIAssistant from "./AIAssistant";
 import DifficultyChart from "../DifficultyChart"; // Import the chart
 
-const RightSidebar = ({ progress, badges, question, pointsData }) => {
+const RightSidebar = ({
+  progress,
+  setProgress,
+  query,
+  taskDescription,
+  retries,
+  badges,
+  pointsData,
+  idealPoints,
+}) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
 
+  // Function to handle hints used and deduct points
   const handleUseHint = () => {
     if (hintsUsed < 3) {
       setHintsUsed((prev) => prev + 1);
+      setProgress((prevProgress) => Math.max(prevProgress - 10, 0)); // Deduct 10 points
     }
   };
+
+  console.log(taskDescription);
 
   // Calculate the percentage of progress toward the next achievement
   const progressPercentage = (progress / 100) * 100;
@@ -53,7 +66,7 @@ const RightSidebar = ({ progress, badges, question, pointsData }) => {
       {/* Difficulty Chart */}
       <div className="difficulty-chart">
         <h3>Performance</h3>
-        <DifficultyChart pointsData={pointsData} />
+        <DifficultyChart pointsData={pointsData} idealPoints={idealPoints} />
       </div>
 
       {/* Achievements */}
@@ -71,18 +84,23 @@ const RightSidebar = ({ progress, badges, question, pointsData }) => {
         handleUseHint={handleUseHint}
         hintsUsed={hintsUsed}
         maxHints={3}
-        question={question}
+        question={taskDescription.question}
+        query={query} // Pass current query
+        retries={retries} // Pass retries count
       />
     </div>
   );
 };
 
-// Prop validation
 RightSidebar.propTypes = {
   progress: PropTypes.number.isRequired,
+  setProgress: PropTypes.func.isRequired, // Allow progress updates
+  query: PropTypes.string.isRequired, // Add query prop validation
+  taskDescription: PropTypes.string.isRequired,
+  retries: PropTypes.number.isRequired, // Add retries prop validation
   badges: PropTypes.arrayOf(PropTypes.string).isRequired,
-  question: PropTypes.string.isRequired,
-  pointsData: PropTypes.object.isRequired, // Add validation for pointsData
+  pointsData: PropTypes.object.isRequired,
+  idealPoints: PropTypes.arrayOf(PropTypes.number).isRequired, // Validate idealPoints
 };
 
 export default RightSidebar;
