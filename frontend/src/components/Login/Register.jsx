@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../../styles/Authentication.css";
-// import axios from "axios";
 import { useAuth } from "./AuthContext";
 
-// const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
-
 function Register() {
-
   // const navigate = useNavigate(); // To navigate to another route
   const [formData, setFormData] = useState({ firstName:"", lastName:"", username: "", password: "" });
   const auth = useAuth();
@@ -20,7 +16,7 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try{
-      auth.login(formData);
+      auth.register(formData);
     }
     catch(err){
       console.log(err);
@@ -54,7 +50,7 @@ function Register() {
               required />
 
             <input
-              type="email"
+              type="text"
               placeholder="Email address*"
               id="username"
               name="username"

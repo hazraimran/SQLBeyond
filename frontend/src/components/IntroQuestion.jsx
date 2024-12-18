@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/IntroQuestion.css";
 
+import { useAuth } from "../components/Login/AuthContext";
+
 function IntroQuestion() {
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
@@ -9,8 +11,14 @@ function IntroQuestion() {
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
+  const auth = useAuth();
+
   const companies = ["Apple", "Microsoft", "Amazon"];
   const positions = ["Software Developer", "Data Analyst", "Product Manager"];
+
+  const handleLogout = () => {
+    auth.logout();
+  }
 
   const handleSubmit = (e) => {
 
@@ -78,6 +86,8 @@ function IntroQuestion() {
             </div>
             <button type="submit">Submit Application</button>
           </form>
+
+          <button onClick={handleLogout}>Logout</button>
         </div>
       ) : (
         <div className="application-result">

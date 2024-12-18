@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../../styles/Authentication.css";
+import { useAuth } from "./AuthContext";
 
 // const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 function Authentication() {
-  const navigate = useNavigate(); // To navigate to another route
   const [formData, setFormData] = useState({ username: "", password: "" });
+  const auth = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,7 +18,7 @@ function Authentication() {
     e.preventDefault();
 
     // Here you could add authentication logic, e.g., API call
-    console.log("Submitted:", formData);
+    auth.login(formData);
 
     // Navigate to the intro page
     // navigate("/intro");
@@ -74,7 +75,7 @@ function Authentication() {
           <p>Don't have account yet? <Link to="/register">Sign up</Link></p>
         </div>
         <div className="log-options">
-          <form action="" className="log-form-box">
+          <form onSubmit={handleSubmit} className="log-form-box">
             <input 
               type="text" 
               placeholder="Email address*" 
