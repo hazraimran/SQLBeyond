@@ -30,13 +30,13 @@ router.post("/login", (req, res) => {
     const { username, password } = req.body;
     const db_password = "";
 
-    console.log(password);
+    // console.log(password);
 
     // make the request to the database with the username
 
     const userData = singleUser(username);
 
-    console.log(userData[0].password);
+    // console.log(userData[0].password);
 
     bcrypt.compare(password, userData[0].password, (err, response) => {
         if(response){
@@ -51,7 +51,7 @@ router.post("/login", (req, res) => {
 });
 
 router.post("/register", (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     const { firstName, lastName, username, password } = req.body;
 
     // still gotta organize the way of saving data
@@ -65,19 +65,18 @@ router.post("/register", (req, res) => {
                 console.error(err);
                 return;
             }
-
+            
             // as I'm not sure which DB and how the data are being stored, I'm saving it locally for now
             // store in the db
             addUser(username, firstName, lastName, hash);
 
-            console.log(singleUser(username)[0]);
+            // console.log(singleUser(username)[0]);
 
-            const userData = { firstName: firstName, lastName: lastName, username: username };
-
+            const userData = { user: { firstName: firstName, lastName: lastName, username: username } };
 
             req.session.user = userData;
 
-            console.log(req.session);
+            // console.log(req.session);
             res.json(userData);
         })
     })
@@ -110,6 +109,6 @@ router.get("/print-sessions", (req, res) => {
       }
       res.send(sessions);
     });
-  });
+});
 
 module.exports = router;

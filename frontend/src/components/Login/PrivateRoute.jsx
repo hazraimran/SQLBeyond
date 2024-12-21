@@ -5,11 +5,13 @@ import { useAuth } from "./AuthContext";
 const PrivateRoute = () => {
     const { user, loading } = useAuth();
 
-    if(loading){
+    if(loading && user){
         return <p>Loading ...</p>
     }
+
     if(user) 
         return <Outlet />;
+
     return <Navigate to="/" />
 }
 

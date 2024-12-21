@@ -24,9 +24,10 @@ const AuthProvider = ({ children }) => {
             });
 
             const data = response.data;
-            console.log(data);
-            if (data) {
+            // console.log(data);
+            if (data.user) {
                 setUser(data.user);
+                setLoading(false);
                 navigate("/intro");
                 return;
             }
@@ -38,7 +39,7 @@ const AuthProvider = ({ children }) => {
     }
 
     const login = async (formData) => {
-        console.log(formData)
+        // console.log(formData)
         try {
             const response = await axios.post(`${apiUrl}/account/login`, {
                 username: formData.username,
@@ -46,9 +47,10 @@ const AuthProvider = ({ children }) => {
             });
 
             const data = response.data;
-            console.log(data);
-            if (data.loggedIn) {
+            // console.log(data);
+            if (data.user) {
                 setUser(data.user);
+                setLoading(false);
                 navigate("/intro");
                 return;
             }
@@ -65,9 +67,10 @@ const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            console.log("trying to logout")
+            // console.log("trying to logout")
             await axios.post(`${apiUrl}/account/logout`);
             setUser(null);
+            setLoading(true);
             navigate("/");
         }
         catch (err) {
@@ -76,7 +79,6 @@ const AuthProvider = ({ children }) => {
     }
 
     useEffect(() => {
-
         const loadUser = async () => {
             try {
                 const response = await axios.get(`${apiUrl}/account/login`);
