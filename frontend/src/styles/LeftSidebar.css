@@ -19,7 +19,6 @@
 
 .left-sidebar-top {
   flex: 1;
-  /* overflow-y: auto; */
   overflow-x: auto;
   padding: 0;
   border-bottom: 2px solid #ddd;
@@ -28,22 +27,20 @@
 
 .left-sidebar-top ul {
   display: grid;
-  align-items: center;
   grid-template-rows: repeat(4, 1fr);
   grid-template-columns: repeat(3, 1fr);
-
-  box-sizing: border-box;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1400px) {
   .left-sidebar-top ul {
     grid-template-columns: repeat(2, 1fr); 
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .left-sidebar-top ul {
-    grid-template-columns: 1fr; 
+    display: flex;
+    flex-direction: column; 
   }
 }
 
@@ -51,25 +48,30 @@
 .table-name {
   font-weight: bold;
   cursor: pointer;
-  padding: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+
+
   width: 100px;
 
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  overflow: hidden;
+
+  /* align-items: center; */
+  /* gap: 0.5rem; */
   /* background-color: #f7f7f7; */
-  background-color: #007bff;
+  /* background-color: #007bff; */
 
 
-  margin: 0.25rem 0;
+  margin: 0.5rem 0;
   border-radius: 5px;
   transition: background-color 0.3s, color 0.3s;
   position: relative;
 }
 
 .table-name:hover {
-  background-color: #e0e0e0;
   color: #007bff;
+  width: auto;
+
 }
 
 .table-name::after {
@@ -144,4 +146,10 @@
   border-radius: 10%;
   object-fit: contain;
   max-inline-size: fit-content;
+}
+
+
+.table-columns ul {
+  display: flex;
+  flex-direction: column;
 }
