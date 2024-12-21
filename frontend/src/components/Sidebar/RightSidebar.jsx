@@ -3,10 +3,16 @@ import PropTypes from "prop-types";
 import "../../styles/RightSidebar.css";
 import AIAssistant from "./AIAssistant";
 import DifficultyChart from "../DifficultyChart"; // Import the chart
+import { useAuth } from "../Login/AuthContext";
 
 const RightSidebar = ({ progress, badges, question, pointsData }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
+  const auth = useAuth();
+
+  const handleLogout = () => {
+    auth.logout();
+  }
 
   const handleUseHint = () => {
     if (hintsUsed < 3) {
@@ -33,7 +39,10 @@ const RightSidebar = ({ progress, badges, question, pointsData }) => {
     <div className="right-sidebar">
       {/* Points and Achievements */}
       <div className="points-system">
-        <h3>Points</h3>
+        <span className="right-sidebar-header">
+          <h3>Points</h3> 
+          <button onClick={handleLogout}>Logout</button>
+        </span>
         <p>
           <strong>Current Points:</strong> {progress} / 100
         </p>

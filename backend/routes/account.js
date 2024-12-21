@@ -20,6 +20,9 @@ router.use(session({
 }));
 
 router.get("/login", (req, res) => {
+
+    // console.log("Loading user");
+
     if(req.session.user) {
         return res.json({ user: req.session.user });
     }

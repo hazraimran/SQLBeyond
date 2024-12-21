@@ -1,4 +1,4 @@
-import axios, { Axios } from "axios";
+import axios from "axios";
 import { useContext, createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -51,7 +51,7 @@ const AuthProvider = ({ children }) => {
             if (data.user) {
                 setUser(data.user);
                 setLoading(false);
-                navigate("/intro");
+                navigate("/SQLEditor");
                 return;
             }
             else{
@@ -67,7 +67,7 @@ const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            // console.log("trying to logout")
+            console.log("trying to logout")
             await axios.post(`${apiUrl}/account/logout`);
             setUser(null);
             setLoading(true);
@@ -82,17 +82,21 @@ const AuthProvider = ({ children }) => {
         const loadUser = async () => {
             try {
                 const response = await axios.get(`${apiUrl}/account/login`);
+                    // console.log(response.data);
                     if (response.data) {
+                        // console.log(response.data);
                         setUser(response.data.user);
                     }
                     else {
                         setUser(null);
-                    }    
+                    }  
+                    // console.log("loading");  
             }
             catch(err) {
                 setUser(null);
             }
             finally{
+                // console.log("finally to false");
                 setLoading(false);
             }
         }

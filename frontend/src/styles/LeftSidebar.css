@@ -19,19 +19,48 @@
 
 .left-sidebar-top {
   flex: 1;
-  overflow-y: auto;
+  /* overflow-y: auto; */
+  overflow-x: auto;
   padding: 0;
   border-bottom: 2px solid #ddd;
 }
+
+
+.left-sidebar-top ul {
+  display: grid;
+  align-items: center;
+  grid-template-rows: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
+
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .left-sidebar-top ul {
+    grid-template-columns: repeat(2, 1fr); 
+  }
+}
+
+@media (max-width: 768px) {
+  .left-sidebar-top ul {
+    grid-template-columns: 1fr; 
+  }
+}
+
 
 .table-name {
   font-weight: bold;
   cursor: pointer;
   padding: 0.5rem;
+  width: 100px;
+
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #f7f7f7;
+  /* background-color: #f7f7f7; */
+  background-color: #007bff;
+
+
   margin: 0.25rem 0;
   border-radius: 5px;
   transition: background-color 0.3s, color 0.3s;
@@ -75,10 +104,14 @@
   justify-content: center;
   padding: 0 1rem;
   max-height: min-content;
-  border: 3px solid #007bff; /* Adds a prominent blue border */
-  border-radius: 8px; /* Adds a rounded corner for style */
-  background-color: #f0f8ff; /* Light blue background to complement the border */
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15); /* Adds a stronger shadow */
+  border: 3px solid #007bff;
+  /* Adds a prominent blue border */
+  border-radius: 8px;
+  /* Adds a rounded corner for style */
+  background-color: #f0f8ff;
+  /* Light blue background to complement the border */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
+  /* Adds a stronger shadow */
   margin: 0.1rem;
 }
 

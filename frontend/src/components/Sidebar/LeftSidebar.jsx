@@ -37,11 +37,11 @@ const LeftSidebar = ({ imageState, message }) => {
                 onClick={() => handleToggle(table.name)}
                 className="table-name"
               >
-                {expandedTable === table.name ? (
+                {/* {expandedTable === table.name ? (
                   <FaChevronDown />
                 ) : (
                   <FaChevronRight />
-                )}
+                )} */}
                 {table.name}
               </div>
               {expandedTable === table.name && (
