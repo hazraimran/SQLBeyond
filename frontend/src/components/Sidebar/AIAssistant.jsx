@@ -167,7 +167,7 @@ const AIAssistant = ({ question, query, retries }) => {
     }
 
     try {
-      const res = await axios.post("http://localhost:3000/get-hint", {
+      const res = await axios.post("http://localhost:5001/get-hint", {
         userQuery: query,
         taskDescription: question,
         retries: retries,

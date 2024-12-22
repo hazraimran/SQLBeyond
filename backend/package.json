@@ -13,6 +13,7 @@
     "express": "^4.17.1",
     "mysql2": "^2.3.3",
     "nodemon": "^3.1.7",
-    "openai": "^3.3.0"
+    "openai": "^3.3.0",
+    "sql-parser": "^0.5.0"
   }
 }
