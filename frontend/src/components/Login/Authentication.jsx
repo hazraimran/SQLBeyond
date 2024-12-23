@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../../styles/Authentication.css";
 import { useAuth } from "./AuthContext";
+
 
 // const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -24,6 +25,9 @@ function Authentication() {
     // navigate("/intro");
   };
 
+
+  
+  
 
   // return (
   //   <div className="auth-container">
@@ -99,8 +103,7 @@ function Authentication() {
           </div>
 
           <div className="log-btns-container">
-            <button className="log-btns">Login with Google</button>
-            <button className="log-btns">Login with Facebook</button>
+            <button className="log-btns" onClick={() => auth.googleOauth()}>Login with Google</button>
           </div>
         </div>
       </div>

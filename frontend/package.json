@@ -16,6 +16,7 @@
     "@codemirror/language": "^6.10.6",
     "@codemirror/state": "^6.5.0",
     "@codemirror/view": "^6.35.3",
+    "@react-oauth/google": "^0.12.1",
     "@uiw/react-codemirror": "^4.23.6",
     "axios": "^1.7.8",
     "canvas-confetti": "^1.9.3",

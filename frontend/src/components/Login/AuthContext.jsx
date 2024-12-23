@@ -1,8 +1,7 @@
 import axios from "axios";
 import { useContext, createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-axios.defaults.withCredentials = true;
+import { useGoogleLogin } from "@react-oauth/google";
 
 const AuthContext = createContext();
 
@@ -21,7 +20,7 @@ const AuthProvider = ({ children }) => {
                 lastName: formData.lastName,
                 username: formData.username,
                 password: formData.password
-            });
+            }, { withCredentials: true });
 
             const data = response.data;
             // console.log(data);
@@ -44,7 +43,7 @@ const AuthProvider = ({ children }) => {
             const response = await axios.post(`${apiUrl}/account/login`, {
                 username: formData.username,
                 password: formData.password
-            });
+            }, { withCredentials: true });
 
             const data = response.data;
             // console.log(data);
@@ -54,7 +53,7 @@ const AuthProvider = ({ children }) => {
                 navigate("/SQLEditor");
                 return;
             }
-            else{
+            else {
                 alert(data.msg);
                 navigate('/');
             }
@@ -68,7 +67,7 @@ const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             console.log("trying to logout")
-            await axios.post(`${apiUrl}/account/logout`);
+            await axios.post(`${apiUrl}/account/logout`, { withCredentials: true });
             setUser(null);
             setLoading(true);
             navigate("/");
@@ -78,24 +77,45 @@ const AuthProvider = ({ children }) => {
         }
     }
 
+    const googleOauth = useGoogleLogin({
+        onSuccess: async (resCode) => {
+            try {
+                const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: {
+                        Authorization: `Bearer ${resCode.access_token}`
+                    },
+                    withCredentials: false
+                })
+
+                const data = userInfo.data;
+                console.log(data);
+            }
+            catch (err) {
+                console.error(err);
+            }
+        },
+        onError: (err) => console.log(`Login failed: ${err}`)
+    });
+
+
     useEffect(() => {
         const loadUser = async () => {
             try {
-                const response = await axios.get(`${apiUrl}/account/login`);
+                const response = await axios.get(`${apiUrl}/account/login`, { withCredentials: true });
+                // console.log(response.data);
+                if (response.data) {
                     // console.log(response.data);
-                    if (response.data) {
-                        // console.log(response.data);
-                        setUser(response.data.user);
-                    }
-                    else {
-                        setUser(null);
-                    }  
-                    // console.log("loading");  
+                    setUser(response.data.user);
+                }
+                else {
+                    setUser(null);
+                }
+                // console.log("loading");  
             }
-            catch(err) {
+            catch (err) {
                 setUser(null);
             }
-            finally{
+            finally {
                 // console.log("finally to false");
                 setLoading(false);
             }
@@ -105,7 +125,7 @@ const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, register, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, register, login, logout, loading, googleOauth }}>
             {children}
         </AuthContext.Provider>
     );
