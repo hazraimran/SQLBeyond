@@ -53,7 +53,10 @@ const Editor = ({
         <CodeMirror
           value={content}
           extensions={[sql()]}
-          onChange={(value) => setContent(value)}
+          onChange={(value) => {
+            setContent(value);
+            setQuery(value); // Update the parent query state in real-time
+          }}
         />
       </div>
     </div>

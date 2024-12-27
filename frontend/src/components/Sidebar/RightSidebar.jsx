@@ -25,7 +25,7 @@ const RightSidebar = ({
     }
   };
 
-  console.log(taskDescription);
+  console.log("THis is the desc:", taskDescription);
 
   // Calculate the percentage of progress toward the next achievement
   const progressPercentage = (progress / 100) * 100;
@@ -83,8 +83,8 @@ const RightSidebar = ({
       <AIAssistant
         handleUseHint={handleUseHint}
         hintsUsed={hintsUsed}
-        maxHints={3}
-        question={taskDescription.question}
+        maxHints={100}
+        taskDescription={taskDescription}
         query={query} // Pass current query
         retries={retries} // Pass retries count
       />

@@ -19,7 +19,10 @@ function SQLEditor() {
   } = location.state || {};
 
   // State variables
-  const [query, setQuery] = useState("SELECT * FROM Patient");
+  // const [query, setQuery] = useState("SELECT * FROM Patient");
+  const [query, setQuery] = useState(
+    "SELECT P.firstName, P.lastName, A.reason, (P.weight / ((P.height / 100) * (P.height / 100))) AS BMI FROM Patient P JOIN Admission A ON P.healthNum = A.pID ORDER BY A.date DESC;"
+  );
   const [result, setResult] = useState([]);
   const [tasksCompleted, setTasksCompleted] = useState(1);
   const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
@@ -461,12 +464,13 @@ function SQLEditor() {
       <LeftSidebar imageState={imageState} message={message} />
       <div className="main-editor">
         <Editor
-          setQuery={setQuery}
+          setQuery={(updatedQuery) => setQuery(updatedQuery)} // Update query in real time
           query={query}
           executeQuery={(content) => executeQuery(content, true)} // Limit rows to 10 for Run
           submitQuery={submitQuery} // Pass submitQuery to handle full comparison
           buttonsDisabled={buttonsDisabled}
         />
+
         {/* <DifficultyChart pointsData={playerPoints} /> */}
         <div className="result">
           <h3>Query Result:</h3>
@@ -501,7 +505,7 @@ function SQLEditor() {
       <RightSidebar
         progress={points}
         setProgress={setPoints} // Allow progress updates
-        query={query} // Pass the current query
+        query={query} // Pass the latest query here
         taskDescription={currentQuestion} // Pass the task description
         retries={retryCount} // Pass the current retry count
         badges={badges}
