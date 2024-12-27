@@ -1,7 +1,8 @@
 import axios from "axios";
 import { useContext, createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin, googleLogout } from "@react-oauth/google";
+import { use } from "react";
 
 const AuthContext = createContext();
 
@@ -68,6 +69,10 @@ const AuthProvider = ({ children }) => {
         try {
             console.log("trying to logout")
             await axios.post(`${apiUrl}/account/logout`, { withCredentials: true });
+
+            if(user.isOauth)
+                googleLogout();
+         
             setUser(null);
             setLoading(true);
             navigate("/");
@@ -88,7 +93,21 @@ const AuthProvider = ({ children }) => {
                 })
 
                 const data = userInfo.data;
-                console.log(data);
+
+                const response = await axios.post(`${apiUrl}/account/google-oauth-login`, {
+                    user: data
+                }, {withCredentials: true});
+
+                if (response.data.user) {
+                    setUser(response.data.user);
+                    setLoading(false);
+
+                    if(response.data.user.isFirstTime)
+                        return navigate("/intro");
+
+                    return navigate("/SQLEditor");
+                }
+                throw new Error(response.message);
             }
             catch (err) {
                 console.error(err);

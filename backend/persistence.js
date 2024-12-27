@@ -1,12 +1,12 @@
 let _user = [
-    { username: "test", firsName: "wow", lastName: "yo", password: "test" },
+    { username: "test", firsName: "wow", lastName: "yo", password: "test", isOauth: true },
     { username: "test2", firsName: "hey", lastName: "boom", password: "test"},
 ];
 
 const getAllUsers = () => _user;
 
-const addUser = (username, firsName, lastName, password) => {
-    _user.push({ username: username, firsName: firsName, lastName: lastName, password: password });
+const addUser = (username, firsName, lastName, password, isOauth) => {
+    _user.push({ username: username, firsName: firsName, lastName: lastName, password: password, isOauth: isOauth });
 }
 
 const removeUser = (username) => {

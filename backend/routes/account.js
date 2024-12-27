@@ -23,7 +23,7 @@ router.get("/login", (req, res) => {
 
     // console.log("Loading user");
 
-    if(req.session.user) {
+    if (req.session.user) {
         return res.json({ user: req.session.user });
     }
     res.status(404);
@@ -42,13 +42,13 @@ router.post("/login", (req, res) => {
     // console.log(userData[0].password);
 
     bcrypt.compare(password, userData[0].password, (err, response) => {
-        if(response){
+        if (response) {
             //user data will be returned by the db query
             req.session.user = userData[0];
-            res.send({ loggedIn: true, user: userData[0]});
+            res.send({ loggedIn: true, user: userData[0] });
         }
-        else{
-            res.send({loggedIn: false, msg: "Username and password don't match!"});
+        else {
+            res.send({ loggedIn: false, msg: "Username and password don't match!" });
         }
     })
 });
@@ -68,14 +68,14 @@ router.post("/register", (req, res) => {
                 console.error(err);
                 return;
             }
-            
+
             // as I'm not sure which DB and how the data are being stored, I'm saving it locally for now
             // store in the db
-            addUser(username, firstName, lastName, hash);
+            addUser(username, firstName, lastName, hash, false);
 
             // console.log(singleUser(username)[0]);
 
-            const userData = { user: { firstName: firstName, lastName: lastName, username: username } };
+            const userData = { user: { firstName: firstName, lastName: lastName, username: username, isOauth: false } };
 
             req.session.user = userData;
 
@@ -85,9 +85,35 @@ router.post("/register", (req, res) => {
     })
 });
 
+router.post('/google-oauth-login', (req, res) => {
+    try {
+        const { given_name, family_name, email } = req.body.user;
+
+        console.log(singleUser(email).length);
+
+        let userData;
+
+        // when adding to the database, just check if the user exists, if it doesn't we add it to the database, otherwise just return the data given by google
+        if(singleUser(email).length===0){
+            addUser(email, given_name, family_name, null, true);
+            userData = { user: { firstName: given_name, lastName: family_name, username: email, isOauth: true, isFirstTime: true } };
+        }
+        else{
+            userData = { user: { firstName: given_name, lastName: family_name, username: email, isOauth: true, isFirstTime: false } };
+        }
+
+        req.session.user = userData;
+
+        res.json(userData);
+    }
+    catch (err) {
+        console.error(err);
+    }
+})
+
 router.post("/logout", (req, res) => {
     req.session.destroy((err) => {
-        if(err){
+        if (err) {
             console.error(err);
             res.send("Logout failed!");
             return;
@@ -105,12 +131,12 @@ router.get("/getAllUsers", (req, res) => {
 router.get("/print-sessions", (req, res) => {
     const sessionStore = req.sessionStore;
     sessionStore.all((err, sessions) => {
-      if (err) {
-        console.error("Error fetching sessions:", err);
-        res.status(500).send("Failed to fetch sessions");
-        return;
-      }
-      res.send(sessions);
+        if (err) {
+            console.error("Error fetching sessions:", err);
+            res.status(500).send("Failed to fetch sessions");
+            return;
+        }
+        res.send(sessions);
     });
 });
 
