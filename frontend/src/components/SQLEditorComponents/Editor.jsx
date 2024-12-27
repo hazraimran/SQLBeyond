@@ -1,11 +1,16 @@
-// src/components/SQLEditorComponents/Editor.jsx
 import { useState, memo } from "react";
 import PropTypes from "prop-types";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import "../../styles/Editor.css";
 
-const Editor = ({ setQuery, query, executeQuery, buttonsDisabled }) => {
+const Editor = ({
+  setQuery,
+  query,
+  executeQuery,
+  submitQuery,
+  buttonsDisabled,
+}) => {
   const [content, setContent] = useState(query);
 
   return (
@@ -16,9 +21,9 @@ const Editor = ({ setQuery, query, executeQuery, buttonsDisabled }) => {
             className="clear button"
             onClick={() => {
               setQuery("");
-              setContent(""); // Clear the editor content as well
+              setContent("");
             }}
-            disabled={buttonsDisabled} // Disable Clear button
+            disabled={buttonsDisabled}
           >
             Clear
           </button>
@@ -26,11 +31,21 @@ const Editor = ({ setQuery, query, executeQuery, buttonsDisabled }) => {
             className="run button"
             onClick={() => {
               setQuery(content);
-              executeQuery(content);
+              executeQuery(content, true); // Pass true to fetch only 10 rows
             }}
-            disabled={buttonsDisabled} // Disable Run button
+            disabled={buttonsDisabled}
           >
             Run
+          </button>
+          <button
+            className="submit button"
+            onClick={() => {
+              setQuery(content);
+              submitQuery(content); // Submit query for full comparison
+            }}
+            disabled={buttonsDisabled}
+          >
+            Submit
           </button>
         </div>
       </div>
@@ -38,7 +53,10 @@ const Editor = ({ setQuery, query, executeQuery, buttonsDisabled }) => {
         <CodeMirror
           value={content}
           extensions={[sql()]}
-          onChange={(value) => setContent(value)}
+          onChange={(value) => {
+            setContent(value);
+            setQuery(value); // Update the parent query state in real-time
+          }}
         />
       </div>
     </div>
@@ -49,7 +67,8 @@ Editor.propTypes = {
   setQuery: PropTypes.func.isRequired,
   query: PropTypes.string.isRequired,
   executeQuery: PropTypes.func.isRequired,
-  buttonsDisabled: PropTypes.bool.isRequired, // Add prop validation for buttonsDisabled
+  submitQuery: PropTypes.func.isRequired, // Submit button function
+  buttonsDisabled: PropTypes.bool.isRequired,
 };
 
 export default memo(Editor);

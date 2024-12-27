@@ -8,6 +8,7 @@ const axios = require("axios");
 //import the account router 
 const accountRouter = require('./routes/account');
 const cookieParser = require("cookie-parser");
+const sqlParser = require("sql-parser"); // SQL Parser for syntax validation
 
 // Load and validate environment variables
 const PORT = process.env.PORT || 3000;
@@ -45,9 +46,7 @@ const pool = mysql.createPool(MYSQL_URL);
   }
 })();
 
-// API Routes
-
-// Route to execute SQL queries
+// Endpoint to execute a SQL query
 app.post("/execute-query", async (req, res) => {
   const { query, params } = req.body;
 
@@ -64,55 +63,78 @@ app.post("/execute-query", async (req, res) => {
   }
 });
 
-// // Route to handle generating SQL query using Hugging Face
-// app.post("/generate-sql", async (req, res) => {
-//   const { question } = req.body;
+app.post("/get-hint", (req, res) => {
+  const { userQuery, taskDescription, retries } = req.body;
 
-//   if (!question) {
-//     return res.status(400).json({ error: "Question is required." });
-//   }
+  if (!taskDescription || retries === undefined || !userQuery) {
+    return res
+      .status(400)
+      .json({ error: "Task description, retries, and query are required." });
+  }
 
-//   try {
-//     const response = await axios.post(
-//       "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B", // Replace with your desired Hugging Face model
-//       {
-//         inputs: question,
-//         parameters: { max_length: 150, temperature: 0.7 },
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
-//         },
-//       }
-//     );
+  const { concepts, columnNames, hints } = taskDescription;
 
-//     console.log("Hugging Face Response:", response.data);
+  // Stage 1: Check Missing Concepts or Columns.
+  const checkForMissingItems = (query, items) => {
+    return items.filter(
+      (item) => !query.toUpperCase().includes(item.toUpperCase())
+    );
+  };
 
-//     res.json({
-//       success: true,
-//       query:
-//         response.data.generated_text ||
-//         response.data[0]?.generated_text ||
-//         "No query generated.",
-//     });
-//   } catch (err) {
-//     console.error(
-//       "Error interacting with Hugging Face:",
-//       err.response?.data || err.message
-//     );
-//     res
-//       .status(500)
-//       .json({ success: false, error: "Failed to generate SQL query." });
-//   }
-// });
+  const missingConcepts = checkForMissingItems(userQuery, concepts);
+  const missingColumns = checkForMissingItems(userQuery, columnNames);
 
+  if (missingConcepts.length > 0 || missingColumns.length > 0) {
+    const hint = `Your query is missing the following: ${
+      missingConcepts.length > 0
+        ? `Keywords: ${missingConcepts.join(", ")}`
+        : ""
+    } ${
+      missingColumns.length > 0 ? `Columns: ${missingColumns.join(", ")}` : ""
+    }`.trim();
+    return res.json({
+      success: true,
+      stage: "S1",
+      hint,
+    });
+  }
+
+  // Stage 2: Metaphorical Guidance.
+  if (hints.metaphor) {
+    return res.json({
+      success: true,
+      stage: "S2",
+      hint: hints.metaphor,
+    });
+  }
+
+  // Stage 3: English-Based Query Guidance.
+  if (hints.english) {
+    return res.json({
+      success: true,
+      stage: "S3",
+      hint: hints.english,
+    });
+  }
+
+  // Default case: Debugging hint.
+  const hint =
+    "Check the structure of your query. Ensure all required elements (keywords, columns, and table) are included and correctly specified.";
+  return res.json({
+    success: true,
+    stage: "S4",
+    hint,
+  });
+});
+
+// Chat endpoint to interact with Hugging Face API
 app.post("/chat", async (req, res) => {
   const { prompt } = req.body;
 
   if (!prompt) {
     return res.status(400).json({ error: "Prompt is required." });
   }
-  console.log(prompt);
+
   try {
     const response = await axios.post(
       "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B",
@@ -121,9 +143,7 @@ app.post("/chat", async (req, res) => {
         parameters: { max_length: 50, temperature: 0.7 },
       },
       {
-        headers: {
-          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-        },
+        headers: { Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}` },
       }
     );
 
@@ -137,40 +157,7 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-// app.post("/generate-sql", async (req, res) => {
-//   const { prompt } = req.body;
-
-//   if (!prompt) {
-//     return res.status(400).json({ error: "Prompt is required." });
-//   }
-//   console.log(prompt);
-//   try {
-//     const response = await axios.post(
-//       "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B",
-//       {
-//         inputs: prompt,
-//         parameters: { max_length: 50, temperature: 0.7 },
-//       },
-//       {
-//         headers: {
-//           Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-//         },
-//       }
-//     );
-
-//     res.json({
-//       success: true,
-//       response:
-//         response.data.generated_text ||
-//         response.data[0]?.generated_text ||
-//         "No response generated.",
-//     });
-//   } catch (err) {
-//     console.error("Error interacting with Hugging Face:", err.message);
-//     res.status(500).json({ error: "Failed to generate SQL." });
-//   }
-// });
-
+// SQL generation endpoint using Hugging Face API
 app.post("/generate-sql", async (req, res) => {
   const { prompt } = req.body;
 
@@ -208,6 +195,37 @@ app.post("/generate-sql", async (req, res) => {
 // ---------------------- login -------------------
 // account route (developed in the routes/account.js)
 app.use("/account", accountRouter);
+
+// app.post("/generate-sql", async (req, res) => {
+//   const { prompt } = req.body;
+
+//   if (!prompt) {
+//     return res.status(400).json({ error: "Prompt is required." });
+//   }
+
+//   try {
+//     const response = await axios.post(
+//       "https://api-inference.huggingface.co/models/defog/sqlcoder-7b-2",
+//       {
+//         inputs: prompt,
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+
+//     res.json({
+//       success: true,
+//       response: response.data?.generated_text || "No response generated.",
+//     });
+//   } catch (err) {
+//     console.error("Error interacting with Hugging Face:", err.message);
+//     res.status(500).json({ error: "Failed to generate SQL." });
+//   }
+// });
 
 // Start the server
 app.listen(PORT, () => {
