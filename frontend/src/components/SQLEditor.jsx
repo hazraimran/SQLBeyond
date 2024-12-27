@@ -241,7 +241,7 @@ function SQLEditor() {
   // );
 
   const checkAnswer = useCallback(
-    (userResult) => {
+    async (userResult) => {
       const correct =
         JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
       const responseTime = (Date.now() - startTime) / 1000;
@@ -313,6 +313,29 @@ function SQLEditor() {
         setRetryCount((prev) => prev + 1);
         setImageState("sad"); // Show the "Try Again" image
         setMessage("Try again");
+
+        // Fetch personalized hint
+        try {
+          const res = await fetch("http://localhost:5001/personalized-hint", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userQuery: query,
+              correctQuery: currentQuestion.answer,
+            }),
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            setMessage(`Personalized Hint: ${data.response}`);
+          } else {
+            setMessage("Unable to fetch personalized hint. Try again.");
+          }
+        } catch (error) {
+          console.error("Error fetching personalized hint:", error);
+          setMessage("Something went wrong. Please try again.");
+        }
+
         setTimeout(() => {
           setImageState("thinking"); // Reset to a neutral image
           setMessage(`Current Task: ${currentQuestion.question}`);

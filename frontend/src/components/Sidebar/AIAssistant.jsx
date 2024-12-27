@@ -118,6 +118,35 @@ const AIAssistant = ({
     setShowHintsList(false);
   };
 
+  const handleGetPersonalizedHint = async () => {
+    if (!query || !taskDescription?.answer) {
+      setMessage(
+        "Ensure both the user's query and the correct query are available."
+      );
+      return;
+    }
+
+    try {
+      const res = await axios.post("http://localhost:5001/personalized-hint", {
+        userQuery: query,
+        correctQuery: taskDescription.answer, // Use the correct query for comparison
+      });
+
+      console.log("AI response:", res.data);
+
+      if (res.data.success) {
+        setResponse(res.data.response); // Directly display the response text
+        setMessage("Personalized hint provided!");
+        setShowCard(true);
+      } else {
+        setMessage("Unable to fetch personalized hint. Try again later.");
+      }
+    } catch (err) {
+      console.error("Error fetching personalized hint:", err.message);
+      setMessage("Something went wrong. Please try again.");
+    }
+  };
+
   return (
     <div className="ai-assistant">
       <div className="assistant-header">
@@ -126,6 +155,27 @@ const AIAssistant = ({
       </div>
       <div className="assistant-message">
         <p>{message}</p>
+        {/* <div className="assistant-buttons">
+          <button
+            className="hint-button"
+            onClick={handleGetHint}
+            style={{ backgroundColor: getHintButtonColor() }}
+          >
+            Hints
+          </button>
+          <button
+            className="ai-hint-button"
+            onClick={handleGetAIHint}
+            style={{ backgroundColor: "blue" }}
+          >
+            AI Hint
+          </button>
+          {hints.length > 0 && (
+            <button className="view-hints-button" onClick={handleViewHints}>
+              View Hints
+            </button>
+          )}
+        </div> */}
         <div className="assistant-buttons">
           <button
             className="hint-button"
@@ -140,6 +190,13 @@ const AIAssistant = ({
             style={{ backgroundColor: "blue" }}
           >
             AI Hint
+          </button>
+          <button
+            className="personalized-hint-button"
+            onClick={handleGetPersonalizedHint}
+            style={{ backgroundColor: "purple" }}
+          >
+            Personalized Hint
           </button>
           {hints.length > 0 && (
             <button className="view-hints-button" onClick={handleViewHints}>

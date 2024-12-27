@@ -181,6 +181,39 @@ app.post("/generate-sql", async (req, res) => {
   }
 });
 
+app.post("/personalized-hint", async (req, res) => {
+  const { userQuery, correctQuery } = req.body;
+
+  if (!userQuery || !correctQuery) {
+    return res.status(400).json({
+      error: "Both userQuery and correctQuery are required.",
+    });
+  }
+
+  const prompt = `The user wrote the following incorrect SQL query: "${userQuery}". The correct query is: "${correctQuery}". Provide a personalized hint to help the user understand what is wrong with their query and how to fix it under 25 words.`;
+  // const prompt = `Generate 4 numbers`;
+
+  try {
+    const response = await axios.post(
+      "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B",
+      {
+        inputs: prompt,
+        parameters: { max_length: 50, temperature: 0.7 },
+      },
+      {
+        headers: { Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}` },
+      }
+    );
+    console.log(response.data[0].generated_text);
+    const generatedText =
+      response.data[0].generated_text || "No response generated.";
+    res.json({ success: true, response: generatedText.trim() }); // Send only the hint text
+  } catch (err) {
+    console.error("Error interacting with Hugging Face:", err.message);
+    res.status(500).json({ error: "Failed to generate personalized hint." });
+  }
+});
+
 // app.post("/generate-sql", async (req, res) => {
 //   const { prompt } = req.body;
 
