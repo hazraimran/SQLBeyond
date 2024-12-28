@@ -14,6 +14,7 @@ const RightSidebar = ({
   badges,
   pointsData,
   idealPoints,
+  errorHint,
 }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
@@ -31,7 +32,9 @@ const RightSidebar = ({
     }
   };
 
-  console.log("THis is the desc:", taskDescription);
+  useEffect(() => {
+    console.log("This is the desc:", taskDescription);
+  }, [taskDescription]);
 
   // Calculate the percentage of progress toward the next achievement
   const progressPercentage = (progress / 100) * 100;
@@ -94,8 +97,9 @@ const RightSidebar = ({
         hintsUsed={hintsUsed}
         maxHints={100}
         taskDescription={taskDescription}
-        query={query} // Pass current query
-        retries={retries} // Pass retries count
+        query={query}
+        retries={retries}
+        errorHint={errorHint} // Pass error hint
       />
     </div>
   );
@@ -103,13 +107,14 @@ const RightSidebar = ({
 
 RightSidebar.propTypes = {
   progress: PropTypes.number.isRequired,
-  setProgress: PropTypes.func.isRequired, // Allow progress updates
-  query: PropTypes.string.isRequired, // Add query prop validation
-  taskDescription: PropTypes.string.isRequired,
-  retries: PropTypes.number.isRequired, // Add retries prop validation
+  setProgress: PropTypes.func.isRequired,
+  query: PropTypes.string.isRequired,
+  taskDescription: PropTypes.object.isRequired,
+  retries: PropTypes.number.isRequired,
   badges: PropTypes.arrayOf(PropTypes.string).isRequired,
   pointsData: PropTypes.object.isRequired,
-  idealPoints: PropTypes.arrayOf(PropTypes.number).isRequired, // Validate idealPoints
+  idealPoints: PropTypes.arrayOf(PropTypes.number).isRequired,
+  errorHint: PropTypes.string, // NEW PROP
 };
 
 export default RightSidebar;
