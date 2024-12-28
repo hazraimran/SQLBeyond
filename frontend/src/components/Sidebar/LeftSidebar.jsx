@@ -12,6 +12,15 @@ const LeftSidebar = ({ imageState, message }) => {
   const [expandedTable, setExpandedTable] = useState(null);
 
   const handleToggle = (tableName) => {
+    let displayTable = document.querySelector('.left-sidebar-top ul');
+
+    if(expandedTable===tableName){
+      displayTable.classList.remove("open-table");
+    }
+    else{
+      displayTable.classList.add("open-table");
+    }
+
     setExpandedTable(expandedTable === tableName ? null : tableName);
   };
 
@@ -29,6 +38,7 @@ const LeftSidebar = ({ imageState, message }) => {
   return (
     <div className="left-sidebar">
       <h2 className="sidebar-heading">Tables</h2>
+
       <div className="left-sidebar-top">
         <ul>
           {tables.map((table, index) => (
@@ -59,6 +69,7 @@ const LeftSidebar = ({ imageState, message }) => {
           ))}
         </ul>
       </div>
+
       <div className="left-sidebar-bottom">
         <div className="message-container">
           {message && (

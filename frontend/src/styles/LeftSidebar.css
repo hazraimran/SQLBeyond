@@ -152,4 +152,9 @@
 .table-columns ul {
   display: flex;
   flex-direction: column;
+  background-color: #d4f1d6;
+}
+
+.open-table {
+  grid-template-columns: 1fr !important;
 }
