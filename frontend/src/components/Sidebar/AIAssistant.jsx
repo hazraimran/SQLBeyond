@@ -109,7 +109,17 @@ const AIAssistant = ({
       return;
     }
 
-    const prompt = `Generate a SQL query for the following task: "${taskDescription.question}".`;
+    // const prompt = `Generate a SQL query example metaphor for the following task: ${taskDescription.question} and the correct query is: ${taskDescription.answer}. Write the hint under 30 words.`;
+    // const prompt = `Provide a helpful metaphorical hint for the following SQL task: "${taskDescription.question}". The correct query is: "${taskDescription.answer}". Ensure the hint is insightful, uses a metaphor, and is under 30 words. Avoid repeating the query or task.`;
+
+    // const prompt = `Create an insightful metaphorical hint to help the user understand the SQL task: "${taskDescription.question}". The correct query is: "${taskDescription.answer}". The hint should: Use a meaningful metaphor be Under 25 words, Avoid repeating or rephrasing the query or task and just provide the hint. Hint: `;
+
+    const prompt = `Create a metaphorical hint for the SQL task: "${taskDescription.question}". The correct query is: "${taskDescription.answer}". The hint must:
+- Use a meaningful metaphor.
+- Be approximately under 30 words.
+- Avoid repeating or rephrasing the query or task.
+- Output only the hint without any additional explanation or context.
+Hint:`;
 
     try {
       const res = await axios.post("http://localhost:5001/generate-sql", {
@@ -168,7 +178,55 @@ const AIAssistant = ({
   //   }
   // };
 
-  const handleGetPersonalizedHint = async (userQuery, defaultMessage) => {
+  // const handleGetPersonalizedHint = async (userQuery, defaultMessage) => {
+  //   if (!query || !taskDescription?.answer) {
+  //     setMessage(
+  //       "Ensure both the user's query and the correct query are available."
+  //     );
+  //     return;
+  //   }
+
+  //   try {
+  //     const res = await axios.post("http://localhost:5001//personalized-hint", {
+  //       userQuery,
+  //       correctQuery: taskDescription.answer,
+  //     });
+
+  //     console.log(res);
+  //     if (res.data.success) {
+  //       const personalizedHint = `Personalized Hint: ${res.data.response}`;
+  //       setHints((prevHints) => [...prevHints, personalizedHint]); // Append hint to hints list
+  //       setResponse(personalizedHint); // Show the hint in the card
+  //       setMessage("Personalized hint provided!");
+  //       setShowCard(true);
+  //       logToCSV({
+  //         timestamp: new Date().toISOString(),
+  //         action: "Hint Used",
+  //         hintType: "Personalized", // Or "AI", "Personalized"
+  //         currentQuery: query,
+  //         retries,
+  //         currentTask: taskDescription.question,
+  //       });
+  //     } else {
+  //       const fallbackMessage =
+  //         defaultMessage || "Unable to fetch personalized hint.";
+  //       setHints((prevHints) => [...prevHints, fallbackMessage]); // Append fallback message
+  //       setResponse(fallbackMessage);
+  //       setMessage(fallbackMessage);
+  //       setShowCard(true);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching personalized hint:", error);
+  //     const errorMessage =
+  //       "An error occurred while fetching the personalized hint.";
+  //     setHints((prevHints) => [...prevHints, errorMessage]);
+  //     setResponse(errorMessage);
+  //     setMessage(errorMessage);
+  //     setShowCard(true);
+  //   }
+  // };
+
+  const handleGetPersonalizedHint = async () => {
     if (!query || !taskDescription?.answer) {
       setMessage(
         "Ensure both the user's query and the correct query are available."
@@ -177,9 +235,14 @@ const AIAssistant = ({
     }
 
     try {
+      // const sanitizedTaskDescription = {
+      //   question: taskDescription.question, // Include only necessary fields
+      //   answer: taskDescription.answer,
+      // };
+
       const res = await axios.post("http://localhost:5001/personalized-hint", {
-        userQuery,
-        correctQuery: taskDescription.answer,
+        userQuery: query,
+        taskDescription: taskDescription,
       });
 
       if (res.data.success) {
@@ -191,15 +254,14 @@ const AIAssistant = ({
         logToCSV({
           timestamp: new Date().toISOString(),
           action: "Hint Used",
-          hintType: "Personalized", // Or "AI", "Personalized"
+          hintType: "Personalized",
           currentQuery: query,
           retries,
           currentTask: taskDescription.question,
         });
       } else {
-        const fallbackMessage =
-          defaultMessage || "Unable to fetch personalized hint.";
-        setHints((prevHints) => [...prevHints, fallbackMessage]); // Append fallback message
+        const fallbackMessage = "Unable to fetch personalized hint.";
+        setHints((prevHints) => [...prevHints, fallbackMessage]);
         setResponse(fallbackMessage);
         setMessage(fallbackMessage);
         setShowCard(true);
