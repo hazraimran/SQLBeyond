@@ -183,3 +183,15 @@ canvas {
   width: 100px;
 }
 
+.google-logo{
+  width: 80px;
+}
+
+.log-btns {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  background-color: #c9c9c9;
+}

@@ -103,7 +103,10 @@ function Authentication() {
           </div>
 
           <div className="log-btns-container">
-            <button className="log-btns" onClick={() => auth.googleOauth()}>Login with Google</button>
+            <button className="log-btns" onClick={() => auth.googleOauth()}>
+              <span>Login with</span>
+              <img className="google-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png" alt="google-logo"/>
+            </button>
           </div>
         </div>
       </div>
