@@ -26,6 +26,8 @@ const AuthProvider = ({ children }) => {
             const data = response.data;
             // console.log(data);
             if (data.user) {
+
+                console.log(data.user);
                 setUser(data.user);
                 setLoading(false);
                 navigate("/intro");
@@ -50,6 +52,9 @@ const AuthProvider = ({ children }) => {
             // console.log(data);
             if (data.user) {
                 setUser(data.user);
+
+                // console.log(data.user);
+
                 setLoading(false);
                 navigate("/SQLEditor");
                 return;
@@ -68,7 +73,10 @@ const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             console.log("trying to logout")
-            await axios.post(`${apiUrl}/account/logout`, { withCredentials: true });
+
+            const response = await axios.post(`${apiUrl}/account/logout`, {}, { withCredentials: true });
+
+            console.log(response.data);
 
             if(user.isOauth)
                 googleLogout();
@@ -99,7 +107,7 @@ const AuthProvider = ({ children }) => {
                 }, {withCredentials: true});
 
                 if (response.data.user) {
-                    setUser(response.data.user);
+                    setUser(response.data);
                     setLoading(false);
 
                     if(response.data.user.isFirstTime)
@@ -118,12 +126,13 @@ const AuthProvider = ({ children }) => {
 
 
     useEffect(() => {
+        // console.log(user);
         const loadUser = async () => {
             try {
                 const response = await axios.get(`${apiUrl}/account/login`, { withCredentials: true });
                 // console.log(response.data);
                 if (response.data) {
-                    // console.log(response.data);
+                    console.log(response.data.user);
                     setUser(response.data.user);
                 }
                 else {

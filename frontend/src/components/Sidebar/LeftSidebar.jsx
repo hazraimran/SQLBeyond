@@ -12,6 +12,13 @@ const LeftSidebar = ({ imageState, message }) => {
   const [expandedTable, setExpandedTable] = useState(null);
   const refs = useRef([]);
 
+  const scroll = (index) => {
+    if(index === 10) 
+      return refs.current[index].scrollIntoView({ behavior: "smooth", block: "end"});
+
+    refs.current[index+1].scrollIntoView({ behavior: "smooth", block: "center"}); 
+  }
+
   const handleToggle = (tableName, index) => {
     let displayTable = document.querySelector('.left-sidebar-top ul');
 
@@ -24,7 +31,7 @@ const LeftSidebar = ({ imageState, message }) => {
 
     setExpandedTable(expandedTable === tableName ? null : tableName);
 
-    refs.current[index]?.scrollIntoView({ behavior: "smooth", block: "center"});
+    scroll(index);
   };
 
   const getImageSrc = () => {

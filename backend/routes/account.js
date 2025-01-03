@@ -118,8 +118,11 @@ router.post("/logout", (req, res) => {
             res.send("Logout failed!");
             return;
         }
+
+        // console.log("loggin out");
+        
         res.clearCookie('connect.sid');
-        res.send("Logout succesfull");
+        res.json({message: "Logout succesfull"});
     })
 });
 

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/IntroQuestion.css";
 
+import { useAuth } from "./Login/AuthContext";
+
 function IntroQuestion() {
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
@@ -12,11 +14,14 @@ function IntroQuestion() {
   const companies = ["Apple", "Microsoft", "Amazon"];
   const positions = ["Software Developer", "Data Analyst", "Product Manager"];
 
+  const user = useAuth().user.user;
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (name && company && position) {
+    
+    if (company && position) {
       setSubmitted(true);
-      const userData = { name, company, position };
+      const userData = { company, position };
       localStorage.setItem("userData", JSON.stringify(userData));
     } else {
       alert(
@@ -35,7 +40,7 @@ function IntroQuestion() {
         <div className="application-form">
           <h1>Apply for a Position</h1>
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
+            {/* <div className="form-group">
               <label htmlFor="name">Enter Your Name:</label>
               <input
                 id="name"
@@ -44,7 +49,7 @@ function IntroQuestion() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your Full Name"
               />
-            </div>
+            </div> */}
             <div className="form-group">
               <label htmlFor="company">Select Company:</label>
               <select
@@ -82,7 +87,7 @@ function IntroQuestion() {
         <div className="application-result">
           <h1>Application Submitted</h1>
           <p>
-            <strong>{name}</strong>, you are applying for the position of{" "}
+            <strong>{`${user.firstName} ${user.lastName}`}</strong>, you are applying for the position of{" "}
             <strong>{position}</strong> at <strong>{company}</strong>.
           </p>
           <button onClick={startQuiz}>Start Quiz</button>

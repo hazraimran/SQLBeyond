@@ -92,19 +92,22 @@
 .table-columns ul {
   display: flex;
   flex-direction: column;
-  background-color: #d4f1d6;
+  background-color: #dfecfa;
 }
 
 .table-columns ul li:hover{
-  background-color: #d4f1d6;
+  background-color: #dfecfa;
 }
 
 .open-table {
   grid-template-columns: 1fr !important;
 }
 
-.open-table .table-columns{
+.open-table .table-name{
   width: auto;
+}
+
+.open-table .table-columns{
   border-bottom: 2px solid #007bff;
 }
 
@@ -126,13 +129,30 @@
   max-height: min-content;
   border: 3px solid #007bff;
   /* Adds a prominent blue border */
-  border-radius: 8px;
+  border-radius: 30px;
   /* Adds a rounded corner for style */
   background-color: #f0f8ff;
   /* Light blue background to complement the border */
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
   /* Adds a stronger shadow */
   margin: 0.1rem;
+
+  position: relative;
+}
+
+.message-container::before{
+  content: "";
+  position: absolute;
+  bottom: -12px;
+
+  transform: translateX(-50%);
+
+  /* width: 0;
+  height: 0; */
+
+  border-style: solid;
+  border-width: 12px 12px 0 12px;
+  border-color: #007bff transparent transparent transparent;
 }
 
 .message {

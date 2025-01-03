@@ -8,16 +8,22 @@ import questions from "../data/questions";
 import logToCSV from "../utils/logger";
 import "../styles/SQLEditor.css";
 
+import { useAuth } from "./Login/AuthContext";
+
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 function SQLEditor() {
   const location = useLocation();
   const savedUserData = JSON.parse(localStorage.getItem("userData")) || {};
+  const user = useAuth().user.user;
+
   const {
-    name = savedUserData.name,
+    name = `${user.firstName} ${user.lastName}`,
     company = savedUserData.company,
     position = savedUserData.position,
   } = location.state || {};
+
+  
 
   // State variables
   const [query, setQuery] = useState(
