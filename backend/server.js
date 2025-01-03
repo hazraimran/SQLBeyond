@@ -137,7 +137,7 @@ app.post("/chat", async (req, res) => {
 
   try {
     const response = await axios.post(
-      "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B",
+      "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct",
       {
         inputs: prompt,
         parameters: { max_length: 50, temperature: 0.7 },
@@ -157,17 +157,50 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-// SQL generation endpoint using Hugging Face API
+// // SQL generation endpoint using Hugging Face API
+// app.post("/generate-sql", async (req, res) => {
+//   const { prompt } = req.body;
+//   console.log(prompt);
+//   if (!prompt) {
+//     return res.status(400).json({ error: "Prompt is required." });
+//   }
+
+//   try {
+//     const response = await axios.post(
+//       "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct",
+//       {
+//         inputs: prompt,
+//         parameters: { max_length: 50, temperature: 0.7 },
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+//         },
+//       }
+//     );
+
+//     res.json({
+//       success: true,
+//       response:
+//         response.data.generated_text ||
+//         response.data[0]?.generated_text ||
+//         "No response generated.",
+//     });
+//   } catch (err) {
+//     console.error("Error interacting with Hugging Face:", err.message);
+//     res.status(500).json({ error: "Failed to generate SQL." });
+//   }
+// });
+
 app.post("/generate-sql", async (req, res) => {
   const { prompt } = req.body;
-
   if (!prompt) {
     return res.status(400).json({ error: "Prompt is required." });
   }
 
   try {
     const response = await axios.post(
-      "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B",
+      "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct",
       {
         inputs: prompt,
         parameters: { max_length: 50, temperature: 0.7 },
@@ -179,12 +212,15 @@ app.post("/generate-sql", async (req, res) => {
       }
     );
 
+    // Extract only the text after "Hint: "
+    const generatedText =
+      response.data.generated_text || response.data[0]?.generated_text || "";
+    const hint =
+      generatedText.split("Hint: ")[1]?.trim() || "No hint generated.";
+
     res.json({
       success: true,
-      response:
-        response.data.generated_text ||
-        response.data[0]?.generated_text ||
-        "No response generated.",
+      response: hint,
     });
   } catch (err) {
     console.error("Error interacting with Hugging Face:", err.message);
@@ -192,21 +228,20 @@ app.post("/generate-sql", async (req, res) => {
   }
 });
 
+// Personalized hint generation endpoint
 app.post("/personalized-hint", async (req, res) => {
-  const { userQuery, correctQuery } = req.body;
-
-  if (!userQuery || !correctQuery) {
+  const { userQuery, taskDescription } = req.body;
+  if (!userQuery || !taskDescription) {
     return res.status(400).json({
       error: "Both userQuery and correctQuery are required.",
     });
   }
 
-  const prompt = `The user wrote the following incorrect SQL query: "${userQuery}". The correct query is: "${correctQuery}". Provide a personalized hint to help the user understand what is wrong with their query and how to fix it under 25 words.`;
-  // const prompt = `Generate 4 numbers`;
-
+  const prompt = `Analyze the following incorrect SQL query and provide a hint to fix it or if its correct then encourage the user to submit (under 25 words). Only output the hint without any additional explanation or repetition. User Query: "${userQuery}" Correct Query: "${taskDescription.answer}" Hint:`;
+  console.log(prompt);
   try {
     const response = await axios.post(
-      "https://api-inference.huggingface.co/models/EleutherAI/gpt-neo-2.7B",
+      "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct",
       {
         inputs: prompt,
         parameters: { max_length: 50, temperature: 0.7 },
@@ -215,10 +250,15 @@ app.post("/personalized-hint", async (req, res) => {
         headers: { Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}` },
       }
     );
-    console.log(response.data[0].generated_text);
+
     const generatedText =
-      response.data[0].generated_text || "No response generated.";
-    res.json({ success: true, response: generatedText.trim() }); // Send only the hint text
+      response.data[0]?.generated_text || "No response generated.";
+
+    // Split and extract the last part after "Hint:"
+    const hint = generatedText.split("Hint:").pop().trim();
+
+    console.log(hint); // Output: "Query looks correct. Submit it!"
+    res.json({ success: true, response: hint }); // Send only the extracted hint text
   } catch (err) {
     console.error("Error interacting with Hugging Face:", err.message);
     res.status(500).json({ error: "Failed to generate personalized hint." });
