@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 import "../../styles/LeftSidebar.css";
@@ -10,8 +10,9 @@ import Typewriter from "typewriter-effect";
 
 const LeftSidebar = ({ imageState, message }) => {
   const [expandedTable, setExpandedTable] = useState(null);
+  const refs = useRef([]);
 
-  const handleToggle = (tableName) => {
+  const handleToggle = (tableName, index) => {
     let displayTable = document.querySelector('.left-sidebar-top ul');
 
     if(expandedTable===tableName){
@@ -22,6 +23,8 @@ const LeftSidebar = ({ imageState, message }) => {
     }
 
     setExpandedTable(expandedTable === tableName ? null : tableName);
+
+    refs.current[index]?.scrollIntoView({ behavior: "smooth", block: "center"});
   };
 
   const getImageSrc = () => {
@@ -42,9 +45,9 @@ const LeftSidebar = ({ imageState, message }) => {
       <div className="left-sidebar-top">
         <ul>
           {tables.map((table, index) => (
-            <li key={index}>
+            <li key={index} ref={(el) => refs.current[index] = el}>
               <div
-                onClick={() => handleToggle(table.name)}
+                onClick={() => handleToggle(table.name, index)}
                 className="table-name"
               >
                 {/* {expandedTable === table.name ? (

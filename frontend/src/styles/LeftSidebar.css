@@ -71,7 +71,6 @@
 .table-name:hover {
   color: #007bff;
   width: auto;
-
 }
 
 .table-name::after {
@@ -88,6 +87,25 @@
 
 .table-name:hover::after {
   opacity: 1;
+}
+
+.table-columns ul {
+  display: flex;
+  flex-direction: column;
+  background-color: #d4f1d6;
+}
+
+.table-columns ul li:hover{
+  background-color: #d4f1d6;
+}
+
+.open-table {
+  grid-template-columns: 1fr !important;
+}
+
+.open-table .table-columns{
+  width: auto;
+  border-bottom: 2px solid #007bff;
 }
 
 .left-sidebar-bottom {
@@ -149,12 +167,4 @@
 }
 
 
-.table-columns ul {
-  display: flex;
-  flex-direction: column;
-  background-color: #d4f1d6;
-}
 
-.open-table {
-  grid-template-columns: 1fr !important;
-}
