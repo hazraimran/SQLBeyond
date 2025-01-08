@@ -13,10 +13,7 @@ const LeftSidebar = ({ imageState, message }) => {
   const refs = useRef([]);
 
   const scroll = (index) => {
-    if(index === 10) 
-      return refs.current[index].scrollIntoView({ behavior: "smooth", block: "end"});
-
-    refs.current[index+1].scrollIntoView({ behavior: "smooth", block: "center"}); 
+    refs.current[index].scrollIntoView({ behavior: "smooth"}); 
   }
 
   const handleToggle = (tableName, index) => {

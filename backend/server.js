@@ -10,6 +10,9 @@ const accountRouter = require('./routes/account');
 const cookieParser = require("cookie-parser");
 const sqlParser = require("sql-parser"); // SQL Parser for syntax validation
 
+//mongo db 
+const { closeMongodbConnection } = require('./utils/mongodb');
+
 // Load and validate environment variables
 const PORT = process.env.PORT || 3000;
 const MYSQL_URL = process.env.MYSQL_URL;
@@ -85,13 +88,11 @@ app.post("/get-hint", (req, res) => {
   const missingColumns = checkForMissingItems(userQuery, columnNames);
 
   if (missingConcepts.length > 0 || missingColumns.length > 0) {
-    const hint = `Your query is missing the following: ${
-      missingConcepts.length > 0
+    const hint = `Your query is missing the following: ${missingConcepts.length > 0
         ? `Keywords: ${missingConcepts.join(", ")}`
         : ""
-    } ${
-      missingColumns.length > 0 ? `Columns: ${missingColumns.join(", ")}` : ""
-    }`.trim();
+      } ${missingColumns.length > 0 ? `Columns: ${missingColumns.join(", ")}` : ""
+      }`.trim();
     return res.json({
       success: true,
       stage: "S1",
@@ -301,6 +302,21 @@ app.use("/account", accountRouter);
 // });
 
 // Start the server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+const closeConnections = async () => {
+  try {
+    await closeMongodbConnection();
+    server.close(() => {
+      process.exit(0);
+    });
+  } catch (err) {
+    console.error("Error during shutdown:", err);
+    process.exit(1);
+  }
+}
+
+process.on('SIGINT', () => closeConnections());
+process.on('SIGUSR2', () => closeConnections());

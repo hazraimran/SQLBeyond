@@ -24,13 +24,16 @@ const AuthProvider = ({ children }) => {
             }, { withCredentials: true });
 
             const data = response.data;
-            // console.log(data);
+            
+            console.log(data);
+
             if (data.user) {
 
                 console.log(data.user);
                 setUser(data.user);
                 setLoading(false);
                 navigate("/intro");
+                navigate(0);
                 return;
             }
             throw new Error(response.message);
@@ -49,9 +52,9 @@ const AuthProvider = ({ children }) => {
             }, { withCredentials: true });
 
             const data = response.data;
-            // console.log(data);
+            // console.log("inside login: ", data.user);
             if (data.user) {
-                setUser(data.user);
+                setUser({user: data.user});
 
                 // console.log(data.user);
 
@@ -72,15 +75,12 @@ const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            console.log("trying to logout")
-
+            // console.log("trying to logout")
             const response = await axios.post(`${apiUrl}/account/logout`, {}, { withCredentials: true });
-
-            console.log(response.data);
-
+            // console.log(response.data);
             if(user.isOauth)
                 googleLogout();
-         
+            
             setUser(null);
             setLoading(true);
             navigate("/");
@@ -132,8 +132,8 @@ const AuthProvider = ({ children }) => {
                 const response = await axios.get(`${apiUrl}/account/login`, { withCredentials: true });
                 // console.log(response.data);
                 if (response.data) {
-                    console.log(response.data.user);
-                    setUser(response.data.user);
+                    // console.log(response.data);
+                    setUser(response.data);
                 }
                 else {
                     setUser(null);

@@ -18,6 +18,8 @@ function IntroQuestion() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // console.log("inside handle sub:", user);
     
     if (company && position) {
       setSubmitted(true);
