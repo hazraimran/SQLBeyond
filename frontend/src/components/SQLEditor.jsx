@@ -15,7 +15,7 @@ const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 function SQLEditor() {
   const location = useLocation();
   const savedUserData = JSON.parse(localStorage.getItem("userData")) || {};
-  const user = useAuth().user.user;
+  const user = useAuth().user;
 
   const {
     name = `${user.firstName} ${user.lastName}`,

@@ -46,7 +46,15 @@ router.post("/login", async (req, res) => {
             const response = await bcrypt.compare(password, user.password);
             if (response) {
                 req.session.user = {username: username};
-                res.send({ user: user });
+                if(user.company && user.position){
+                    if(!user.quizData)
+                        res.send({ user: user, missingQuiz: true });
+                    else
+                        res.send({ user: user });
+                }
+                else{
+                    res.send({ user: user, isFirstTime: true });
+                }
             }
             else {
                 res.send({ msg: "Username and password don't match!" });
@@ -77,11 +85,12 @@ router.post("/register", async (req, res) => {
                 lastName: lastName,
                 username: username,
                 password: hash,
-                isOauth: false
+                isOauth: false,
+                badges: []
             }); 
-            const userData = { user: { firstName: firstName, lastName: lastName, username: username, isOauth: false }};
+            const userData = { user: { firstName: firstName, lastName: lastName, username: username, isOauth: false, badges: [] }};
             //store only the userID
-            req.session.user =  { username: username } ;
+            req.session.user =  { username: username };
             res.json(userData);
         }catch(err){
             console.error("Failed to insert new user: ", err);
@@ -112,8 +121,9 @@ router.post('/google-oauth-login', async (req, res) => {
                     username: email,
                     password: null,
                     isOauth: true,
+                    badges: []
                 });   
-                userData = { user: { firstName: given_name, lastName: family_name, username: email, isOauth: true, isFirstTime: true }};  
+                userData = { user: { firstName: given_name, lastName: family_name, username: email, isOauth: true, badges: []}, isFirstTime: true };  
             }catch(err){
                 console.error("Failed to insert new user: ", err);
                 res.json({status: "failed"});
@@ -121,7 +131,14 @@ router.post('/google-oauth-login', async (req, res) => {
         }
         else{
             // console.log(checkUser);
-            userData = { user: checkUser };
+            if(checkUser.company && checkUser.position){
+                if(!checkUser.quizData)
+                    userData = { user: checkUser, missingQuiz: true };
+                else
+                    userData = { user: checkUser };
+            }
+            else
+                userData = { user: checkUser, isFirstTime: true };
         }
         //save only the userID
         req.session.user = { username: email };
@@ -145,16 +162,49 @@ router.post("/logout", (req, res) => {
     })
 });
 
-router.get("/print-sessions", (req, res) => {
-    const sessionStore = req.sessionStore;
-    sessionStore.all((err, sessions) => {
-        if (err) {
-            console.error("Error fetching sessions:", err);
-            res.status(500).send("Failed to fetch sessions");
-            return;
-        }
-        res.send(sessions);
-    });
+router.post("/application-details", async (req, res) => {
+    const { company, position } = req.body;
+    const db = await connectToMongoDB();
+    const collection = db.collection('users');
+
+    // console.log(req.session.user);
+
+    try{
+        await collection.updateOne({
+            username: req.session.user.username
+        }, {
+            $set: {
+                company: company,
+                position: position
+            }
+        });   
+        res.json({success: true}); 
+    }catch(err){
+        console.error("Failed to update user: ", err);
+        res.json({status: "failed"});
+    }
+});
+
+router.post("/quiz-grade", async (req, res) => {
+    const { quizData } = req.body;
+    const db = await connectToMongoDB();
+    const collection = db.collection('users');
+
+    console.log(req.session.user);
+
+    try{
+        await collection.updateOne({
+            username: req.session.user.username
+        }, {
+            $set: {
+                quizData: quizData
+            }
+        });   
+        res.json({success: true}); 
+    }catch(err){
+        console.error("Failed to update user: ", err);
+        res.json({status: "failed"});
+    }
 });
 
 module.exports = router;

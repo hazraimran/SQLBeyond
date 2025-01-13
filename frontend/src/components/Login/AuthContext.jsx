@@ -2,7 +2,6 @@ import axios from "axios";
 import { useContext, createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin, googleLogout } from "@react-oauth/google";
-import { use } from "react";
 
 const AuthContext = createContext();
 
@@ -28,7 +27,6 @@ const AuthProvider = ({ children }) => {
             console.log(data);
 
             if (data.user) {
-
                 console.log(data.user);
                 setUser(data.user);
                 setLoading(false);
@@ -54,13 +52,18 @@ const AuthProvider = ({ children }) => {
             const data = response.data;
             // console.log("inside login: ", data.user);
             if (data.user) {
-                setUser({user: data.user});
+                setUser(data.user);
 
                 // console.log(data.user);
 
                 setLoading(false);
-                navigate("/SQLEditor");
-                return;
+                if(response.data.isFirstTime)
+                    return navigate("/intro");
+
+                if(response.data.missingQuiz)
+                    return navigate("/query")
+
+                return navigate("/SQLEditor");
             }
             else {
                 alert(data.msg);
@@ -76,7 +79,7 @@ const AuthProvider = ({ children }) => {
     const logout = async () => {
         try {
             // console.log("trying to logout")
-            const response = await axios.post(`${apiUrl}/account/logout`, {}, { withCredentials: true });
+            await axios.post(`${apiUrl}/account/logout`, {}, { withCredentials: true });
             // console.log(response.data);
             if(user.isOauth)
                 googleLogout();
@@ -107,11 +110,16 @@ const AuthProvider = ({ children }) => {
                 }, {withCredentials: true});
 
                 if (response.data.user) {
-                    setUser(response.data);
+                    setUser(response.data.user);
                     setLoading(false);
 
-                    if(response.data.user.isFirstTime)
+                    // console.log(response.data);
+
+                    if(response.data.isFirstTime)
                         return navigate("/intro");
+
+                    if(response.data.missingQuiz)
+                        return navigate("/query")
 
                     return navigate("/SQLEditor");
                 }
@@ -133,7 +141,7 @@ const AuthProvider = ({ children }) => {
                 // console.log(response.data);
                 if (response.data) {
                     // console.log(response.data);
-                    setUser(response.data);
+                    setUser(response.data.user);
                 }
                 else {
                     setUser(null);

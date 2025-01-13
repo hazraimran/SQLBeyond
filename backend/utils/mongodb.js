@@ -43,7 +43,3 @@ async function closeMongodbConnection() {
 }
 
 module.exports = { connectToMongoDB, closeMongodbConnection };
-
-
-
-

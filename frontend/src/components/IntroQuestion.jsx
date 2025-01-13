@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import "../styles/IntroQuestion.css";
 
 import { useAuth } from "./Login/AuthContext";
+import axios from "axios";
+
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 function IntroQuestion() {
-  const [name, setName] = useState("");
+  // const [name, setName] = useState("");
   const [company, setCompany] = useState("");
   const [position, setPosition] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -14,17 +17,28 @@ function IntroQuestion() {
   const companies = ["Apple", "Microsoft", "Amazon"];
   const positions = ["Software Developer", "Data Analyst", "Product Manager"];
 
-  const user = useAuth().user.user;
+  const user = useAuth().user;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // console.log("inside handle sub:", user);
-    
+
     if (company && position) {
       setSubmitted(true);
-      const userData = { company, position };
-      localStorage.setItem("userData", JSON.stringify(userData));
+
+      // save this data in the data base
+      try{
+        const response = await axios.post(`${apiUrl}/account/application-details`, {
+          company: company,
+          position: position
+        }, { withCredentials: true });
+      }
+      catch(err){
+        console.error("Error occurred when adding company and position to the user in the database: ", err);
+      }
+      // const userData = { company, position };
+      // localStorage.setItem("userData", JSON.stringify(userData));
     } else {
       alert(
         "Please fill in your name, select a company, and a position before submitting."

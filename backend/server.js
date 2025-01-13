@@ -7,6 +7,8 @@ const axios = require("axios");
 
 //import the account router 
 const accountRouter = require('./routes/account');
+const gameRouter = require('./routes/game');
+
 const cookieParser = require("cookie-parser");
 const sqlParser = require("sql-parser"); // SQL Parser for syntax validation
 
@@ -266,9 +268,11 @@ app.post("/personalized-hint", async (req, res) => {
   }
 });
 
-// ---------------------- login -------------------
+// ---------------------- routes -------------------
 // account route (developed in the routes/account.js)
 app.use("/account", accountRouter);
+// game route (developed in the routes/game.js)
+app.use("/game", gameRouter);
 
 // app.post("/generate-sql", async (req, res) => {
 //   const { prompt } = req.body;
