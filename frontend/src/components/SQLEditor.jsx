@@ -4,6 +4,7 @@ import confetti from "canvas-confetti";
 import LeftSidebar from "./Sidebar/LeftSidebar";
 import RightSidebar from "./Sidebar/RightSidebar";
 import Editor from "./SQLEditorComponents/Editor";
+import BadgeModal from "./BadgeModal";
 import questions from "../data/questions";
 import logToCSV from "../utils/logger";
 import "../styles/SQLEditor.css";
@@ -11,6 +12,81 @@ import "../styles/SQLEditor.css";
 import { useAuth } from "./Login/AuthContext";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
+import joinExpert from './../assets/badges/join-expert.png';
+import levelUp from './../assets/badges/level-up.png';
+import logicPro from './../assets/badges/logic-pro.png';
+import noHintHero from './../assets/badges/no-hint-hero.png';
+import persistentLearner from './../assets/badges/persistent-learner.png';
+import quickSolver from './../assets/badges/quick-solver.png';
+import reflectiveThinker from './../assets/badges/reflective-thinker.png';
+import sqlChampion from './../assets/badges/sql-champion.png';
+import steadyProgress from './../assets/badges/steady-progress.png';
+import syntaxMaster from './../assets/badges/syntax-master.png';
+
+const badgesData = [
+  {
+    displayName: "Join Expert",
+    name: "joinExpert",
+    criteria: "Successfully complete a task using SQL JOINs.",
+    badge: joinExpert,
+  },
+  {
+    displayName: "Level Up",
+    name: "levelUp",
+    criteria: "Progress to the next proficiency level (e.g., Beginner → Intermediate).",
+    badge: levelUp,
+  },
+  {
+    displayName: "Logic Pro",
+    name: "logicPro",
+    criteria: "Solve 3 consecutive tasks using logical operators (AND, OR, NOT).",
+    badge: logicPro,
+  },
+  {
+    displayName: "No-Hint Hero",
+    name: "noHintHero",
+    criteria: "Solve 3 consecutive tasks without using hints.",
+    badge: noHintHero,
+  },
+  {
+    displayName: "Persistent Learner",
+    name: "persistentLearner",
+    criteria: "Solve a task successfully after 3+ incorrect attempts.",
+    badge: persistentLearner,
+  },
+  {
+    displayName: "Quick Solver",
+    name: "quickSolver",
+    criteria: "Solve a query in under 2 minutes.",
+    badge: quickSolver,
+  },
+  {
+    displayName: "Reflective Thinker",
+    name: "reflectiveThinker",
+    criteria: "Answer reflective feedback questions correctly after solving a query.",
+    badge: reflectiveThinker,
+  },
+  {
+    displayName: "SQL Champion",
+    name: "sqlChampion",
+    criteria: "Complete all challenges in the game.",
+    badge: sqlChampion,
+  },
+  {
+    displayName: "Steady Progress",
+    name: "steadyProgress",
+    criteria: "Complete 3 tasks within a single session.",
+    badge: steadyProgress,
+  },
+  {
+    displayName: "Syntax Master",
+    name: "syntaxMaster",
+    criteria: "Solve 5 tasks without any syntax errors.",
+    badge: syntaxMaster,
+  },
+];
+
 
 function SQLEditor() {
   const location = useLocation();
@@ -198,6 +274,7 @@ function SQLEditor() {
           return updatedPoints;
         });
 
+        // luiz: add the backend request here
         if (points + earnedPoints >= 100 && !badges.includes("SQL Expert")) {
           setBadges((prevBadges) => [...prevBadges, "SQL Expert"]);
         }
@@ -409,8 +486,37 @@ function SQLEditor() {
     }
   }, [hasExecuted, loadQuestion, name, company, position]);
 
+
+
+  // -> display badge with color 
+  // dumping some ideas i have in mind so that I don't forget
+  // the logic for this is not very good, make it work first for now, but then improve how it is working.
+  // load the badges the users have in the SQLEditor, and then from the manipulate the badges individually
+  // make a post request to the api, update it in the database, in case the user reloads, it loads the page with the most recent badges
+  // think about this for the point system as well.
+  // the user from AuthContext should be used only to manipulate the user data, not individual parts of the user data
+  useEffect(() => {
+    if(user.badges){
+      setBadges(user.badges);
+    }
+  }, []);
+
+  // when user clicks in the badge, open a modal with the image, the name, and how to get it.
+  const [ badgeState, setBadgeState ] = useState ({ open: false, name: "" });
+
+  const openBadgeModal = (badge) => {
+    console.log(badge);
+    setBadgeState({ open: true, badgeData: badge });
+  };
+
+  const closeBadgeModal = () => {
+    setBadgeState({ open: false, badgeData: null });
+  };
+
   return (
     <div className="sql-editor-container">
+      {/* open this div as the modal for the badge */}
+      {badgeState.open && <BadgeModal closeBadgeModal={closeBadgeModal} badgeData={badgeState.badgeData} />}
       <LeftSidebar imageState={imageState} message={message} />
       <div className="main-editor">
         <Editor
@@ -459,6 +565,8 @@ function SQLEditor() {
         taskDescription={currentQuestion}
         retries={retryCount}
         badges={badges}
+        badgesData={badgesData}
+        openBadgeModal={openBadgeModal}
         pointsData={playerPoints}
         idealPoints={dynamicIdealPoints}
         errorHint={errorHint} // Pass error message to AI Assistant

@@ -41,15 +41,15 @@ app.use(express.urlencoded({ extended: true }));
 // MySQL Connection Pool
 const pool = mysql.createPool(MYSQL_URL);
 
-(async () => {
-  try {
-    await pool.getConnection(); // Test the database connection
-    console.log("Connected to the database.");
-  } catch (err) {
-    console.error("Database connection failed:", err);
-    process.exit(1);
-  }
-})();
+// (async () => {
+//   try {
+//     await pool.getConnection(); // Test the database connection
+//     console.log("Connected to the database.");
+//   } catch (err) {
+//     console.error("Database connection failed:", err);
+//     process.exit(1);
+//   }
+// })();
 
 // Endpoint to execute a SQL query
 app.post("/execute-query", async (req, res) => {

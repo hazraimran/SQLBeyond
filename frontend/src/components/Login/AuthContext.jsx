@@ -126,6 +126,7 @@ const AuthProvider = ({ children }) => {
                 throw new Error(response.message);
             }
             catch (err) {
+                alert("Not able to login with google. Try again!");
                 console.error(err);
             }
         },
