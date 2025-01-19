@@ -32,34 +32,6 @@ const DifficultyChart = ({ pointsData, idealPoints }) => {
     });
   });
 
-  // const data = {
-  //   labels: difficulties, // x-axis labels
-  //   datasets: [
-  //     {
-  //       label: "Ideal Points (y = x)",
-  //       data: idealPoints.map((y) => ({
-  //         x: difficulties[idealPoints.indexOf(y)],
-  //         y,
-  //       })), // x, y format for line
-  //       borderColor: "red",
-  //       borderWidth: 2,
-  //       fill: false,
-  //       showLine: true, // Show diagonal line
-  //       pointBackgroundColor: "red",
-  //     },
-  //     {
-  //       label: "User Points",
-  //       data: userPoints, // Use individual points
-  //       backgroundColor: "blue",
-  //       borderColor: "blue",
-  //       borderWidth: 0,
-  //       showLine: false, // Disable line for user points
-  //       pointStyle: "circle",
-  //       pointRadius: 5, // Distinct radius for individual points
-  //     },
-  //   ],
-  // };
-
   const data = {
     labels: difficulties, // x-axis labels
     datasets: [

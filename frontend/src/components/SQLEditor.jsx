@@ -13,16 +13,16 @@ import { useAuth } from "./Login/AuthContext";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-import joinExpert from './../assets/badges/join-expert.png';
-import levelUp from './../assets/badges/level-up.png';
-import logicPro from './../assets/badges/logic-pro.png';
-import noHintHero from './../assets/badges/no-hint-hero.png';
-import persistentLearner from './../assets/badges/persistent-learner.png';
-import quickSolver from './../assets/badges/quick-solver.png';
-import reflectiveThinker from './../assets/badges/reflective-thinker.png';
-import sqlChampion from './../assets/badges/sql-champion.png';
-import steadyProgress from './../assets/badges/steady-progress.png';
-import syntaxMaster from './../assets/badges/syntax-master.png';
+import joinExpert from "./../assets/badges/join-expert.png";
+import levelUp from "./../assets/badges/level-up.png";
+import logicPro from "./../assets/badges/logic-pro.png";
+import noHintHero from "./../assets/badges/no-hint-hero.png";
+import persistentLearner from "./../assets/badges/persistent-learner.png";
+import quickSolver from "./../assets/badges/quick-solver.png";
+import reflectiveThinker from "./../assets/badges/reflective-thinker.png";
+import sqlChampion from "./../assets/badges/sql-champion.png";
+import steadyProgress from "./../assets/badges/steady-progress.png";
+import syntaxMaster from "./../assets/badges/syntax-master.png";
 
 const badgesData = [
   {
@@ -34,13 +34,15 @@ const badgesData = [
   {
     displayName: "Level Up",
     name: "levelUp",
-    criteria: "Progress to the next proficiency level (e.g., Beginner → Intermediate).",
+    criteria:
+      "Progress to the next proficiency level (e.g., Beginner → Intermediate).",
     badge: levelUp,
   },
   {
     displayName: "Logic Pro",
     name: "logicPro",
-    criteria: "Solve 3 consecutive tasks using logical operators (AND, OR, NOT).",
+    criteria:
+      "Solve 3 consecutive tasks using logical operators (AND, OR, NOT).",
     badge: logicPro,
   },
   {
@@ -64,7 +66,8 @@ const badgesData = [
   {
     displayName: "Reflective Thinker",
     name: "reflectiveThinker",
-    criteria: "Answer reflective feedback questions correctly after solving a query.",
+    criteria:
+      "Answer reflective feedback questions correctly after solving a query.",
     badge: reflectiveThinker,
   },
   {
@@ -87,7 +90,6 @@ const badgesData = [
   },
 ];
 
-
 function SQLEditor() {
   const location = useLocation();
   const savedUserData = JSON.parse(localStorage.getItem("userData")) || {};
@@ -98,8 +100,6 @@ function SQLEditor() {
     company = savedUserData.company,
     position = savedUserData.position,
   } = location.state || {};
-
-  
 
   // State variables
   const [query, setQuery] = useState(
@@ -215,7 +215,7 @@ function SQLEditor() {
     }
 
     if (selectedQuestion) {
-      setCurrentQuestion(selectedQuestion);
+      setCurrentQuestion(selectedQuestion); // Keep the entire question object in the state
       setStartTime(Date.now());
       const correctResult = await fetchCorrectAnswerResult(
         selectedQuestion.answer
@@ -236,6 +236,31 @@ function SQLEditor() {
     } catch (err) {
       console.error("Error saving user data:", err);
     }
+  };
+
+  const handleUseHint = () => {
+    setCurrentQuestion((prev) => ({
+      ...prev,
+      points: Math.max((prev.points || 0) - 0.5, 0), // Deduct 0.5 from current question points
+    }));
+
+    setPoints((prev) => Math.max(prev - 0.5, 0)); // Deduct total points
+
+    // Update playerPoints for the current difficulty
+    const difficultyKey = currentDifficulty.toLowerCase();
+    setPlayerPoints((prev) => {
+      const updatedPoints = { ...prev };
+      if (updatedPoints[difficultyKey]?.length > 0) {
+        updatedPoints[difficultyKey][updatedPoints[difficultyKey].length - 1] =
+          Math.max(
+            updatedPoints[difficultyKey][
+              updatedPoints[difficultyKey].length - 1
+            ] - 0.5,
+            0
+          );
+      }
+      return updatedPoints;
+    });
   };
 
   const checkAnswer = useCallback(
@@ -486,9 +511,7 @@ function SQLEditor() {
     }
   }, [hasExecuted, loadQuestion, name, company, position]);
 
-
-
-  // -> display badge with color 
+  // -> display badge with color
   // dumping some ideas i have in mind so that I don't forget
   // the logic for this is not very good, make it work first for now, but then improve how it is working.
   // load the badges the users have in the SQLEditor, and then from the manipulate the badges individually
@@ -496,13 +519,13 @@ function SQLEditor() {
   // think about this for the point system as well.
   // the user from AuthContext should be used only to manipulate the user data, not individual parts of the user data
   useEffect(() => {
-    if(user.badges){
+    if (user.badges) {
       setBadges(user.badges);
     }
   }, []);
 
   // when user clicks in the badge, open a modal with the image, the name, and how to get it.
-  const [ badgeState, setBadgeState ] = useState ({ open: false, name: "" });
+  const [badgeState, setBadgeState] = useState({ open: false, name: "" });
 
   const openBadgeModal = (badge) => {
     console.log(badge);
@@ -516,7 +539,12 @@ function SQLEditor() {
   return (
     <div className="sql-editor-container">
       {/* open this div as the modal for the badge */}
-      {badgeState.open && <BadgeModal closeBadgeModal={closeBadgeModal} badgeData={badgeState.badgeData} />}
+      {badgeState.open && (
+        <BadgeModal
+          closeBadgeModal={closeBadgeModal}
+          badgeData={badgeState.badgeData}
+        />
+      )}
       <LeftSidebar imageState={imageState} message={message} />
       <div className="main-editor">
         <Editor
@@ -563,6 +591,9 @@ function SQLEditor() {
         setProgress={setPoints}
         query={query}
         taskDescription={currentQuestion}
+        currentQuestionPoints={currentQuestion.points} // Current question points
+        handleUseHint={handleUseHint} // Function to deduct points
+        setCurrentQuestion={setCurrentQuestion} // Pass setCurrentQuestion
         retries={retryCount}
         badges={badges}
         badgesData={badgesData}
