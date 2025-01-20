@@ -186,5 +186,17 @@
   max-inline-size: fit-content;
 }
 
+.tables-headers {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
 
+.pin-icon {
+  margin-right: 30px;
+}
+
+.pin-icon:hover {
+  color: #d9534f;
+}
 

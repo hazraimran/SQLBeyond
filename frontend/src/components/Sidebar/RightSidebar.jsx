@@ -5,8 +5,6 @@ import AIAssistant from "./AIAssistant";
 import DifficultyChart from "../DifficultyChart"; // Import the chart
 import { useAuth } from "../Login/AuthContext";
 
-
-
 const RightSidebar = ({
   progress,
   setProgress,
@@ -19,6 +17,7 @@ const RightSidebar = ({
   pointsData,
   idealPoints,
   errorHint,
+  user,
 }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
@@ -38,6 +37,7 @@ const RightSidebar = ({
 
   useEffect(() => {
     console.log("This is the desc:", taskDescription);
+    console.log("this is the user: ", user);
   }, [taskDescription]);
 
   // Calculate the percentage of progress toward the next achievement
@@ -61,13 +61,21 @@ const RightSidebar = ({
       {/* Points and Achievements */}
       <div className="points-system">
         <span className="right-sidebar-header">
-          <h3>Points</h3> 
+          <h3>Hi, {`${user.firstName} ${user.lastName}`}</h3> 
           <button onClick={handleLogout}>Logout</button>
         </span>
-        <p>
+
+        <div className="level-system">
+          <h3>Level up</h3>
+          <div className="level-boxes">
+            <div className="level-box"></div>
+            <div className="level-box"></div>
+            <div className="level-box"></div>
+          </div>
+        </div>
+        {/* <p>
           <strong>Current Points:</strong> {progress} / 100
         </p>
-        {/* Progress Bar */}
         <div className="progress-bar-container">
           <div className="progress-bar">
             <div
@@ -77,7 +85,7 @@ const RightSidebar = ({
               }}
             ></div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Difficulty Chart */}

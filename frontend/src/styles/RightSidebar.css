@@ -217,4 +217,23 @@
 
 .gray-image img{
   filter: grayscale(100%);
+  opacity: 0.28;
+}
+
+/* ------------------ level system ------------------ */
+
+.level-system {
+}
+
+.level-boxes {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.level-box {
+  width: 50px;
+  height: 50px;
+  background-color: palevioletred;
 }

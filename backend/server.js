@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const axios = require("axios");
 
 //import the account router 
-const accountRouter = require('./routes/account');
+const userRouter = require('./routes/user');
 const gameRouter = require('./routes/game');
 
 const cookieParser = require("cookie-parser");
@@ -270,7 +270,7 @@ app.post("/personalized-hint", async (req, res) => {
 
 // ---------------------- routes -------------------
 // account route (developed in the routes/account.js)
-app.use("/account", accountRouter);
+app.use("/account", userRouter);
 // game route (developed in the routes/game.js)
 app.use("/game", gameRouter);
 
