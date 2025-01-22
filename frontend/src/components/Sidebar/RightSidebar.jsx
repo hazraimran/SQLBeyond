@@ -37,7 +37,6 @@ const RightSidebar = ({
 
   useEffect(() => {
     console.log("This is the desc:", taskDescription);
-    console.log("this is the user: ", user);
   }, [taskDescription]);
 
   // Calculate the percentage of progress toward the next achievement

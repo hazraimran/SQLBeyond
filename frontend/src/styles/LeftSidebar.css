@@ -27,21 +27,7 @@
 
 .left-sidebar-top ul {
   display: grid;
-  grid-template-rows: repeat(4, 1fr);
-  grid-template-columns: repeat(3, 1fr);
-}
-
-@media (max-width: 1400px) {
-  .left-sidebar-top ul {
-    grid-template-columns: repeat(2, 1fr); 
-  }
-}
-
-@media (max-width: 1100px) {
-  .left-sidebar-top ul {
-    display: flex;
-    flex-direction: column; 
-  }
+  grid-template-columns: 1fr;
 }
 
 
@@ -50,14 +36,12 @@
   cursor: pointer;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+  width: 100%;
 
+  /* overflow: hidden; */
 
-  width: 100px;
-
-  overflow: hidden;
-
-  /* align-items: center; */
-  /* gap: 0.5rem; */
+  align-items: center;
+  gap: 0.5rem;
   /* background-color: #f7f7f7; */
   /* background-color: #007bff; */
 
@@ -66,6 +50,10 @@
   border-radius: 5px;
   transition: background-color 0.3s, color 0.3s;
   position: relative;
+
+  display: flex;
+  flex-direction: row;
+
 }
 
 .table-name:hover {
@@ -97,10 +85,6 @@
 
 .table-columns ul li:hover{
   background-color: #dfecfa;
-}
-
-.open-table {
-  grid-template-columns: 1fr !important;
 }
 
 .open-table .table-name{
@@ -190,6 +174,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  width: 100%;
 }
 
 .pin-icon {

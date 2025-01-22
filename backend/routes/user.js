@@ -71,11 +71,10 @@ router.post("/login", async (req, res) => {
 
 router.post("/register", async (req, res) => {
     const { firstName, lastName, username, password } = req.body;
-    const db = await connectToMongoDB();
-    const collection = db.collection('users');
-
     //check if user name already exists 
     try{
+        const db = await connectToMongoDB();
+        const collection = db.collection('users');
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(password, salt);
 

@@ -11,27 +11,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbtack } from '@fortawesome/free-solid-svg-icons';
 
 
-const LeftSidebar = ({ imageState, message }) => {
+const LeftSidebar = ({ imageState, message, handleTableContent }) => {
   const [expandedTable, setExpandedTable] = useState(null);
-  const refs = useRef([]);
-
-  const scroll = (index) => {
-    refs.current[index].scrollIntoView({ behavior: "smooth" });
-  }
 
   const handleToggle = (tableName, index) => {
-    let displayTable = document.querySelector('.left-sidebar-top ul');
-
-    if (expandedTable === tableName) {
-      displayTable.classList.remove("open-table");
-    }
-    else {
-      displayTable.classList.add("open-table");
-    }
-
     setExpandedTable(expandedTable === tableName ? null : tableName);
-
-    scroll(index);
   };
 
   const getImageSrc = () => {
@@ -52,22 +36,21 @@ const LeftSidebar = ({ imageState, message }) => {
       <div className="left-sidebar-top">
         <ul>
           {tables.map((table, index) => (
-            <li key={index} ref={(el) => refs.current[index] = el}>
+            <li key={index}>
               <div
                 onClick={() => handleToggle(table.name, index)}
                 className="table-name"
               >
-                {/* {expandedTable === table.name ? (
+                {expandedTable === table.name ? (
                   <FaChevronDown />
                 ) : (
                   <FaChevronRight />
-                )} */}
+                )}
                 <span className="tables-headers">
                   <div>{table.name}</div>
                   {expandedTable === table.name && 
-                      <FontAwesomeIcon icon={faThumbtack} className="pin-icon"/>
+                      <FontAwesomeIcon icon={faThumbtack} className="pin-icon" onClick={() => handleTableContent(table)}/>
                   }
-                  
                 </span>
               </div>
               {expandedTable === table.name && (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import confetti from "canvas-confetti";
 import LeftSidebar from "./Sidebar/LeftSidebar";
@@ -11,6 +11,8 @@ import badgesData from "../data/badges";
 import "../styles/SQLEditor.css";
 
 import { useAuth } from "./Login/AuthContext";
+
+import DisplayTables from "./SQLEditorComponents/DisplayTables";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -25,7 +27,7 @@ function SQLEditor() {
     position = savedUserData.position,
   } = location.state || {};
 
-  
+
 
   // State variables
   const [query, setQuery] = useState(
@@ -125,7 +127,7 @@ function SQLEditor() {
     if (remainingQuestions.length > 0) {
       selectedQuestion =
         remainingQuestions[
-          Math.floor(Math.random() * remainingQuestions.length)
+        Math.floor(Math.random() * remainingQuestions.length)
         ];
       setUsedQuestions((prev) => ({
         ...prev,
@@ -213,8 +215,8 @@ function SQLEditor() {
           questionDifficulty === "easy"
             ? 30
             : questionDifficulty === "medium"
-            ? 50
-            : 70;
+              ? 50
+              : 70;
 
         if (totalPointsInDifficulty >= requiredPoints) {
           if (questionDifficulty === "easy") {
@@ -400,10 +402,8 @@ function SQLEditor() {
       }
 
       setMessage(
-        `Hi ${name || "User"}, I'm Joe from ${
-          company || "your company"
-        }, manager for ${
-          position || "your position"
+        `Hi ${name || "User"}, I'm Joe from ${company || "your company"
+        }, manager for ${position || "your position"
         }. Let's start your assessment.`
       );
       setImageState("happy");
@@ -422,13 +422,13 @@ function SQLEditor() {
   // think about this for the point system as well.
   // the user from AuthContext should be used only to manipulate the user data, not individual parts of the user data
   useEffect(() => {
-    if(user.badges){
+    if (user.badges) {
       setBadges(user.badges);
     }
   }, []);
 
   // when user clicks in the badge, open a modal with the image, the name, and how to get it.
-  const [ badgeState, setBadgeState ] = useState ({ open: false, name: "" });
+  const [badgeState, setBadgeState] = useState({ open: false, name: "" });
 
   const openBadgeModal = (badge) => {
     console.log(badge);
@@ -439,11 +439,68 @@ function SQLEditor() {
     setBadgeState({ open: false, badgeData: null });
   };
 
+  const QueryResult = () => {
+    return (
+      <>
+        <h3>Query Result:</h3>
+        <div className="table-container">
+          {Array.isArray(result) ? (
+            <table>
+              <thead>
+                <tr>
+                  {result.length > 0 &&
+                    Object.keys(result[0]).map((key) => (
+                      <th key={key}>{key}</th>
+                    ))}
+                </tr>
+              </thead>
+              <tbody>
+                {result.map((row, index) => (
+                  <tr key={index}>
+                    {Object.values(row).map((value, i) => (
+                      <td key={i}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <pre>{result}</pre>
+          )}
+        </div>
+      </>
+    );
+  }
+
+  const [ isTableOn, setIsTableOn ] = useState(false);
+  const [ tableContent, setTableContent ] = useState([]);
+  const checkTable = useRef(new Set());
+
+  const handleTableActions = () => {
+    isTableOn ? setIsTableOn(false) : setIsTableOn(true);
+  };
+
+  const addTableContent = (table) => {
+    if(checkTable.current.has(table.name))
+      return;
+
+    checkTable.current.add(table.name);
+    setTableContent([...tableContent, table]);
+  };
+
+  const removeTableContent = (table) => {
+    if(!checkTable.current.has(table.name))
+      return;
+
+    checkTable.current.delete(table.name);
+    setTableContent(tableContent.filter(t => t.name !== table.name));
+  };
+
   return (
     <div className="sql-editor-container">
       {/* open this div as the modal for the badge */}
       {badgeState.open && <BadgeModal closeBadgeModal={closeBadgeModal} badgeData={badgeState.badgeData} />}
-      <LeftSidebar imageState={imageState} message={message} />
+      <LeftSidebar imageState={imageState} message={message} handleTableContent={addTableContent} />
       <div className="main-editor">
         <Editor
           setQuery={(updatedQuery) => setQuery(updatedQuery)}
@@ -453,34 +510,13 @@ function SQLEditor() {
           buttonsDisabled={buttonsDisabled}
         />
         <div className="result">
-          <button onClick={downloadLogs}>Download Logs</button>
-
-          <h3>Query Result:</h3>
-          <div className="table-container">
-            {Array.isArray(result) ? (
-              <table>
-                <thead>
-                  <tr>
-                    {result.length > 0 &&
-                      Object.keys(result[0]).map((key) => (
-                        <th key={key}>{key}</th>
-                      ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.map((row, index) => (
-                    <tr key={index}>
-                      {Object.values(row).map((value, i) => (
-                        <td key={i}>{value}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <pre>{result}</pre>
-            )}
+          <div className="result-btns">
+            <button onClick={downloadLogs}>Download Logs</button>
+            <button onClick={handleTableActions}>Tables</button>
+            <button onClick={() => setIsTableOn(false)}>Query Results</button>
           </div>
+
+          {isTableOn ? <DisplayTables tableContent={tableContent} removeTable={removeTableContent}/> : QueryResult()}
         </div>
       </div>
 
