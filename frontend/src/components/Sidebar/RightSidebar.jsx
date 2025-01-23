@@ -37,23 +37,13 @@ const RightSidebar = ({
 
   const handleUseHint = () => {
     console.log("handleUseHint called in RightSidebar");
-
     setHintsUsed((prev) => prev + 1);
-    setProgress((prevProgress) => Math.max(prevProgress - 10, 0)); // Deduct 10 points from total progress
-
-    // Deduct 0.5 points for each hint used from the current difficulty's points
-    const difficultyKey = taskDescription.difficulty.toLowerCase(); // Get current difficulty
-    setAdjustedQuestionPoints((prevPoints) => Math.max(prevPoints - 0.5, 0));
-
-    pointsData[difficultyKey] = pointsData[difficultyKey]?.map((point, index) =>
-      index === pointsData[difficultyKey].length - 1
-        ? Math.max(point - 0.5, 0)
-        : point
-    );
   };
 
   // Calculate the percentage of progress toward the next achievement
-  const progressPercentage = (progress / 100) * 100;
+  // const progressPercentage = (progress / 100) * 100;
+
+  const progressPercentage = Math.min((progress / 100) * 100, 100); // Cap at 100%
 
   useEffect(() => {
     if (progress >= 100) {
@@ -66,13 +56,6 @@ const RightSidebar = ({
       return () => clearTimeout(timer);
     }
   }, [progress, badges]);
-
-  const handleUseHintInSidebar = () => {
-    if (hintsUsed < 3) {
-      setHintsUsed((prev) => prev + 1);
-      handleUseHint(); // Call the function from SQLEditor to deduct points
-    }
-  };
 
   return (
     <div className="right-sidebar">
@@ -89,12 +72,23 @@ const RightSidebar = ({
           <strong>Points for this Question:</strong> {adjustedQuestionPoints}
         </p>
         {/* Progress Bar */}
+        {/* <div className="progress-bar-container">
+          <div className="progress-bar">
+            <div
+              className="progress-bar-fill"
+              style={{
+                width: displayFullProgress ? "100%" : `${progressPercentage}%`,
+              }}
+            ></div>
+          </div>
+        </div> */}
         <div className="progress-bar-container">
           <div className="progress-bar">
             <div
               className="progress-bar-fill"
               style={{
                 width: displayFullProgress ? "100%" : `${progressPercentage}%`,
+                backgroundColor: progress >= 100 ? "green" : "#4caf50",
               }}
             ></div>
           </div>

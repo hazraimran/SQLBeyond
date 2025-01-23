@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { FaChevronDown, FaChevronRight } from "react-icons/fa";
+// import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 import "../../styles/LeftSidebar.css";
 import tables from "../../data/tables";
 import thinkingImage from "../../assets/Thinking.png";
@@ -13,16 +13,15 @@ const LeftSidebar = ({ imageState, message }) => {
   const refs = useRef([]);
 
   const scroll = (index) => {
-    refs.current[index].scrollIntoView({ behavior: "smooth"}); 
-  }
+    refs.current[index].scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleToggle = (tableName, index) => {
-    let displayTable = document.querySelector('.left-sidebar-top ul');
+    let displayTable = document.querySelector(".left-sidebar-top ul");
 
-    if(expandedTable===tableName){
+    if (expandedTable === tableName) {
       displayTable.classList.remove("open-table");
-    }
-    else{
+    } else {
       displayTable.classList.add("open-table");
     }
 
@@ -49,7 +48,7 @@ const LeftSidebar = ({ imageState, message }) => {
       <div className="left-sidebar-top">
         <ul>
           {tables.map((table, index) => (
-            <li key={index} ref={(el) => refs.current[index] = el}>
+            <li key={index} ref={(el) => (refs.current[index] = el)}>
               <div
                 onClick={() => handleToggle(table.name, index)}
                 className="table-name"

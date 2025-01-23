@@ -23,7 +23,7 @@ const questions = {
       difficulty: "easy",
       expectedResponseTime: 50, // seconds
       maxRetries: 2,
-      points: 30,
+      points: 20,
       penalty: 10, // Points deducted per retry
       metrics: {
         queryExecutionTime: {
@@ -76,7 +76,7 @@ const questions = {
       difficulty: "easy",
       expectedResponseTime: 50, // seconds
       maxRetries: 2,
-      points: 30,
+      points: 20,
       penalty: 10, // Points deducted per retry
       metrics: {
         queryExecutionTime: {
@@ -129,7 +129,7 @@ const questions = {
       difficulty: "easy",
       expectedResponseTime: 50, // seconds
       maxRetries: 2,
-      points: 30,
+      points: 20,
       penalty: 10, // Points deducted per retry
       metrics: {
         queryExecutionTime: {
@@ -177,7 +177,7 @@ const questions = {
       difficulty: "medium",
       expectedResponseTime: 60,
       maxRetries: 2,
-      points: 50,
+      points: 30,
       penalty: 15,
       metrics: {
         queryExecutionTime: {
@@ -223,7 +223,7 @@ const questions = {
       difficulty: "medium",
       expectedResponseTime: 60,
       maxRetries: 2,
-      points: 50,
+      points: 30,
       penalty: 15,
       metrics: {
         queryExecutionTime: {
@@ -269,7 +269,7 @@ const questions = {
       difficulty: "medium",
       expectedResponseTime: 60,
       maxRetries: 2,
-      points: 50,
+      points: 30,
       penalty: 15,
       metrics: {
         queryExecutionTime: {
@@ -317,7 +317,7 @@ const questions = {
       difficulty: "hard",
       expectedResponseTime: 90,
       maxRetries: 1,
-      points: 100,
+      points: 50,
       penalty: 25,
       metrics: {
         queryExecutionTime: {

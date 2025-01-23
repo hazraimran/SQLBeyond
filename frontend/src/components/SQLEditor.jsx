@@ -6,89 +6,13 @@ import RightSidebar from "./Sidebar/RightSidebar";
 import Editor from "./SQLEditorComponents/Editor";
 import BadgeModal from "./BadgeModal";
 import questions from "../data/questions";
+import badgesData from "../data/badges";
 import logToCSV from "../utils/logger";
 import "../styles/SQLEditor.css";
 
 import { useAuth } from "./Login/AuthContext";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
-
-import joinExpert from "./../assets/badges/join-expert.png";
-import levelUp from "./../assets/badges/level-up.png";
-import logicPro from "./../assets/badges/logic-pro.png";
-import noHintHero from "./../assets/badges/no-hint-hero.png";
-import persistentLearner from "./../assets/badges/persistent-learner.png";
-import quickSolver from "./../assets/badges/quick-solver.png";
-import reflectiveThinker from "./../assets/badges/reflective-thinker.png";
-import sqlChampion from "./../assets/badges/sql-champion.png";
-import steadyProgress from "./../assets/badges/steady-progress.png";
-import syntaxMaster from "./../assets/badges/syntax-master.png";
-
-const badgesData = [
-  {
-    displayName: "Join Expert",
-    name: "joinExpert",
-    criteria: "Successfully complete a task using SQL JOINs.",
-    badge: joinExpert,
-  },
-  {
-    displayName: "Level Up",
-    name: "levelUp",
-    criteria:
-      "Progress to the next proficiency level (e.g., Beginner → Intermediate).",
-    badge: levelUp,
-  },
-  {
-    displayName: "Logic Pro",
-    name: "logicPro",
-    criteria:
-      "Solve 3 consecutive tasks using logical operators (AND, OR, NOT).",
-    badge: logicPro,
-  },
-  {
-    displayName: "No-Hint Hero",
-    name: "noHintHero",
-    criteria: "Solve 3 consecutive tasks without using hints.",
-    badge: noHintHero,
-  },
-  {
-    displayName: "Persistent Learner",
-    name: "persistentLearner",
-    criteria: "Solve a task successfully after 3+ incorrect attempts.",
-    badge: persistentLearner,
-  },
-  {
-    displayName: "Quick Solver",
-    name: "quickSolver",
-    criteria: "Solve a query in under 2 minutes.",
-    badge: quickSolver,
-  },
-  {
-    displayName: "Reflective Thinker",
-    name: "reflectiveThinker",
-    criteria:
-      "Answer reflective feedback questions correctly after solving a query.",
-    badge: reflectiveThinker,
-  },
-  {
-    displayName: "SQL Champion",
-    name: "sqlChampion",
-    criteria: "Complete all challenges in the game.",
-    badge: sqlChampion,
-  },
-  {
-    displayName: "Steady Progress",
-    name: "steadyProgress",
-    criteria: "Complete 3 tasks within a single session.",
-    badge: steadyProgress,
-  },
-  {
-    displayName: "Syntax Master",
-    name: "syntaxMaster",
-    criteria: "Solve 5 tasks without any syntax errors.",
-    badge: syntaxMaster,
-  },
-];
 
 function SQLEditor() {
   const location = useLocation();
@@ -106,7 +30,7 @@ function SQLEditor() {
     "SELECT P.firstName, P.lastName, A.reason, (P.weight / ((P.height / 100) * (P.height / 100))) AS BMI FROM Patient P JOIN Admission A ON P.healthNum = A.pID ORDER BY A.date DESC;"
   );
   const [result, setResult] = useState([]);
-  const [tasksCompleted, setTasksCompleted] = useState(1);
+  // const [tasksCompleted, setTasksCompleted] = useState(1);
   const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
   const [imageState, setImageState] = useState("thinking");
   const [message, setMessage] = useState("");
@@ -118,8 +42,8 @@ function SQLEditor() {
   const [startTime, setStartTime] = useState(null);
   const [points, setPoints] = useState(0);
   const [badges, setBadges] = useState(["Query Novice", "JOIN Master"]);
-  const [accuracy, setAccuracy] = useState(100);
-  const [responseTimes, setResponseTimes] = useState([]);
+  // const [accuracy, setAccuracy] = useState(100);
+  // const [responseTimes, setResponseTimes] = useState([]);
   const [retryCount, setRetryCount] = useState(0);
   const [currentDifficulty, setCurrentDifficulty] = useState("easy");
   const [usedQuestions, setUsedQuestions] = useState({
@@ -159,30 +83,6 @@ function SQLEditor() {
     a.href = url;
     a.download = "user_logs.csv";
     a.click();
-  };
-
-  const calculatePoints = (responseTime) => {
-    const { queryExecutionTime, totalTimeToSolve } = currentQuestion.metrics;
-    let executionTimePoints = 0;
-    let totalSolveTimePoints = 0;
-
-    if (responseTime <= queryExecutionTime.excellent.threshold) {
-      executionTimePoints = queryExecutionTime.excellent.points;
-    } else if (responseTime <= queryExecutionTime.mediocre.threshold) {
-      executionTimePoints = queryExecutionTime.mediocre.points;
-    } else {
-      executionTimePoints = queryExecutionTime.poor.points;
-    }
-
-    if (responseTime <= totalTimeToSolve.excellent.threshold) {
-      totalSolveTimePoints = totalTimeToSolve.excellent.points;
-    } else if (responseTime <= totalTimeToSolve.mediocre.threshold) {
-      totalSolveTimePoints = totalTimeToSolve.mediocre.points;
-    } else {
-      totalSolveTimePoints = totalTimeToSolve.poor.points;
-    }
-
-    return executionTimePoints + totalSolveTimePoints;
   };
 
   const loadQuestion = useCallback(async () => {
@@ -239,47 +139,117 @@ function SQLEditor() {
   };
 
   const handleUseHint = () => {
-    setCurrentQuestion((prev) => ({
-      ...prev,
-      points: Math.max((prev.points || 0) - 0.5, 0), // Deduct 0.5 from current question points
-    }));
-
-    setPoints((prev) => Math.max(prev - 0.5, 0)); // Deduct total points
-
-    // Update playerPoints for the current difficulty
-    const difficultyKey = currentDifficulty.toLowerCase();
-    setPlayerPoints((prev) => {
-      const updatedPoints = { ...prev };
-      if (updatedPoints[difficultyKey]?.length > 0) {
-        updatedPoints[difficultyKey][updatedPoints[difficultyKey].length - 1] =
-          Math.max(
-            updatedPoints[difficultyKey][
-              updatedPoints[difficultyKey].length - 1
-            ] - 0.5,
-            0
-          );
-      }
-      return updatedPoints;
-    });
+    console.log("Hint used!");
   };
+
+  // const checkAnswer = useCallback(
+  //   async (userResult) => {
+  //     const correct =
+  //       JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
+
+  //     const questionDifficulty = currentQuestion.difficulty; // Get current question difficulty
+  //     const earnedPoints = correct ? currentQuestion.points : 0; // Use static points from questions.js
+
+  //     // Update playerPoints for the chart
+  //     setPlayerPoints((prevPoints) => {
+  //       const updatedPoints = { ...prevPoints };
+  //       updatedPoints[questionDifficulty] = [
+  //         ...updatedPoints[questionDifficulty],
+  //         earnedPoints,
+  //       ];
+  //       return updatedPoints;
+  //     });
+
+  //     const questionData = {
+  //       userId: "user123",
+  //       question: currentQuestion.question,
+  //       difficulty: questionDifficulty,
+  //       correctAnswer: currentQuestion.answer,
+  //       userAnswerResult: userResult,
+  //       isCorrect: correct,
+  //       timeTaken: (Date.now() - startTime) / 1000, // Calculate time taken
+  //       pointsEarned: earnedPoints,
+  //       timestamp: new Date(),
+  //     };
+
+  //     saveUserData(questionData);
+
+  //     if (correct) {
+  //       setPoints((prevPoints) => prevPoints + earnedPoints); // Update total points
+
+  //       const totalPointsInDifficulty = playerPoints[questionDifficulty].reduce(
+  //         (a, b) => a + b,
+  //         earnedPoints
+  //       );
+  //       const requiredPoints =
+  //         questionDifficulty === "easy"
+  //           ? 30
+  //           : questionDifficulty === "medium"
+  //           ? 50
+  //           : 70;
+
+  //       if (totalPointsInDifficulty >= requiredPoints) {
+  //         // Promote to the next difficulty if required points are met
+  //         if (questionDifficulty === "easy") {
+  //           setCurrentDifficulty("medium");
+  //         } else if (questionDifficulty === "medium") {
+  //           setCurrentDifficulty("hard");
+  //         }
+  //       }
+
+  //       setMessage("Good job!");
+  //       triggerConfetti();
+
+  //       // Load the next question after 2 seconds
+  //       setTimeout(() => {
+  //         setMessage("");
+  //         loadQuestion();
+  //       }, 2000);
+  //     } else {
+  //       setRetryCount((prev) => prev + 1);
+  //       setMessage("Try again");
+  //       setTimeout(() => {
+  //         setImageState("thinking");
+  //         setMessage(`Current Task: ${currentQuestion.question}`);
+  //       }, 3000);
+  //     }
+  //   },
+  //   [
+  //     correctAnswerResult,
+  //     currentQuestion,
+  //     currentDifficulty,
+  //     playerPoints,
+  //     startTime,
+  //     loadQuestion, // Ensure this dependency is included
+  //   ]
+  // );
 
   const checkAnswer = useCallback(
     async (userResult) => {
       const correct =
         JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
-      const responseTime = (Date.now() - startTime) / 1000;
-      setResponseTimes((prev) => [...prev, responseTime]);
 
-      const earnedPoints = correct ? calculatePoints(responseTime) : 0;
+      const questionDifficulty = currentQuestion.difficulty; // Get current question difficulty
+      const earnedPoints = correct ? currentQuestion.points : 0; // Use static points from questions.js
+
+      // Update playerPoints for the chart
+      setPlayerPoints((prevPoints) => {
+        const updatedPoints = { ...prevPoints };
+        updatedPoints[questionDifficulty] = [
+          ...updatedPoints[questionDifficulty],
+          earnedPoints,
+        ];
+        return updatedPoints;
+      });
 
       const questionData = {
         userId: "user123",
         question: currentQuestion.question,
-        difficulty: currentDifficulty,
+        difficulty: questionDifficulty,
         correctAnswer: currentQuestion.answer,
         userAnswerResult: userResult,
         isCorrect: correct,
-        timeTaken: responseTime,
+        timeTaken: (Date.now() - startTime) / 1000, // Calculate time taken
         pointsEarned: earnedPoints,
         timestamp: new Date(),
       };
@@ -287,98 +257,57 @@ function SQLEditor() {
       saveUserData(questionData);
 
       if (correct) {
-        const questionDifficulty = currentQuestion.difficulty;
+        setPoints((prevPoints) => {
+          const newPoints = prevPoints + earnedPoints;
 
-        setPoints((prevPoints) => prevPoints + earnedPoints);
-        setPlayerPoints((prev) => {
-          const updatedPoints = { ...prev };
-          updatedPoints[questionDifficulty] = [
-            ...updatedPoints[questionDifficulty],
-            earnedPoints,
-          ];
-          return updatedPoints;
+          if (newPoints >= 100) {
+            // Promote to the next difficulty and reset points
+            if (questionDifficulty === "easy") {
+              setCurrentDifficulty("medium");
+              setMessage("Congratulations! You've advanced to Medium Level.");
+            } else if (questionDifficulty === "medium") {
+              setCurrentDifficulty("hard");
+              setMessage("Amazing! You've advanced to Hard Level.");
+            }
+
+            // Reset points to 0 after progressing
+            setTimeout(() => {
+              setPoints(0);
+              loadQuestion(); // Load a question for the new difficulty
+            }, 2000);
+
+            return 0; // Reset points to 0 in state
+          }
+
+          return newPoints;
         });
 
-        // luiz: add the backend request here
-        if (points + earnedPoints >= 100 && !badges.includes("SQL Expert")) {
-          setBadges((prevBadges) => [...prevBadges, "SQL Expert"]);
-        }
-
-        const totalPointsInDifficulty = playerPoints[questionDifficulty].reduce(
-          (a, b) => a + b,
-          0
-        );
-        const requiredPoints =
-          questionDifficulty === "easy"
-            ? 30
-            : questionDifficulty === "medium"
-            ? 50
-            : 70;
-
-        if (totalPointsInDifficulty >= requiredPoints) {
-          if (questionDifficulty === "easy") {
-            setCurrentDifficulty("medium");
-            setTimeout(() => loadQuestion(), 0);
-          } else if (questionDifficulty === "medium") {
-            setCurrentDifficulty("hard");
-            setTimeout(() => loadQuestion(), 0);
-          }
-        } else {
-          setTimeout(loadQuestion, 3000);
-        }
-
-        setTasksCompleted((prev) => prev + 1);
         setMessage("Good job!");
         triggerConfetti();
+
+        // Load the next question if points are below the threshold
+        if (points + earnedPoints < 100) {
+          setTimeout(() => {
+            setMessage("");
+            loadQuestion();
+          }, 2000);
+        }
       } else {
         setRetryCount((prev) => prev + 1);
-        setImageState("sad");
         setMessage("Try again");
-
-        try {
-          const res = await fetch("http://localhost:5001/personalized-hint", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              userQuery: query,
-              correctQuery: currentQuestion.answer,
-            }),
-          });
-          const data = await res.json();
-
-          if (data.success) {
-            setErrorHint(data.response);
-          } else {
-            setMessage("Unable to fetch personalized hint. Try again.");
-          }
-        } catch (error) {
-          console.error("Error fetching personalized hint:", error);
-          setMessage("Something went wrong. Please try again.");
-        }
-
         setTimeout(() => {
           setImageState("thinking");
           setMessage(`Current Task: ${currentQuestion.question}`);
         }, 3000);
-
-        if (retryCount >= 3) {
-          setAccuracy((prevAccuracy) => Math.max(0, prevAccuracy - 10));
-        }
       }
     },
     [
       correctAnswerResult,
-      startTime,
-      responseTimes,
-      accuracy,
-      retryCount,
-      badges,
-      currentDifficulty,
-      loadQuestion,
-      tasksCompleted,
       currentQuestion,
-      calculatePoints,
+      currentDifficulty,
       playerPoints,
+      startTime,
+      loadQuestion, // Ensure this dependency is included
       points,
     ]
   );
