@@ -39,6 +39,8 @@ function SQLEditor() {
     question: "",
     answer: "",
   });
+  const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
+
   const [startTime, setStartTime] = useState(null);
   const [points, setPoints] = useState(0);
   const [badges, setBadges] = useState(["Query Novice", "JOIN Master"]);
@@ -86,6 +88,8 @@ function SQLEditor() {
   };
 
   const loadQuestion = useCallback(async () => {
+    setHintsUsedForQuestion(0);
+
     setImageState("thinking");
     setButtonsDisabled(true);
 
@@ -138,99 +142,14 @@ function SQLEditor() {
     }
   };
 
-  const handleUseHint = () => {
-    console.log("Hint used!");
-  };
-
-  // const checkAnswer = useCallback(
-  //   async (userResult) => {
-  //     const correct =
-  //       JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
-
-  //     const questionDifficulty = currentQuestion.difficulty; // Get current question difficulty
-  //     const earnedPoints = correct ? currentQuestion.points : 0; // Use static points from questions.js
-
-  //     // Update playerPoints for the chart
-  //     setPlayerPoints((prevPoints) => {
-  //       const updatedPoints = { ...prevPoints };
-  //       updatedPoints[questionDifficulty] = [
-  //         ...updatedPoints[questionDifficulty],
-  //         earnedPoints,
-  //       ];
-  //       return updatedPoints;
-  //     });
-
-  //     const questionData = {
-  //       userId: "user123",
-  //       question: currentQuestion.question,
-  //       difficulty: questionDifficulty,
-  //       correctAnswer: currentQuestion.answer,
-  //       userAnswerResult: userResult,
-  //       isCorrect: correct,
-  //       timeTaken: (Date.now() - startTime) / 1000, // Calculate time taken
-  //       pointsEarned: earnedPoints,
-  //       timestamp: new Date(),
-  //     };
-
-  //     saveUserData(questionData);
-
-  //     if (correct) {
-  //       setPoints((prevPoints) => prevPoints + earnedPoints); // Update total points
-
-  //       const totalPointsInDifficulty = playerPoints[questionDifficulty].reduce(
-  //         (a, b) => a + b,
-  //         earnedPoints
-  //       );
-  //       const requiredPoints =
-  //         questionDifficulty === "easy"
-  //           ? 30
-  //           : questionDifficulty === "medium"
-  //           ? 50
-  //           : 70;
-
-  //       if (totalPointsInDifficulty >= requiredPoints) {
-  //         // Promote to the next difficulty if required points are met
-  //         if (questionDifficulty === "easy") {
-  //           setCurrentDifficulty("medium");
-  //         } else if (questionDifficulty === "medium") {
-  //           setCurrentDifficulty("hard");
-  //         }
-  //       }
-
-  //       setMessage("Good job!");
-  //       triggerConfetti();
-
-  //       // Load the next question after 2 seconds
-  //       setTimeout(() => {
-  //         setMessage("");
-  //         loadQuestion();
-  //       }, 2000);
-  //     } else {
-  //       setRetryCount((prev) => prev + 1);
-  //       setMessage("Try again");
-  //       setTimeout(() => {
-  //         setImageState("thinking");
-  //         setMessage(`Current Task: ${currentQuestion.question}`);
-  //       }, 3000);
-  //     }
-  //   },
-  //   [
-  //     correctAnswerResult,
-  //     currentQuestion,
-  //     currentDifficulty,
-  //     playerPoints,
-  //     startTime,
-  //     loadQuestion, // Ensure this dependency is included
-  //   ]
-  // );
-
   const checkAnswer = useCallback(
     async (userResult) => {
       const correct =
         JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
 
       const questionDifficulty = currentQuestion.difficulty; // Get current question difficulty
-      const earnedPoints = correct ? currentQuestion.points : 0; // Use static points from questions.js
+      let earnedPoints = correct ? currentQuestion.points : 0;
+      earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0); // Deduct hints used
 
       // Update playerPoints for the chart
       setPlayerPoints((prevPoints) => {
@@ -309,6 +228,7 @@ function SQLEditor() {
       startTime,
       loadQuestion, // Ensure this dependency is included
       points,
+      hintsUsedForQuestion, // Ensure hint usage affects the points calculation
     ]
   );
 
@@ -337,30 +257,6 @@ function SQLEditor() {
       setMessage("Try again");
     }
   };
-
-  // const submitQuery = async (userQuery) => {
-  //   try {
-  //     const response = await fetch(`${apiUrl}/execute-query`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ query: userQuery }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (response.ok) {
-  //       setResult(data.results);
-  //       checkAnswer(data.results);
-  //     } else {
-  //       setResult([{ error: "Syntax error or invalid query." }]);
-  //       setMessage("Submit failed. Check your query.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     setResult([{ error: "Error connecting to server." }]);
-  //     setMessage("Submit failed.");
-  //   }
-  // };
 
   const submitQuery = async (userQuery) => {
     const timestamp = new Date().toISOString();
@@ -464,7 +360,7 @@ function SQLEditor() {
   const closeBadgeModal = () => {
     setBadgeState({ open: false, badgeData: null });
   };
-
+  console.log(currentQuestion.points);
   return (
     <div className="sql-editor-container">
       {/* open this div as the modal for the badge */}
@@ -520,16 +416,16 @@ function SQLEditor() {
         setProgress={setPoints}
         query={query}
         taskDescription={currentQuestion}
-        currentQuestionPoints={currentQuestion.points} // Current question points
-        handleUseHint={handleUseHint} // Function to deduct points
-        setCurrentQuestion={setCurrentQuestion} // Pass setCurrentQuestion
+        currentQuestionPoints={currentQuestion.points}
         retries={retryCount}
         badges={badges}
         badgesData={badgesData}
         openBadgeModal={openBadgeModal}
         pointsData={playerPoints}
         idealPoints={dynamicIdealPoints}
-        errorHint={errorHint} // Pass error message to AI Assistant
+        errorHint={errorHint}
+        hintsUsedForQuestion={hintsUsedForQuestion}
+        setHintsUsedForQuestion={setHintsUsedForQuestion}
       />
     </div>
   );

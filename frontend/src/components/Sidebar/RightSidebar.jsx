@@ -6,18 +6,20 @@ import DifficultyChart from "../DifficultyChart"; // Import the chart
 import { useAuth } from "../Login/AuthContext";
 
 const RightSidebar = ({
-  progress,
-  setProgress,
-  query,
-  taskDescription,
-  currentQuestionPoints, // Static points for the current question
-  retries,
-  badges,
-  badgesData,
-  openBadgeModal,
-  pointsData,
-  idealPoints,
-  errorHint,
+  progress, // Current progress/points
+  setProgress, // Function to update progress/points
+  query, // User's current query
+  taskDescription, // Description of the current task/question
+  currentQuestionPoints, // Points allocated to the current question
+  retries, // Retry count for the current question
+  badges, // List of earned badges
+  badgesData, // Metadata for all available badges
+  openBadgeModal, // Function to open badge modal
+  pointsData, // Points distribution data for the chart
+  idealPoints, // Ideal points for difficulty levels
+  errorHint, // Error hints for AI Assistant
+  hintsUsedForQuestion, // Number of hints used for the current question
+  setHintsUsedForQuestion, // Function to increment hints used for the current question
 }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
@@ -26,22 +28,25 @@ const RightSidebar = ({
   ); // Track points for the current question
   const auth = useAuth();
 
-  // Update adjustedQuestionPoints when currentQuestionPoints changes
+  // // Update adjustedQuestionPoints when currentQuestionPoints changes
+  // useEffect(() => {
+  //   setAdjustedQuestionPoints(currentQuestionPoints || 0);
+  // }, [currentQuestionPoints]);
+
   useEffect(() => {
-    setAdjustedQuestionPoints(currentQuestionPoints || 0);
-  }, [currentQuestionPoints]);
+    setAdjustedQuestionPoints(currentQuestionPoints || 0); // Reset points to the new question's points
+    setHintsUsedForQuestion(0); // Reset hints used for the new question
+  }, [currentQuestionPoints, setHintsUsedForQuestion]);
 
   const handleLogout = () => {
     auth.logout();
   };
 
   const handleUseHint = () => {
-    console.log("handleUseHint called in RightSidebar");
-    setHintsUsed((prev) => prev + 1);
+    setHintsUsedForQuestion((prev) => prev + 1);
+    setAdjustedQuestionPoints((prevPoints) => Math.max(prevPoints - 1, 0)); // Deduct 1 points for each hint
+    console.log("Hint used! Points deducted.");
   };
-
-  // Calculate the percentage of progress toward the next achievement
-  // const progressPercentage = (progress / 100) * 100;
 
   const progressPercentage = Math.min((progress / 100) * 100, 100); // Cap at 100%
 
@@ -71,17 +76,6 @@ const RightSidebar = ({
         <p>
           <strong>Points for this Question:</strong> {adjustedQuestionPoints}
         </p>
-        {/* Progress Bar */}
-        {/* <div className="progress-bar-container">
-          <div className="progress-bar">
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: displayFullProgress ? "100%" : `${progressPercentage}%`,
-              }}
-            ></div>
-          </div>
-        </div> */}
         <div className="progress-bar-container">
           <div className="progress-bar">
             <div
@@ -140,7 +134,7 @@ RightSidebar.propTypes = {
   setProgress: PropTypes.func.isRequired,
   query: PropTypes.string.isRequired,
   taskDescription: PropTypes.object.isRequired,
-  currentQuestionPoints: PropTypes.number, // Static points for the current question
+  currentQuestionPoints: PropTypes.number.isRequired,
   retries: PropTypes.number.isRequired,
   badges: PropTypes.arrayOf(PropTypes.string).isRequired,
   badgesData: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -148,7 +142,8 @@ RightSidebar.propTypes = {
   pointsData: PropTypes.object.isRequired,
   idealPoints: PropTypes.arrayOf(PropTypes.number).isRequired,
   errorHint: PropTypes.string,
-  handleUseHint: PropTypes.func.isRequired, // Add PropType
+  hintsUsedForQuestion: PropTypes.number.isRequired,
+  setHintsUsedForQuestion: PropTypes.func.isRequired,
 };
 
 export default RightSidebar;
