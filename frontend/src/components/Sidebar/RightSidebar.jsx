@@ -14,6 +14,7 @@ const RightSidebar = ({
   badges,
   badgesData,
   openBadgeModal,
+  openHintModal,
   pointsData,
   idealPoints,
   errorHint,
@@ -109,11 +110,6 @@ const RightSidebar = ({
                 );
               })}
         </div>
-        {/* {badges.map((badge, index) => (
-          <div key={index} className="badge">
-            <span>{badge}</span>
-          </div>
-        ))} */}
       </div>
 
       {/* AI Assistant */}

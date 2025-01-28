@@ -4,7 +4,6 @@ import confetti from "canvas-confetti";
 import LeftSidebar from "./Sidebar/LeftSidebar";
 import RightSidebar from "./Sidebar/RightSidebar";
 import Editor from "./SQLEditorComponents/Editor";
-import BadgeModal from "./BadgeModal";
 import questions from "../data/questions";
 import logToCSV from "../utils/logger";
 import badgesData from "../data/badges";
@@ -13,6 +12,8 @@ import "../styles/SQLEditor.css";
 import { useAuth } from "./Login/AuthContext";
 
 import DisplayTables from "./SQLEditorComponents/DisplayTables";
+import HintModal from "./HintModal";
+import BadgeModal from "./BadgeModal";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -412,15 +413,7 @@ function SQLEditor() {
     }
   }, [hasExecuted, loadQuestion, name, company, position]);
 
-
-
-  // -> display badge with color 
-  // dumping some ideas i have in mind so that I don't forget
-  // the logic for this is not very good, make it work first for now, but then improve how it is working.
-  // load the badges the users have in the SQLEditor, and then from the manipulate the badges individually
-  // make a post request to the api, update it in the database, in case the user reloads, it loads the page with the most recent badges
-  // think about this for the point system as well.
-  // the user from AuthContext should be used only to manipulate the user data, not individual parts of the user data
+  
   useEffect(() => {
     if (user.badges) {
       setBadges(user.badges);
@@ -439,6 +432,7 @@ function SQLEditor() {
     setBadgeState({ open: false, badgeData: null });
   };
 
+  // ---------------------- query result ----------------------
   const QueryResult = () => {
     return (
       <>
@@ -472,6 +466,8 @@ function SQLEditor() {
     );
   }
 
+  // ---------------------- tables ----------------------
+
   const [ isTableOn, setIsTableOn ] = useState(false);
   const [ tableContent, setTableContent ] = useState([]);
   const checkTable = useRef(new Set());
@@ -496,10 +492,28 @@ function SQLEditor() {
     setTableContent(tableContent.filter(t => t.name !== table.name));
   };
 
+  // ---------------------- hint modal ----------------------
+  // here i have to open the modal and ask the user if they want to proceed or not?
+  // or i just inform them they will lose points by using the hint? 
+  // const [hintState, setHintState] = useState(false);
+
+  // const openHintModal = () => {
+  //   setBadgeState(true);
+  // };
+
+  // const closeHintModal = () => {
+  //   setBadgeState(false);
+  // };
+
+
+  // ---------------------- SQLEditor return ----------------------
   return (
     <div className="sql-editor-container">
       {/* open this div as the modal for the badge */}
       {badgeState.open && <BadgeModal closeBadgeModal={closeBadgeModal} badgeData={badgeState.badgeData} />}
+
+      {/* {hintState && <HintModal closeHintModal={closeHintModal} />} */}
+
       <LeftSidebar imageState={imageState} message={message} handleTableContent={addTableContent} />
       <div className="main-editor">
         <Editor
