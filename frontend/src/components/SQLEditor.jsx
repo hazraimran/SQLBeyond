@@ -147,11 +147,10 @@ function SQLEditor() {
       const correct =
         JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
 
-      const questionDifficulty = currentQuestion.difficulty; // Get current question difficulty
+      const questionDifficulty = currentQuestion.difficulty;
       let earnedPoints = correct ? currentQuestion.points : 0;
       earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0); // Deduct hints used
 
-      // Update playerPoints for the chart
       setPlayerPoints((prevPoints) => {
         const updatedPoints = { ...prevPoints };
         updatedPoints[questionDifficulty] = [
@@ -168,7 +167,7 @@ function SQLEditor() {
         correctAnswer: currentQuestion.answer,
         userAnswerResult: userResult,
         isCorrect: correct,
-        timeTaken: (Date.now() - startTime) / 1000, // Calculate time taken
+        timeTaken: (Date.now() - startTime) / 1000,
         pointsEarned: earnedPoints,
         timestamp: new Date(),
       };
@@ -180,40 +179,41 @@ function SQLEditor() {
           const newPoints = prevPoints + earnedPoints;
 
           if (newPoints >= 100) {
-            // Promote to the next difficulty and reset points
-            if (questionDifficulty === "easy") {
-              setCurrentDifficulty("medium");
-              setMessage("Congratulations! You've advanced to Medium Level.");
-            } else if (questionDifficulty === "medium") {
-              setCurrentDifficulty("hard");
-              setMessage("Amazing! You've advanced to Hard Level.");
+            let nextDifficulty = currentDifficulty;
+            let message = "";
+
+            if (currentDifficulty === "easy") {
+              nextDifficulty = "medium";
+              message = "🎉 Congratulations! You've advanced to Medium Level.";
+            } else if (currentDifficulty === "medium") {
+              nextDifficulty = "hard";
+              message = "🔥 Amazing! You've advanced to Hard Level.";
             }
 
-            // Reset points to 0 after progressing
+            setMessage(message);
             setTimeout(() => {
-              setPoints(0);
-              loadQuestion(); // Load a question for the new difficulty
-            }, 2000);
+              setCurrentDifficulty(nextDifficulty);
+              setPoints(0); // Reset points
+              setMessage(""); // Clear congratulatory message
+              loadQuestion(); // ✅ Load new question after the message
+            }, 3000);
 
-            return 0; // Reset points to 0 in state
+            return 0; // Reset points
           }
 
           return newPoints;
         });
 
-        setMessage("Good job!");
+        setMessage("✅ Good job!");
         triggerConfetti();
 
-        // Load the next question if points are below the threshold
-        if (points + earnedPoints < 100) {
-          setTimeout(() => {
-            setMessage("");
-            loadQuestion();
-          }, 2000);
-        }
+        setTimeout(() => {
+          setMessage(""); // Clear message before loading next question
+          loadQuestion(); // ✅ Load the next question
+        }, 3000);
       } else {
         setRetryCount((prev) => prev + 1);
-        setMessage("Try again");
+        setMessage("❌ Try again");
         setTimeout(() => {
           setImageState("thinking");
           setMessage(`Current Task: ${currentQuestion.question}`);
@@ -226,11 +226,14 @@ function SQLEditor() {
       currentDifficulty,
       playerPoints,
       startTime,
-      loadQuestion, // Ensure this dependency is included
       points,
-      hintsUsedForQuestion, // Ensure hint usage affects the points calculation
+      hintsUsedForQuestion,
     ]
   );
+
+  useEffect(() => {
+    loadQuestion(); // ✅ Load a new question when difficulty changes
+  }, [currentDifficulty]);
 
   const executeQuery = async (userQuery, limitRows = false) => {
     try {
@@ -323,16 +326,22 @@ function SQLEditor() {
         ]);
       }
 
-      setMessage(
-        `Hi ${name || "User"}, I'm Joe from ${
-          company || "your company"
-        }, manager for ${
-          position || "your position"
-        }. Let's start your assessment.`
-      );
-      setImageState("happy");
-      setButtonsDisabled(true);
-      setTimeout(loadQuestion, 7000);
+      // // Set the intro message
+      // setMessage(
+      //   `Hi ${name || "User"}, I'm Joe from ${
+      //     company || "your company"
+      //   }, manager for ${
+      //     position || "your position"
+      //   }. Let's start your assessment.`
+      // );
+
+      // setImageState("happy"); // Ensure assistant is in a happy state
+      // setButtonsDisabled(true);
+
+      // // Wait for intro message to display before loading first question
+      // setTimeout(() => {
+      //   loadQuestion();
+      // }, 5000); // Show intro for 5 seconds before first question
     }
   }, [hasExecuted, loadQuestion, name, company, position]);
 

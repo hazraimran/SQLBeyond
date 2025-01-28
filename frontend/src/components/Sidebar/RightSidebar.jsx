@@ -7,7 +7,7 @@ import { useAuth } from "../Login/AuthContext";
 
 const RightSidebar = ({
   progress, // Current progress/points
-  setProgress, // Function to update progress/points
+  // setProgress, // Function to update progress/points
   query, // User's current query
   taskDescription, // Description of the current task/question
   currentQuestionPoints, // Points allocated to the current question
@@ -18,7 +18,7 @@ const RightSidebar = ({
   pointsData, // Points distribution data for the chart
   idealPoints, // Ideal points for difficulty levels
   errorHint, // Error hints for AI Assistant
-  hintsUsedForQuestion, // Number of hints used for the current question
+  // hintsUsedForQuestion, // Number of hints used for the current question
   setHintsUsedForQuestion, // Function to increment hints used for the current question
 }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
@@ -28,15 +28,10 @@ const RightSidebar = ({
   ); // Track points for the current question
   const auth = useAuth();
 
-  // // Update adjustedQuestionPoints when currentQuestionPoints changes
-  // useEffect(() => {
-  //   setAdjustedQuestionPoints(currentQuestionPoints || 0);
-  // }, [currentQuestionPoints]);
-
   useEffect(() => {
     setAdjustedQuestionPoints(currentQuestionPoints || 0); // Reset points to the new question's points
     setHintsUsedForQuestion(0); // Reset hints used for the new question
-  }, [currentQuestionPoints, setHintsUsedForQuestion]);
+  }, [currentQuestionPoints, setHintsUsedForQuestion, taskDescription]);
 
   const handleLogout = () => {
     auth.logout();

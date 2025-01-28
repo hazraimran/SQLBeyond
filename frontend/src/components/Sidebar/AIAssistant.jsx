@@ -138,43 +138,6 @@ Hint:`;
     }
   };
 
-  // const handleGetPersonalizedHint = async () => {
-  //   if (!query || !taskDescription?.answer) {
-  //     setMessage(
-  //       "Ensure both the user's query and the correct query are available."
-  //     );
-  //     return;
-  //   }
-
-  //   try {
-  //     const res = await axios.post("http://localhost:5001/personalized-hint", {
-  //       userQuery: query,
-  //       taskDescription: taskDescription,
-  //     });
-
-  //     if (res.data.success) {
-  //       const personalizedHint = `Personalized Hint: ${res.data.response}`;
-  //       setHints((prevHints) => [personalizedHint, ...prevHints]); // Append hint to hints list
-  //       setResponse(personalizedHint); // Show the hint in the card
-  //       setMessage("Personalized hint provided!");
-  //       setShowCard(true);
-  //       logToCSV({
-  //         timestamp: new Date().toISOString(),
-  //         action: "Hint Used",
-  //         hintType: "Personalized",
-  //         currentQuery: query,
-  //         retries,
-  //         currentTask: taskDescription.question,
-  //       });
-  //     } else {
-  //       setMessage("Unable to fetch personalized hint.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching personalized hint:", error.message);
-  //     setMessage("An error occurred while fetching the personalized hint.");
-  //   }
-  // };
-
   const handleGetPersonalizedHint = async () => {
     if (!query || !taskDescription?.answer) {
       setMessage(

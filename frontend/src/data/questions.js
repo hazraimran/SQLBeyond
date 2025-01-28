@@ -76,7 +76,7 @@ const questions = {
       difficulty: "easy",
       expectedResponseTime: 50, // seconds
       maxRetries: 2,
-      points: 21,
+      points: 20,
       penalty: 10, // Points deducted per retry
       metrics: {
         queryExecutionTime: {
@@ -129,7 +129,7 @@ const questions = {
       difficulty: "easy",
       expectedResponseTime: 50, // seconds
       maxRetries: 2,
-      points: 22,
+      points: 20,
       penalty: 10, // Points deducted per retry
       metrics: {
         queryExecutionTime: {
