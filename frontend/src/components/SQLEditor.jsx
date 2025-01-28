@@ -5,6 +5,7 @@ import LeftSidebar from "./Sidebar/LeftSidebar";
 import RightSidebar from "./Sidebar/RightSidebar";
 import Editor from "./SQLEditorComponents/Editor";
 import questions from "../data/questions";
+import badgesData from "../data/badges";
 import logToCSV from "../utils/logger";
 import badgesData from "../data/badges";
 import "../styles/SQLEditor.css";
@@ -28,14 +29,14 @@ function SQLEditor() {
     position = savedUserData.position,
   } = location.state || {};
 
-
+  
 
   // State variables
   const [query, setQuery] = useState(
     "SELECT P.firstName, P.lastName, A.reason, (P.weight / ((P.height / 100) * (P.height / 100))) AS BMI FROM Patient P JOIN Admission A ON P.healthNum = A.pID ORDER BY A.date DESC;"
   );
   const [result, setResult] = useState([]);
-  const [tasksCompleted, setTasksCompleted] = useState(1);
+  // const [tasksCompleted, setTasksCompleted] = useState(1);
   const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
   const [imageState, setImageState] = useState("thinking");
   const [message, setMessage] = useState("");
@@ -44,11 +45,13 @@ function SQLEditor() {
     question: "",
     answer: "",
   });
+  const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
+
   const [startTime, setStartTime] = useState(null);
   const [points, setPoints] = useState(0);
   const [badges, setBadges] = useState(["Query Novice", "JOIN Master"]);
-  const [accuracy, setAccuracy] = useState(100);
-  const [responseTimes, setResponseTimes] = useState([]);
+  // const [accuracy, setAccuracy] = useState(100);
+  // const [responseTimes, setResponseTimes] = useState([]);
   const [retryCount, setRetryCount] = useState(0);
   const [currentDifficulty, setCurrentDifficulty] = useState("easy");
   const [usedQuestions, setUsedQuestions] = useState({
@@ -90,31 +93,9 @@ function SQLEditor() {
     a.click();
   };
 
-  const calculatePoints = (responseTime) => {
-    const { queryExecutionTime, totalTimeToSolve } = currentQuestion.metrics;
-    let executionTimePoints = 0;
-    let totalSolveTimePoints = 0;
-
-    if (responseTime <= queryExecutionTime.excellent.threshold) {
-      executionTimePoints = queryExecutionTime.excellent.points;
-    } else if (responseTime <= queryExecutionTime.mediocre.threshold) {
-      executionTimePoints = queryExecutionTime.mediocre.points;
-    } else {
-      executionTimePoints = queryExecutionTime.poor.points;
-    }
-
-    if (responseTime <= totalTimeToSolve.excellent.threshold) {
-      totalSolveTimePoints = totalTimeToSolve.excellent.points;
-    } else if (responseTime <= totalTimeToSolve.mediocre.threshold) {
-      totalSolveTimePoints = totalTimeToSolve.mediocre.points;
-    } else {
-      totalSolveTimePoints = totalTimeToSolve.poor.points;
-    }
-
-    return executionTimePoints + totalSolveTimePoints;
-  };
-
   const loadQuestion = useCallback(async () => {
+    setHintsUsedForQuestion(0);
+
     setImageState("thinking");
     setButtonsDisabled(true);
 
@@ -144,7 +125,7 @@ function SQLEditor() {
     }
 
     if (selectedQuestion) {
-      setCurrentQuestion(selectedQuestion);
+      setCurrentQuestion(selectedQuestion); // Keep the entire question object in the state
       setStartTime(Date.now());
       const correctResult = await fetchCorrectAnswerResult(
         selectedQuestion.answer
@@ -171,19 +152,28 @@ function SQLEditor() {
     async (userResult) => {
       const correct =
         JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
-      const responseTime = (Date.now() - startTime) / 1000;
-      setResponseTimes((prev) => [...prev, responseTime]);
 
-      const earnedPoints = correct ? calculatePoints(responseTime) : 0;
+      const questionDifficulty = currentQuestion.difficulty;
+      let earnedPoints = correct ? currentQuestion.points : 0;
+      earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0); // Deduct hints used
+
+      setPlayerPoints((prevPoints) => {
+        const updatedPoints = { ...prevPoints };
+        updatedPoints[questionDifficulty] = [
+          ...updatedPoints[questionDifficulty],
+          earnedPoints,
+        ];
+        return updatedPoints;
+      });
 
       const questionData = {
         userId: "user123",
         question: currentQuestion.question,
-        difficulty: currentDifficulty,
+        difficulty: questionDifficulty,
         correctAnswer: currentQuestion.answer,
         userAnswerResult: userResult,
         isCorrect: correct,
-        timeTaken: responseTime,
+        timeTaken: (Date.now() - startTime) / 1000,
         pointsEarned: earnedPoints,
         timestamp: new Date(),
       };
@@ -191,101 +181,65 @@ function SQLEditor() {
       saveUserData(questionData);
 
       if (correct) {
-        const questionDifficulty = currentQuestion.difficulty;
+        setPoints((prevPoints) => {
+          const newPoints = prevPoints + earnedPoints;
 
-        setPoints((prevPoints) => prevPoints + earnedPoints);
-        setPlayerPoints((prev) => {
-          const updatedPoints = { ...prev };
-          updatedPoints[questionDifficulty] = [
-            ...updatedPoints[questionDifficulty],
-            earnedPoints,
-          ];
-          return updatedPoints;
+          if (newPoints >= 100) {
+            let nextDifficulty = currentDifficulty;
+            let message = "";
+
+            if (currentDifficulty === "easy") {
+              nextDifficulty = "medium";
+              message = "🎉 Congratulations! You've advanced to Medium Level.";
+            } else if (currentDifficulty === "medium") {
+              nextDifficulty = "hard";
+              message = "🔥 Amazing! You've advanced to Hard Level.";
+            }
+
+            setMessage(message);
+            setTimeout(() => {
+              setCurrentDifficulty(nextDifficulty);
+              setPoints(0); // Reset points
+              setMessage(""); // Clear congratulatory message
+              loadQuestion(); // ✅ Load new question after the message
+            }, 3000);
+
+            return 0; // Reset points
+          }
+
+          return newPoints;
         });
 
-        // luiz: add the backend request here
-        if (points + earnedPoints >= 100 && !badges.includes("SQL Expert")) {
-          setBadges((prevBadges) => [...prevBadges, "SQL Expert"]);
-        }
-
-        const totalPointsInDifficulty = playerPoints[questionDifficulty].reduce(
-          (a, b) => a + b,
-          0
-        );
-        const requiredPoints =
-          questionDifficulty === "easy"
-            ? 30
-            : questionDifficulty === "medium"
-              ? 50
-              : 70;
-
-        if (totalPointsInDifficulty >= requiredPoints) {
-          if (questionDifficulty === "easy") {
-            setCurrentDifficulty("medium");
-            setTimeout(() => loadQuestion(), 0);
-          } else if (questionDifficulty === "medium") {
-            setCurrentDifficulty("hard");
-            setTimeout(() => loadQuestion(), 0);
-          }
-        } else {
-          setTimeout(loadQuestion, 3000);
-        }
-
-        setTasksCompleted((prev) => prev + 1);
-        setMessage("Good job!");
+        setMessage("✅ Good job!");
         triggerConfetti();
+
+        setTimeout(() => {
+          setMessage(""); // Clear message before loading next question
+          loadQuestion(); // ✅ Load the next question
+        }, 3000);
       } else {
         setRetryCount((prev) => prev + 1);
-        setImageState("sad");
-        setMessage("Try again");
-
-        try {
-          const res = await fetch("http://localhost:5001/personalized-hint", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              userQuery: query,
-              correctQuery: currentQuestion.answer,
-            }),
-          });
-          const data = await res.json();
-
-          if (data.success) {
-            setErrorHint(data.response);
-          } else {
-            setMessage("Unable to fetch personalized hint. Try again.");
-          }
-        } catch (error) {
-          console.error("Error fetching personalized hint:", error);
-          setMessage("Something went wrong. Please try again.");
-        }
-
+        setMessage("❌ Try again");
         setTimeout(() => {
           setImageState("thinking");
           setMessage(`Current Task: ${currentQuestion.question}`);
         }, 3000);
-
-        if (retryCount >= 3) {
-          setAccuracy((prevAccuracy) => Math.max(0, prevAccuracy - 10));
-        }
       }
     },
     [
       correctAnswerResult,
-      startTime,
-      responseTimes,
-      accuracy,
-      retryCount,
-      badges,
-      currentDifficulty,
-      loadQuestion,
-      tasksCompleted,
       currentQuestion,
-      calculatePoints,
+      currentDifficulty,
       playerPoints,
+      startTime,
       points,
+      hintsUsedForQuestion,
     ]
   );
+
+  useEffect(() => {
+    loadQuestion(); // ✅ Load a new question when difficulty changes
+  }, [currentDifficulty]);
 
   const executeQuery = async (userQuery, limitRows = false) => {
     try {
@@ -312,30 +266,6 @@ function SQLEditor() {
       setMessage("Try again");
     }
   };
-
-  // const submitQuery = async (userQuery) => {
-  //   try {
-  //     const response = await fetch(`${apiUrl}/execute-query`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ query: userQuery }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (response.ok) {
-  //       setResult(data.results);
-  //       checkAnswer(data.results);
-  //     } else {
-  //       setResult([{ error: "Syntax error or invalid query." }]);
-  //       setMessage("Submit failed. Check your query.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     setResult([{ error: "Error connecting to server." }]);
-  //     setMessage("Submit failed.");
-  //   }
-  // };
 
   const submitQuery = async (userQuery) => {
     const timestamp = new Date().toISOString();
@@ -402,20 +332,28 @@ function SQLEditor() {
         ]);
       }
 
-      setMessage(
-        `Hi ${name || "User"}, I'm Joe from ${company || "your company"
-        }, manager for ${position || "your position"
-        }. Let's start your assessment.`
-      );
-      setImageState("happy");
-      setButtonsDisabled(true);
-      setTimeout(loadQuestion, 7000);
+      // // Set the intro message
+      // setMessage(
+      //   `Hi ${name || "User"}, I'm Joe from ${
+      //     company || "your company"
+      //   }, manager for ${
+      //     position || "your position"
+      //   }. Let's start your assessment.`
+      // );
+
+      // setImageState("happy"); // Ensure assistant is in a happy state
+      // setButtonsDisabled(true);
+
+      // // Wait for intro message to display before loading first question
+      // setTimeout(() => {
+      //   loadQuestion();
+      // }, 5000); // Show intro for 5 seconds before first question
     }
   }, [hasExecuted, loadQuestion, name, company, position]);
 
   
   useEffect(() => {
-    if (user.badges) {
+    if  (user.badges)  {
       setBadges(user.badges);
     }
   }, []);
@@ -539,13 +477,16 @@ function SQLEditor() {
         setProgress={setPoints}
         query={query}
         taskDescription={currentQuestion}
+        currentQuestionPoints={currentQuestion.points}
         retries={retryCount}
         badges={badges}
         badgesData={badgesData}
         openBadgeModal={openBadgeModal}
         pointsData={playerPoints}
         idealPoints={dynamicIdealPoints}
-        errorHint={errorHint} // Pass error message to AI Assistant
+        errorHint={errorHint}
+        hintsUsedForQuestion={hintsUsedForQuestion}
+        setHintsUsedForQuestion={setHintsUsedForQuestion}
         user={user}
       />
     </div>

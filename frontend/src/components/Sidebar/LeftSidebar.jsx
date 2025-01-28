@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { FaChevronDown, FaChevronRight } from "react-icons/fa";
+// import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 import "../../styles/LeftSidebar.css";
 import tables from "../../data/tables";
 import thinkingImage from "../../assets/Thinking.png";

@@ -6,42 +6,46 @@ import DifficultyChart from "../DifficultyChart"; // Import the chart
 import { useAuth } from "../Login/AuthContext";
 
 const RightSidebar = ({
-  progress,
-  setProgress,
-  query,
-  taskDescription,
-  retries,
-  badges,
-  badgesData,
-  openBadgeModal,
+  progress, // Current progress/points
+  // setProgress, // Function to update progress/points
+  query, // User's current query
+  taskDescription, // Description of the current task/question
+  currentQuestionPoints, // Points allocated to the current question
+  retries, // Retry count for the current question
+  badges, // List of earned badges
+  badgesData, // Metadata for all available badges
+  openBadgeModal, // Function to open badge modal
   openHintModal,
-  pointsData,
-  idealPoints,
-  errorHint,
+  pointsData, // Points distribution data for the chart
+  idealPoints, // Ideal points for difficulty levels
+  errorHint, // Error hints for AI Assistant
+  // hintsUsedForQuestion, // Number of hints used for the current question
+  setHintsUsedForQuestion, // Function to increment hints used for the current question
   user,
 }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
+  const [adjustedQuestionPoints, setAdjustedQuestionPoints] = useState(
+    currentQuestionPoints || 0
+  ); // Track points for the current question
   const auth = useAuth();
+
+  useEffect(() => {
+    setAdjustedQuestionPoints(currentQuestionPoints || 0); // Reset points to the new question's points
+    setHintsUsedForQuestion(0); // Reset hints used for the new question
+  }, [currentQuestionPoints, setHintsUsedForQuestion, taskDescription]);
 
   const handleLogout = () => {
     auth.logout();
-  }
-
-  // Function to handle hints used and deduct points
-  const handleUseHint = () => {
-    if (hintsUsed < 3) {
-      setHintsUsed((prev) => prev + 1);
-      setProgress((prevProgress) => Math.max(prevProgress - 10, 0)); // Deduct 10 points
-    }
   };
 
-  useEffect(() => {
-    console.log("This is the desc:", taskDescription);
-  }, [taskDescription]);
+  const handleUseHint = () => {
+    setHintsUsedForQuestion((prev) => prev + 1);
+    setAdjustedQuestionPoints((prevPoints) => Math.max(prevPoints - 1, 0)); // Deduct 1 points for each hint
+    console.log("Hint used! Points deducted.");
+  };
 
-  // Calculate the percentage of progress toward the next achievement
-  const progressPercentage = (progress / 100) * 100;
+  const progressPercentage = Math.min((progress / 100) * 100, 100); // Cap at 100%
 
   useEffect(() => {
     if (progress >= 100) {
@@ -54,7 +58,6 @@ const RightSidebar = ({
       return () => clearTimeout(timer);
     }
   }, [progress, badges]);
-
 
   return (
     <div className="right-sidebar">
@@ -76,12 +79,16 @@ const RightSidebar = ({
         {/* <p>
           <strong>Current Points:</strong> {progress} / 100
         </p>
+        <p>
+          <strong>Points for this Question:</strong> {adjustedQuestionPoints}
+        </p>
         <div className="progress-bar-container">
           <div className="progress-bar">
             <div
               className="progress-bar-fill"
               style={{
                 width: displayFullProgress ? "100%" : `${progressPercentage}%`,
+                backgroundColor: progress >= 100 ? "green" : "#4caf50",
               }}
             ></div>
           </div>
@@ -98,17 +105,19 @@ const RightSidebar = ({
       <div className="achievements">
         <h3>Achievements</h3>
         <div className="badges-container">
-              {badgesData.map((badge) => {
-                return (
-                  <div 
-                    key={badge.name} 
-                    className={`badge-container ${badges.includes(badge.name)? "" : "gray-image"}`}
-                    onClick={() => openBadgeModal(badge)}
-                  >
-                    <img src={badge.badge} alt={badge.name}/>
-                  </div>
-                );
-              })}
+          {badgesData.map((badge) => {
+            return (
+              <div
+                key={badge.name}
+                className={`badge-container ${
+                  badges.includes(badge.name) ? "" : "gray-image"
+                }`}
+                onClick={() => openBadgeModal(badge)}
+              >
+                <img src={badge.badge} alt={badge.name} />
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -131,11 +140,16 @@ RightSidebar.propTypes = {
   setProgress: PropTypes.func.isRequired,
   query: PropTypes.string.isRequired,
   taskDescription: PropTypes.object.isRequired,
+  currentQuestionPoints: PropTypes.number.isRequired,
   retries: PropTypes.number.isRequired,
   badges: PropTypes.arrayOf(PropTypes.string).isRequired,
+  badgesData: PropTypes.arrayOf(PropTypes.object).isRequired,
+  openBadgeModal: PropTypes.func.isRequired,
   pointsData: PropTypes.object.isRequired,
   idealPoints: PropTypes.arrayOf(PropTypes.number).isRequired,
-  errorHint: PropTypes.string, // NEW PROP
+  errorHint: PropTypes.string,
+  hintsUsedForQuestion: PropTypes.number.isRequired,
+  setHintsUsedForQuestion: PropTypes.func.isRequired,
 };
 
 export default RightSidebar;

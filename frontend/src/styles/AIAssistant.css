@@ -150,3 +150,51 @@ h4 {
   border-radius: 5px;
   cursor: pointer;
 }
+
+.hints-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.hints-modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.hints-modal-content h5 {
+  margin-bottom: 20px;
+}
+
+.hints-modal-content ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.hints-modal-content ul li {
+  margin: 10px 0;
+  padding: 5px 10px;
+  background-color: #f7f7f7;
+  border-radius: 4px;
+}
+
+.close-modal-button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}

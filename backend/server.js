@@ -12,8 +12,8 @@ const gameRouter = require('./routes/game');
 const cookieParser = require("cookie-parser");
 const sqlParser = require("sql-parser"); // SQL Parser for syntax validation
 
-//mongo db 
-const { closeMongodbConnection } = require('./utils/mongodb');
+//mongo db
+const { closeMongodbConnection } = require("./utils/mongodb");
 
 // Load and validate environment variables
 const PORT = process.env.PORT || 3000;
@@ -28,10 +28,12 @@ if (!MYSQL_URL || !HUGGINGFACE_API_KEY) {
 // Express app setup
 const app = express();
 app.use(bodyParser.json());
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Express cookie-parser - cors was changed as well
@@ -90,11 +92,13 @@ app.post("/get-hint", (req, res) => {
   const missingColumns = checkForMissingItems(userQuery, columnNames);
 
   if (missingConcepts.length > 0 || missingColumns.length > 0) {
-    const hint = `Your query is missing the following: ${missingConcepts.length > 0
+    const hint = `Your query is missing the following: ${
+      missingConcepts.length > 0
         ? `Keywords: ${missingConcepts.join(", ")}`
         : ""
-      } ${missingColumns.length > 0 ? `Columns: ${missingColumns.join(", ")}` : ""
-      }`.trim();
+    } ${
+      missingColumns.length > 0 ? `Columns: ${missingColumns.join(", ")}` : ""
+    }`.trim();
     return res.json({
       success: true,
       stage: "S1",
@@ -214,7 +218,7 @@ app.post("/generate-sql", async (req, res) => {
         },
       }
     );
-
+    console.log(response);
     // Extract only the text after "Hint: "
     const generatedText =
       response.data.generated_text || response.data[0]?.generated_text || "";
@@ -320,7 +324,7 @@ const closeConnections = async () => {
     console.error("Error during shutdown:", err);
     process.exit(1);
   }
-}
+};
 
-process.on('SIGINT', () => closeConnections());
-process.on('SIGUSR2', () => closeConnections());
+process.on("SIGINT", () => closeConnections());
+process.on("SIGUSR2", () => closeConnections());
