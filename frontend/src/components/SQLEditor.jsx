@@ -181,28 +181,52 @@ function SQLEditor() {
       if (correct) {
         setPoints((prevPoints) => {
           const newPoints = prevPoints + earnedPoints;
+          if (currentDifficulty == "easy") {
+            if (newPoints >= 100) {
+              let nextDifficulty = currentDifficulty;
+              let message = "";
 
-          if (newPoints >= 100) {
-            let nextDifficulty = currentDifficulty;
-            let message = "";
+              if (currentDifficulty === "easy") {
+                nextDifficulty = "medium";
+                message = "Congratulations! You've advanced to Medium Level.";
+              } else if (currentDifficulty === "medium") {
+                nextDifficulty = "hard";
+                message = "Amazing! You've advanced to Hard Level.";
+              }
 
-            if (currentDifficulty === "easy") {
-              nextDifficulty = "medium";
-              message = "🎉 Congratulations! You've advanced to Medium Level.";
-            } else if (currentDifficulty === "medium") {
-              nextDifficulty = "hard";
-              message = "🔥 Amazing! You've advanced to Hard Level.";
+              setMessage(message);
+              setTimeout(() => {
+                setCurrentDifficulty(nextDifficulty);
+                setPoints(0); // Reset points
+                setMessage(""); // Clear congratulatory message
+                loadQuestion(); // ✅ Load new question after the message
+              }, 3000);
+
+              return 0; // Reset points
             }
+          } else if (currentDifficulty == "medium") {
+            if (newPoints >= 120) {
+              let nextDifficulty = currentDifficulty;
+              let message = "";
 
-            setMessage(message);
-            setTimeout(() => {
-              setCurrentDifficulty(nextDifficulty);
-              setPoints(0); // Reset points
-              setMessage(""); // Clear congratulatory message
-              loadQuestion(); // ✅ Load new question after the message
-            }, 3000);
+              if (currentDifficulty === "easy") {
+                nextDifficulty = "medium";
+                message = "Congratulations! You've advanced to Medium Level.";
+              } else if (currentDifficulty === "medium") {
+                nextDifficulty = "hard";
+                message = "Amazing! You've advanced to Hard Level.";
+              }
 
-            return 0; // Reset points
+              setMessage(message);
+              setTimeout(() => {
+                setCurrentDifficulty(nextDifficulty);
+                setPoints(0); // Reset points
+                setMessage(""); // Clear congratulatory message
+                loadQuestion(); // ✅ Load new question after the message
+              }, 3000);
+
+              return 0; // Reset points
+            }
           }
 
           return newPoints;
