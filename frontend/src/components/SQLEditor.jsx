@@ -7,7 +7,6 @@ import Editor from "./SQLEditorComponents/Editor";
 import questions from "../data/questions";
 import badgesData from "../data/badges";
 import logToCSV from "../utils/logger";
-import badgesData from "../data/badges";
 import "../styles/SQLEditor.css";
 
 import { useAuth } from "./Login/AuthContext";
@@ -28,8 +27,6 @@ function SQLEditor() {
     company = savedUserData.company,
     position = savedUserData.position,
   } = location.state || {};
-
-  
 
   // State variables
   const [query, setQuery] = useState(
@@ -137,15 +134,16 @@ function SQLEditor() {
   }, [currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
 
   const saveUserData = async (data) => {
-    try {
-      await fetch("http://localhost:3000/save-user-data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-    } catch (err) {
-      console.error("Error saving user data:", err);
-    }
+    // try {
+    //   await fetch("http://localhost:3000/save-user-data", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify(data),
+    //   });
+    // } catch (err) {
+    //   console.error("Error saving user data:", err);
+    // }
+    console.log("save user data function");
   };
 
   const checkAnswer = useCallback(
@@ -444,6 +442,7 @@ function SQLEditor() {
   // };
 
 
+  console.log(currentQuestion.points);
   // ---------------------- SQLEditor return ----------------------
   return (
     <div className="sql-editor-container">
