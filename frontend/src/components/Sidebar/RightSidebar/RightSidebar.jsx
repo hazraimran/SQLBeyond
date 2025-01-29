@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import "../../styles/RightSidebar.css";
+import "../../../styles/RightSidebar.css";
 import AIAssistant from "./AIAssistant";
-import DifficultyChart from "../DifficultyChart"; // Import the chart
-import { useAuth } from "../Login/AuthContext";
+import DifficultyChart from "./DifficultyChart"; // Import the chart
+import { useAuth } from "../../Login/AuthContext";
 
 const RightSidebar = ({
   progress, // Current progress/points
@@ -29,7 +29,6 @@ const RightSidebar = ({
     currentQuestionPoints || 0
   ); // Track points for the current question
   const auth = useAuth();
-
   useEffect(() => {
     setAdjustedQuestionPoints(currentQuestionPoints || 0); // Reset points to the new question's points
     setHintsUsedForQuestion(0); // Reset hints used for the new question
@@ -64,7 +63,7 @@ const RightSidebar = ({
       {/* Points and Achievements */}
       <div className="points-system">
         <span className="right-sidebar-header">
-          <h3>Hi, {`${user.firstName} ${user.lastName}`}</h3> 
+          <h3>Hi, {`${user.firstName} ${user.lastName}`}</h3>
           <button onClick={handleLogout}>Logout</button>
         </span>
 

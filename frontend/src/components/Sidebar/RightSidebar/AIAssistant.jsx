@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import "../../styles/AIAssistant.css";
+import "../../../styles/AIAssistant.css";
 import { FaRobot } from "react-icons/fa";
 import PropTypes from "prop-types";
 import axios from "axios";
-import logToCSV from "../../utils/logger";
+import logToCSV from "../../../utils/logger";
 
 const AIAssistant = ({
   handleUseHint,

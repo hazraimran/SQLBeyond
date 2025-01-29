@@ -9,18 +9,18 @@ import PrivateRoute from "./components/Login/PrivateRoute";
 
 function App() {
   return (
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Authentication />} />
-          <Route path="/register" element={<Register />} />
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Authentication />} />
+        <Route path="/register" element={<Register />} />
 
-          <Route element={<PrivateRoute />}>
-            <Route path="/intro" element={<IntroQuestion />} />
-            <Route path="/query" element={<QuestionaireForUsers />} />
-            <Route path="/SQLEditor" element={<SQLEditor />} />
-          </Route>
-        </Routes>
-      </AuthProvider>
+        <Route element={<PrivateRoute />}>
+          <Route path="/intro" element={<IntroQuestion />} />
+          <Route path="/query" element={<QuestionaireForUsers />} />
+          <Route path="/SQLEditor" element={<SQLEditor />} />
+        </Route>
+      </Routes>
+    </AuthProvider>
   );
 }
 

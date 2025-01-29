@@ -28,14 +28,20 @@ function IntroQuestion() {
       setSubmitted(true);
 
       // save this data in the data base
-      try{
-        const response = await axios.post(`${apiUrl}/account/application-details`, {
-          company: company,
-          position: position
-        }, { withCredentials: true });
-      }
-      catch(err){
-        console.error("Error occurred when adding company and position to the user in the database: ", err);
+      try {
+        const response = await axios.post(
+          `${apiUrl}/account/application-details`,
+          {
+            company: company,
+            position: position,
+          },
+          { withCredentials: true }
+        );
+      } catch (err) {
+        console.error(
+          "Error occurred when adding company and position to the user in the database: ",
+          err
+        );
       }
       // const userData = { company, position };
       // localStorage.setItem("userData", JSON.stringify(userData));
@@ -103,8 +109,9 @@ function IntroQuestion() {
         <div className="application-result">
           <h1>Application Submitted</h1>
           <p>
-            <strong>{`${user.firstName} ${user.lastName}`}</strong>, you are applying for the position of{" "}
-            <strong>{position}</strong> at <strong>{company}</strong>.
+            <strong>{`${user.firstName} ${user.lastName}`}</strong>, you are
+            applying for the position of <strong>{position}</strong> at{" "}
+            <strong>{company}</strong>.
           </p>
           <button onClick={startQuiz}>Start Quiz</button>
         </div>

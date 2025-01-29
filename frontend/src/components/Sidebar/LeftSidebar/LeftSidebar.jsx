@@ -1,15 +1,14 @@
 import { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { FaChevronDown, FaChevronRight } from "react-icons/fa";
-import "../../styles/LeftSidebar.css";
-import tables from "../../data/tables";
-import thinkingImage from "../../assets/Thinking.png";
-import helpfulImage from "../../assets/Helpful.webp";
-import happyImage from "../../assets/Happy.png";
+import "../../../styles/LeftSidebar.css";
+import tables from "../../../data/tables";
+import thinkingImage from "../../../assets/Thinking.png";
+import helpfulImage from "../../../assets/Helpful.webp";
+import happyImage from "../../../assets/Happy.png";
 import Typewriter from "typewriter-effect";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThumbtack } from '@fortawesome/free-solid-svg-icons';
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 
 const LeftSidebar = ({ imageState, message, handleTableContent }) => {
   const [expandedTable, setExpandedTable] = useState(null);
@@ -48,9 +47,13 @@ const LeftSidebar = ({ imageState, message, handleTableContent }) => {
                 )}
                 <span className="tables-headers">
                   <div>{table.name}</div>
-                  {expandedTable === table.name && 
-                      <FontAwesomeIcon icon={faThumbtack} className="pin-icon" onClick={() => handleTableContent(table)}/>
-                  }
+                  {expandedTable === table.name && (
+                    <FontAwesomeIcon
+                      icon={faThumbtack}
+                      className="pin-icon"
+                      onClick={() => handleTableContent(table)}
+                    />
+                  )}
                 </span>
               </div>
               {expandedTable === table.name && (

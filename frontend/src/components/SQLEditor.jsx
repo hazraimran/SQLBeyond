@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import confetti from "canvas-confetti";
-import LeftSidebar from "./Sidebar/LeftSidebar";
-import RightSidebar from "./Sidebar/RightSidebar";
+import LeftSidebar from "./Sidebar/LeftSidebar/LeftSidebar";
+import RightSidebar from "./Sidebar/RightSidebar/RightSidebar";
 import Editor from "./SQLEditorComponents/Editor";
 import questions from "../data/questions";
 import badgesData from "../data/badges";
@@ -12,12 +12,13 @@ import "../styles/SQLEditor.css";
 import { useAuth } from "./Login/AuthContext";
 
 import DisplayTables from "./SQLEditorComponents/DisplayTables";
-import HintModal from "./HintModal";
-import BadgeModal from "./BadgeModal";
+import HintModal from "./Modal/HintModal";
+import BadgeModal from "./Modal/BadgeModal";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 function SQLEditor() {
+  console.log("SQLEditor");
   const location = useLocation();
   const savedUserData = JSON.parse(localStorage.getItem("userData")) || {};
   const user = useAuth().user;
@@ -33,7 +34,6 @@ function SQLEditor() {
     "SELECT P.firstName, P.lastName, A.reason, (P.weight / ((P.height / 100) * (P.height / 100))) AS BMI FROM Patient P JOIN Admission A ON P.healthNum = A.pID ORDER BY A.date DESC;"
   );
   const [result, setResult] = useState([]);
-  // const [tasksCompleted, setTasksCompleted] = useState(1);
   const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
   const [imageState, setImageState] = useState("thinking");
   const [message, setMessage] = useState("");
@@ -41,14 +41,13 @@ function SQLEditor() {
   const [currentQuestion, setCurrentQuestion] = useState({
     question: "",
     answer: "",
+    points: 0,
   });
   const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
 
   const [startTime, setStartTime] = useState(null);
   const [points, setPoints] = useState(0);
   const [badges, setBadges] = useState(["Query Novice", "JOIN Master"]);
-  // const [accuracy, setAccuracy] = useState(100);
-  // const [responseTimes, setResponseTimes] = useState([]);
   const [retryCount, setRetryCount] = useState(0);
   const [currentDifficulty, setCurrentDifficulty] = useState("easy");
   const [usedQuestions, setUsedQuestions] = useState({
@@ -106,7 +105,7 @@ function SQLEditor() {
     if (remainingQuestions.length > 0) {
       selectedQuestion =
         remainingQuestions[
-        Math.floor(Math.random() * remainingQuestions.length)
+          Math.floor(Math.random() * remainingQuestions.length)
         ];
       setUsedQuestions((prev) => ({
         ...prev,
@@ -134,16 +133,7 @@ function SQLEditor() {
   }, [currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
 
   const saveUserData = async (data) => {
-    // try {
-    //   await fetch("http://localhost:3000/save-user-data", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(data),
-    //   });
-    // } catch (err) {
-    //   console.error("Error saving user data:", err);
-    // }
-    console.log("save user data function");
+    console.log("save user data function", data);
   };
 
   const checkAnswer = useCallback(
@@ -182,7 +172,11 @@ function SQLEditor() {
         setPoints((prevPoints) => {
           const newPoints = prevPoints + earnedPoints;
           if (currentDifficulty == "easy") {
-            if (newPoints >= 100) {
+            if (
+              newPoints >= 100 &&
+              playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0])
+                .length >= 4
+            ) {
               let nextDifficulty = currentDifficulty;
               let message = "";
 
@@ -205,7 +199,11 @@ function SQLEditor() {
               return 0; // Reset points
             }
           } else if (currentDifficulty == "medium") {
-            if (newPoints >= 120) {
+            if (
+              newPoints >= 120 &&
+              playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0])
+                .length >= 3
+            ) {
               let nextDifficulty = currentDifficulty;
               let message = "";
 
@@ -353,29 +351,11 @@ function SQLEditor() {
           userData.idealSlope.hard,
         ]);
       }
-
-      // // Set the intro message
-      // setMessage(
-      //   `Hi ${name || "User"}, I'm Joe from ${
-      //     company || "your company"
-      //   }, manager for ${
-      //     position || "your position"
-      //   }. Let's start your assessment.`
-      // );
-
-      // setImageState("happy"); // Ensure assistant is in a happy state
-      // setButtonsDisabled(true);
-
-      // // Wait for intro message to display before loading first question
-      // setTimeout(() => {
-      //   loadQuestion();
-      // }, 5000); // Show intro for 5 seconds before first question
     }
   }, [hasExecuted, loadQuestion, name, company, position]);
 
-  
   useEffect(() => {
-    if  (user.badges)  {
+    if (user.badges) {
       setBadges(user.badges);
     }
   }, []);
@@ -424,12 +404,12 @@ function SQLEditor() {
         </div>
       </>
     );
-  }
+  };
 
   // ---------------------- tables ----------------------
 
-  const [ isTableOn, setIsTableOn ] = useState(false);
-  const [ tableContent, setTableContent ] = useState([]);
+  const [isTableOn, setIsTableOn] = useState(false);
+  const [tableContent, setTableContent] = useState([]);
   const checkTable = useRef(new Set());
 
   const handleTableActions = () => {
@@ -437,45 +417,37 @@ function SQLEditor() {
   };
 
   const addTableContent = (table) => {
-    if(checkTable.current.has(table.name))
-      return;
+    if (checkTable.current.has(table.name)) return;
 
     checkTable.current.add(table.name);
     setTableContent([...tableContent, table]);
   };
 
   const removeTableContent = (table) => {
-    if(!checkTable.current.has(table.name))
-      return;
+    if (!checkTable.current.has(table.name)) return;
 
     checkTable.current.delete(table.name);
-    setTableContent(tableContent.filter(t => t.name !== table.name));
+    setTableContent(tableContent.filter((t) => t.name !== table.name));
   };
 
-  // ---------------------- hint modal ----------------------
-  // here i have to open the modal and ask the user if they want to proceed or not?
-  // or i just inform them they will lose points by using the hint? 
-  // const [hintState, setHintState] = useState(false);
-
-  // const openHintModal = () => {
-  //   setBadgeState(true);
-  // };
-
-  // const closeHintModal = () => {
-  //   setBadgeState(false);
-  // };
-
-
-  console.log(currentQuestion.points);
   // ---------------------- SQLEditor return ----------------------
   return (
     <div className="sql-editor-container">
       {/* open this div as the modal for the badge */}
-      {badgeState.open && <BadgeModal closeBadgeModal={closeBadgeModal} badgeData={badgeState.badgeData} />}
+      {badgeState.open && (
+        <BadgeModal
+          closeBadgeModal={closeBadgeModal}
+          badgeData={badgeState.badgeData}
+        />
+      )}
 
       {/* {hintState && <HintModal closeHintModal={closeHintModal} />} */}
 
-      <LeftSidebar imageState={imageState} message={message} handleTableContent={addTableContent} />
+      <LeftSidebar
+        imageState={imageState}
+        message={message}
+        handleTableContent={addTableContent}
+      />
       <div className="main-editor">
         <Editor
           setQuery={(updatedQuery) => setQuery(updatedQuery)}
@@ -491,7 +463,14 @@ function SQLEditor() {
             <button onClick={() => setIsTableOn(false)}>Query Results</button>
           </div>
 
-          {isTableOn ? <DisplayTables tableContent={tableContent} removeTable={removeTableContent}/> : QueryResult()}
+          {isTableOn ? (
+            <DisplayTables
+              tableContent={tableContent}
+              removeTable={removeTableContent}
+            />
+          ) : (
+            QueryResult()
+          )}
         </div>
       </div>
 
