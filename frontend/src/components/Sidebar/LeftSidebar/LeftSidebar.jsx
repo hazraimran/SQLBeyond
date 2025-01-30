@@ -10,7 +10,12 @@ import Typewriter from "typewriter-effect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 
-const LeftSidebar = ({ imageState, message, handleTableContent }) => {
+const LeftSidebar = ({
+  imageState,
+  message,
+  handleTableContent,
+  expectedOutput,
+}) => {
   const [expandedTable, setExpandedTable] = useState(null);
 
   const handleToggle = (tableName, index) => {
@@ -76,20 +81,62 @@ const LeftSidebar = ({ imageState, message, handleTableContent }) => {
         <div className="message-container">
           {message && (
             <div className="message">
-              <Typewriter
-                options={{
-                  strings: [message],
-                  autoStart: true,
-                  loop: true, // Set to false to prevent looping
-                  delay: 50,
-                  pauseFor: 60000, // Pauses for 60 seconds after typing the message
-                }}
-              />
+              <p>{message}</p>
+              <h4>Expected Output (Top 5 Rows):</h4>
+              {/* <table className="sample-table">
+                <thead>
+                  <tr>
+                    {expectedOutput.length > 0 &&
+                      Object.keys(expectedOutput[0]).map((col, index) => (
+                        <th key={index}>{col}</th>
+                      ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {expectedOutput.length > 0 ? (
+                    expectedOutput.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {Object.values(row).map((val, colIndex) => (
+                          <td key={colIndex}>{val}</td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="100%">No data available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table> */}
+              <div className="sample-table-container">
+                <table className="sample-table">
+                  <thead>
+                    <tr>
+                      {expectedOutput.length > 0 &&
+                        Object.keys(expectedOutput[0]).map((col, index) => (
+                          <th key={index}>{col}</th>
+                        ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {expectedOutput.length > 0 ? (
+                      expectedOutput.map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                          {Object.values(row).map((val, colIndex) => (
+                            <td key={colIndex}>{val}</td>
+                          ))}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="100%">No data available</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
-        </div>
-        <div className="image-container">
-          <img src={getImageSrc()} alt={imageState} className="sidebar-image" />
         </div>
       </div>
     </div>
@@ -99,6 +146,13 @@ const LeftSidebar = ({ imageState, message, handleTableContent }) => {
 LeftSidebar.propTypes = {
   imageState: PropTypes.string.isRequired,
   message: PropTypes.string,
+  handleTableContent: PropTypes.func.isRequired,
+  expectedOutput: PropTypes.array,
+  // currentQuestion: PropTypes.shape({
+  //   question: PropTypes.string.isRequired,
+  //   difficulty: PropTypes.string.isRequired,
+  //   expectedOutput: PropTypes.array, // Array of objects representing expected output
+  // }).isRequired,
 };
 
 export default LeftSidebar;

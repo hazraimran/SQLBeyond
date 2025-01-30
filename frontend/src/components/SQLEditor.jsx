@@ -63,6 +63,7 @@ function SQLEditor() {
   const [dynamicIdealPoints, setDynamicIdealPoints] = useState([10, 50, 100]);
   const [hasExecuted, setHasExecuted] = useState(false);
   const [errorHint, setErrorHint] = useState(""); // NEW STATE
+  const [expectedOutput, setExpectedOutput] = useState([]); // ✅ Store expected output
 
   const fetchCorrectAnswerResult = useCallback(async (correctQuery) => {
     try {
@@ -123,9 +124,15 @@ function SQLEditor() {
     if (selectedQuestion) {
       setCurrentQuestion(selectedQuestion); // Keep the entire question object in the state
       setStartTime(Date.now());
+      // const correctResult = await fetchCorrectAnswerResult(
+      //   selectedQuestion.answer
+      // );
       const correctResult = await fetchCorrectAnswerResult(
         selectedQuestion.answer
       );
+      setCorrectAnswerResult(correctResult);
+      setExpectedOutput(correctResult ? correctResult.slice(0, 5) : []); // ✅ Store top 5 rows
+
       setCorrectAnswerResult(correctResult);
       setMessage(`Current Task: ${selectedQuestion.question}`);
       setTimeout(() => setButtonsDisabled(false), 2000);
@@ -447,6 +454,7 @@ function SQLEditor() {
         imageState={imageState}
         message={message}
         handleTableContent={addTableContent}
+        expectedOutput={expectedOutput}
       />
       <div className="main-editor">
         <Editor

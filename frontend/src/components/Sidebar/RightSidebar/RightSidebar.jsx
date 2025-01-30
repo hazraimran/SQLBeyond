@@ -84,29 +84,6 @@ const RightSidebar = ({
             ></div>
           </div>
         </div>
-        {/* <p>
-          <strong>Current Points:</strong> {progress} / 100
-        </p>
-        <p>
-          <strong>Points for this Question:</strong> {adjustedQuestionPoints}
-        </p>
-        <div className="progress-bar-container">
-          <div className="progress-bar">
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: displayFullProgress ? "100%" : `${progressPercentage}%`,
-                backgroundColor: progress >= 100 ? "green" : "#4caf50",
-              }}
-            ></div>
-          </div>
-        </div> */}
-      </div>
-
-      {/* Difficulty Chart */}
-      <div className="difficulty-chart">
-        <h3>Performance</h3>
-        <DifficultyChart pointsData={pointsData} idealPoints={idealPoints} />
       </div>
 
       {/* Achievements */}
@@ -139,6 +116,12 @@ const RightSidebar = ({
         retries={retries}
         errorHint={errorHint} // Pass error hint
       />
+
+      {/* Difficulty Chart */}
+      <div className="difficulty-chart">
+        <h3>Performance</h3>
+        <DifficultyChart pointsData={pointsData} idealPoints={idealPoints} />
+      </div>
     </div>
   );
 };
