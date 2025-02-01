@@ -35,53 +35,13 @@ const LeftSidebar = ({
 
   return (
     <div className="left-sidebar">
-      <h2 className="sidebar-heading">Tables</h2>
-
       <div className="left-sidebar-top">
-        <ul>
-          {tables.map((table, index) => (
-            <li key={index}>
-              <div
-                onClick={() => handleToggle(table.name, index)}
-                className="table-name"
-              >
-                {expandedTable === table.name ? (
-                  <FaChevronDown />
-                ) : (
-                  <FaChevronRight />
-                )}
-                <span className="tables-headers">
-                  <div>{table.name}</div>
-                  {expandedTable === table.name && (
-                    <FontAwesomeIcon
-                      icon={faThumbtack}
-                      className="pin-icon"
-                      onClick={() => handleTableContent(table)}
-                    />
-                  )}
-                </span>
-              </div>
-              {expandedTable === table.name && (
-                <div className="table-columns">
-                  <ul>
-                    {table.columns.map((column, idx) => (
-                      <li key={idx} className="column">
-                        <strong>{column.name}</strong>: {column.type}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="left-sidebar-bottom">
         <div className="message-container">
           {message && (
             <div className="message">
-              <p>{message}</p>
+              <p>
+                Current Task: <span>{message}</span>
+              </p>
               <h4>Expected Output (Top 5 Rows):</h4>
               {/* <table className="sample-table">
                 <thead>
@@ -138,6 +98,47 @@ const LeftSidebar = ({
             </div>
           )}
         </div>
+      </div>
+
+      <h2 className="sidebar-heading">Tables</h2>
+      <div className="left-sidebar-bottom">
+        <ul>
+          {tables.map((table, index) => (
+            <li key={index}>
+              <div
+                onClick={() => handleToggle(table.name, index)}
+                className="table-name"
+              >
+                {expandedTable === table.name ? (
+                  <FaChevronDown />
+                ) : (
+                  <FaChevronRight />
+                )}
+                <span className="tables-headers">
+                  <div>{table.name}</div>
+                  {expandedTable === table.name && (
+                    <FontAwesomeIcon
+                      icon={faThumbtack}
+                      className="pin-icon"
+                      onClick={() => handleTableContent(table)}
+                    />
+                  )}
+                </span>
+              </div>
+              {expandedTable === table.name && (
+                <div className="table-columns">
+                  <ul>
+                    {table.columns.map((column, idx) => (
+                      <li key={idx} className="column">
+                        <strong>{column.name}</strong>: {column.type}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

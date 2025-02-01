@@ -14,11 +14,12 @@ import { useAuth } from "./Login/AuthContext";
 import DisplayTables from "./SQLEditorComponents/DisplayTables";
 import HintModal from "./Modal/HintModal";
 import BadgeModal from "./Modal/BadgeModal";
+import LogoutModal from "./Modal/LogoutModal";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 function SQLEditor() {
-  console.log("SQLEditor");
+  // console.log("SQLEditor");
   const location = useLocation();
   const savedUserData = JSON.parse(localStorage.getItem("userData")) || {};
   const user = useAuth().user;
@@ -106,7 +107,7 @@ function SQLEditor() {
     if (remainingQuestions.length > 0) {
       selectedQuestion =
         remainingQuestions[
-          Math.floor(Math.random() * remainingQuestions.length)
+        Math.floor(Math.random() * remainingQuestions.length)
         ];
       setUsedQuestions((prev) => ({
         ...prev,
@@ -134,7 +135,7 @@ function SQLEditor() {
       setExpectedOutput(correctResult ? correctResult.slice(0, 5) : []); // ✅ Store top 5 rows
 
       setCorrectAnswerResult(correctResult);
-      setMessage(`Current Task: ${selectedQuestion.question}`);
+      setMessage(`${selectedQuestion.question}`);
       setTimeout(() => setButtonsDisabled(false), 2000);
     }
   }, [currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
@@ -437,6 +438,17 @@ function SQLEditor() {
     setTableContent(tableContent.filter((t) => t.name !== table.name));
   };
 
+  // ---------------------- Logout modal ----------------------
+  const [logoutModal, setLogoutModal] = useState(false);
+
+  const openLogoutModal = () => {
+    setLogoutModal(true);
+  }
+
+  const closeLogoutModal = () => {
+    setLogoutModal(false);
+  }
+
   // ---------------------- SQLEditor return ----------------------
   return (
     <div className="sql-editor-container">
@@ -447,6 +459,8 @@ function SQLEditor() {
           badgeData={badgeState.badgeData}
         />
       )}
+
+      {logoutModal && <LogoutModal closeLogoutModal={closeLogoutModal} />}
 
       {/* {hintState && <HintModal closeHintModal={closeHintModal} />} */}
 
@@ -466,9 +480,9 @@ function SQLEditor() {
         />
         <div className="result">
           <div className="result-btns">
-            <button onClick={downloadLogs}>Download Logs</button>
-            <button onClick={handleTableActions}>Tables</button>
+            {/* <button onClick={downloadLogs}>Download Logs</button> */}
             <button onClick={() => setIsTableOn(false)}>Query Results</button>
+            <button onClick={handleTableActions}>Pinned Tables</button>
           </div>
 
           {isTableOn ? (
@@ -498,6 +512,7 @@ function SQLEditor() {
         hintsUsedForQuestion={hintsUsedForQuestion}
         setHintsUsedForQuestion={setHintsUsedForQuestion}
         user={user}
+        openLogoutModal={openLogoutModal}
       />
     </div>
   );

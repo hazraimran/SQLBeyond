@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import "../../../styles/RightSidebar.css";
 import AIAssistant from "./AIAssistant";
 import DifficultyChart from "./DifficultyChart"; // Import the chart
-import { useAuth } from "../../Login/AuthContext";
 
 const RightSidebar = ({
   progress, // Current progress/points
@@ -22,20 +21,20 @@ const RightSidebar = ({
   // hintsUsedForQuestion, // Number of hints used for the current question
   setHintsUsedForQuestion, // Function to increment hints used for the current question
   user,
+  openLogoutModal,
 }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [displayFullProgress, setDisplayFullProgress] = useState(false);
   const [adjustedQuestionPoints, setAdjustedQuestionPoints] = useState(
     currentQuestionPoints || 0
   ); // Track points for the current question
-  const auth = useAuth();
   useEffect(() => {
     setAdjustedQuestionPoints(currentQuestionPoints || 0); // Reset points to the new question's points
     setHintsUsedForQuestion(0); // Reset hints used for the new question
   }, [currentQuestionPoints, setHintsUsedForQuestion, taskDescription]);
 
   const handleLogout = () => {
-    auth.logout();
+    openLogoutModal(true)
   };
 
   const handleUseHint = () => {

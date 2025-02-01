@@ -13,20 +13,21 @@
   text-align: center;
   margin: 0;
   padding: 0.5rem;
-  background-color: #f0f0f0;
-  border-bottom: 2px solid #ddd;
+  /* background-color: #f0f0f0; */
+  /* border-bottom: 2px solid #ddd; */
 }
 
-.left-sidebar-top {
+/* old top */
+.left-sidebar-bottom {
   flex: 1;
   overflow-x: auto;
   padding: 0;
-  border-bottom: 2px solid #ddd;
 }
 
-.left-sidebar-top ul {
+.left-sidebar-bottom ul {
   display: grid;
   grid-template-columns: 1fr;
+  margin: 0;
 }
 
 .table-name {
@@ -91,13 +92,14 @@
   border-bottom: 2px solid #007bff;
 }
 
-.left-sidebar-bottom {
+.left-sidebar-top {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 50%;
   text-align: center;
+  border-bottom: 2px solid #ddd;
 }
 
 .message-container {
@@ -117,7 +119,7 @@
   /* Adds a stronger shadow */
   margin: 0.1rem;
 
-  position: relative;
+  /* position: relative; */
 }
 
 .message {
@@ -126,6 +128,10 @@
   line-height: 1.4;
   color: #333;
   max-width: 90%;
+}
+
+.message  p span{
+  font-weight: 300;
 }
 
 .image-container {
@@ -176,18 +182,19 @@
   /* max-height: 35vh; Restrict height to avoid overflow */
   overflow-y: auto; /* Make it scrollable if needed */
   width: 90%;
-  border: 2px solid #ddd; /* Subtle border for separation */
+  /* border: 2px solid #ddd; Subtle border for separation */
   background-color: #f9f9f9;
-  border-radius: 10px;
+  /* border-radius: 10px; */
 }
 
 .sample-table-container {
-  max-height: 150px; /* Restrict table height */
+  /* max-height: 150px; Restrict table height */
   overflow-y: auto; /* Allow vertical scrolling */
   width: 100%;
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: white;
+  margin-bottom: 1em;
 }
 
 .sample-table {

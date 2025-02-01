@@ -47,6 +47,9 @@
 .achievements {
   margin-bottom: 1rem;
 }
+.achievements  h3{
+  margin-bottom: 0;
+}
 
 .badge {
   background-color: #ffd700;
@@ -89,9 +92,9 @@
   transition: background-color 0.3s;
 }
 
-.hint-button:hover {
-  background-color: #45a049;
-}
+/* .hint-button:hover {
+  background-color: #45a049 !important;
+} */
 
 .performance-summary p {
   margin: 0.5rem 0;
@@ -177,15 +180,19 @@
   align-items: center;
   justify-content: space-between;
 }
+/* here */
+.right-sidebar-header h3 {
+  margin: 10px 0 10px 0;
+}
 
 .right-sidebar-header button {
   width: 100px;
   background-color: #d9534f;
 }
 
-.achievements h3 {
+/* .achievements h3 {
   margin-bottom: 0;
-}
+} */
 
 .badges-container {
   width: 100%;
@@ -218,24 +225,6 @@
 .gray-image img{
   filter: grayscale(100%);
   opacity: 0.28;
-}
-
-/* ------------------ level system ------------------ */
-
-.level-system {
-}
-
-.level-boxes {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.level-box {
-  width: 50px;
-  height: 50px;
-  background-color: palevioletred;
 }
 
 /* Difficulty Chart Container */

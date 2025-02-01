@@ -192,8 +192,8 @@ Hint:`;
   return (
     <div className="ai-assistant">
       <div className="assistant-header">
-        <FaRobot className="assistant-icon" />
-        <h4>AI Assistant</h4>
+        {/* <FaRobot className="assistant-icon" /> */}
+        <h4>SAGE</h4>
       </div>
       <div className="assistant-message">
         <p>{message}</p>
@@ -204,16 +204,16 @@ Hint:`;
             style={{
               backgroundColor:
                 clickStage === 0
-                  ? "green"
+                  ? "#4caf50"
                   : clickStage === 1
-                  ? "blue"
-                  : "purple",
+                    ? "blue"
+                    : "purple",
             }}
           >
-            Get Hint
+            Ask SAGE
           </button>
           <button className="show-hints-button" onClick={handleToggleModal}>
-            Show Hints
+            SAGE's Wisdom Log
           </button>
         </div>
       </div>
