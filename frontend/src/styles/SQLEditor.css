@@ -144,3 +144,9 @@
 .right-sidebar {
   flex: 1;
 }
+
+.result-btns{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}

@@ -13,34 +13,49 @@
   text-align: center;
   margin: 0;
   padding: 0.5rem;
-  background-color: #f0f0f0;
-  border-bottom: 2px solid #ddd;
+  /* background-color: #f0f0f0; */
+  /* border-bottom: 2px solid #ddd; */
 }
 
-.left-sidebar-top {
+/* old top */
+.left-sidebar-bottom {
   flex: 1;
-  overflow-y: auto;
+  overflow-x: auto;
   padding: 0;
-  border-bottom: 2px solid #ddd;
+}
+
+.left-sidebar-bottom ul {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin: 0;
 }
 
 .table-name {
   font-weight: bold;
   cursor: pointer;
-  padding: 0.5rem;
-  display: flex;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  width: 100%;
+
+  /* overflow: hidden; */
+
   align-items: center;
   gap: 0.5rem;
-  background-color: #f7f7f7;
-  margin: 0.25rem 0;
+  /* background-color: #f7f7f7; */
+  /* background-color: #007bff; */
+
+  margin: 0.5rem 0;
   border-radius: 5px;
   transition: background-color 0.3s, color 0.3s;
   position: relative;
+
+  display: flex;
+  flex-direction: row;
 }
 
 .table-name:hover {
-  background-color: #e0e0e0;
   color: #007bff;
+  width: auto;
 }
 
 .table-name::after {
@@ -59,13 +74,32 @@
   opacity: 1;
 }
 
-.left-sidebar-bottom {
+.table-columns ul {
+  display: flex;
+  flex-direction: column;
+  background-color: #dfecfa;
+}
+
+.table-columns ul li:hover {
+  background-color: #dfecfa;
+}
+
+.open-table .table-name {
+  width: auto;
+}
+
+.open-table .table-columns {
+  border-bottom: 2px solid #007bff;
+}
+
+.left-sidebar-top {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 50%;
   text-align: center;
+  border-bottom: 2px solid #ddd;
 }
 
 .message-container {
@@ -75,11 +109,17 @@
   justify-content: center;
   padding: 0 1rem;
   max-height: min-content;
-  border: 3px solid #007bff; /* Adds a prominent blue border */
-  border-radius: 8px; /* Adds a rounded corner for style */
-  background-color: #f0f8ff; /* Light blue background to complement the border */
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15); /* Adds a stronger shadow */
+  /* border: 3px solid #007bff; */
+  /* Adds a prominent blue border */
+  /* border-radius: 30px; */
+  /* Adds a rounded corner for style */
+  /* background-color: #f0f8ff; */
+  /* Light blue background to complement the border */
+  /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15); */
+  /* Adds a stronger shadow */
   margin: 0.1rem;
+
+  /* position: relative; */
 }
 
 .message {
@@ -88,6 +128,10 @@
   line-height: 1.4;
   color: #333;
   max-width: 90%;
+}
+
+.message  p span{
+  font-weight: 300;
 }
 
 .image-container {
@@ -111,4 +155,66 @@
   border-radius: 10%;
   object-fit: contain;
   max-inline-size: fit-content;
+}
+
+.tables-headers {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.pin-icon {
+  margin-right: 30px;
+}
+
+.pin-icon:hover {
+  color: #d9534f;
+}
+
+.message-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* Ensure content stacks properly */
+  align-items: center;
+  justify-content: flex-start;
+  /* padding: 0.5rem; */
+  /* max-height: 35vh; Restrict height to avoid overflow */
+  overflow-y: auto; /* Make it scrollable if needed */
+  width: 90%;
+  /* border: 2px solid #ddd; Subtle border for separation */
+  background-color: #f9f9f9;
+  /* border-radius: 10px; */
+}
+
+.sample-table-container {
+  /* max-height: 150px; Restrict table height */
+  overflow-y: auto; /* Allow vertical scrolling */
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  margin-bottom: 1em;
+}
+
+.sample-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.sample-table th,
+.sample-table td {
+  padding: 6px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.sample-table th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.sample-table tbody tr:hover {
+  background-color: #f9f9f9;
 }

@@ -4,7 +4,16 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const axios = require("axios");
+
+//import the account router 
+const userRouter = require('./routes/user');
+const gameRouter = require('./routes/game');
+
+const cookieParser = require("cookie-parser");
 const sqlParser = require("sql-parser"); // SQL Parser for syntax validation
+
+//mongo db
+const { closeMongodbConnection } = require("./utils/mongodb");
 
 // Load and validate environment variables
 const PORT = process.env.PORT || 3000;
@@ -19,21 +28,30 @@ if (!MYSQL_URL || !HUGGINGFACE_API_KEY) {
 // Express app setup
 const app = express();
 app.use(bodyParser.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
+
+// Express cookie-parser - cors was changed as well
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
 
 // MySQL Connection Pool
 const pool = mysql.createPool(MYSQL_URL);
 
-(async () => {
-  try {
-    await pool.getConnection(); // Test the database connection
-    console.log("Connected to the database.");
-  } catch (err) {
-    console.error("Database connection failed:", err);
-    process.exit(1);
-  }
-})();
+// (async () => {
+//   try {
+//     await pool.getConnection(); // Test the database connection
+//     console.log("Connected to the database.");
+//   } catch (err) {
+//     console.error("Database connection failed:", err);
+//     process.exit(1);
+//   }
+// })();
 
 // Endpoint to execute a SQL query
 app.post("/execute-query", async (req, res) => {
@@ -200,7 +218,7 @@ app.post("/generate-sql", async (req, res) => {
         },
       }
     );
-
+    console.log(response);
     // Extract only the text after "Hint: "
     const generatedText =
       response.data.generated_text || response.data[0]?.generated_text || "";
@@ -254,7 +272,59 @@ app.post("/personalized-hint", async (req, res) => {
   }
 });
 
+// ---------------------- routes -------------------
+// account route (developed in the routes/account.js)
+app.use("/account", userRouter);
+// game route (developed in the routes/game.js)
+app.use("/game", gameRouter);
+
+// app.post("/generate-sql", async (req, res) => {
+//   const { prompt } = req.body;
+
+//   if (!prompt) {
+//     return res.status(400).json({ error: "Prompt is required." });
+//   }
+
+//   try {
+//     const response = await axios.post(
+//       "https://api-inference.huggingface.co/models/defog/sqlcoder-7b-2",
+//       {
+//         inputs: prompt,
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+
+//     res.json({
+//       success: true,
+//       response: response.data?.generated_text || "No response generated.",
+//     });
+//   } catch (err) {
+//     console.error("Error interacting with Hugging Face:", err.message);
+//     res.status(500).json({ error: "Failed to generate SQL." });
+//   }
+// });
+
 // Start the server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+const closeConnections = async () => {
+  try {
+    await closeMongodbConnection();
+    server.close(() => {
+      process.exit(0);
+    });
+  } catch (err) {
+    console.error("Error during shutdown:", err);
+    process.exit(1);
+  }
+};
+
+process.on("SIGINT", () => closeConnections());
+process.on("SIGUSR2", () => closeConnections());

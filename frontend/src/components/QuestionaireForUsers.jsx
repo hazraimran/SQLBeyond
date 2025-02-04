@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
+import axios from "axios";
+
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const quiz = {
   totalQuestions: 9,
@@ -126,8 +129,22 @@ function QuestionaireForUsers() {
       hard = { correct: 0, total: 0 },
     } = result;
 
+    // previous quizz data
+    // const quizData = {
+    //   userId: "user123", // Replace with dynamic user ID
+    //   questionDetails: questions.map((q) => ({
+    //     question: q.question,
+    //     correctAnswer: q.correctAnswer,
+    //     difficulty: q.difficulty,
+    //   })),
+    //   timeTaken: 120, // Replace with actual total time
+    //   score: result.score,
+    //   correctAnswers: result.correctAnswers,
+    //   wrongAnswers: result.wrongAnswers,
+    //   performanceByDifficulty: { easy, medium, hard },
+    // };
+
     const quizData = {
-      userId: "user123", // Replace with dynamic user ID
       questionDetails: questions.map((q) => ({
         question: q.question,
         correctAnswer: q.correctAnswer,
@@ -140,12 +157,12 @@ function QuestionaireForUsers() {
       performanceByDifficulty: { easy, medium, hard },
     };
 
+    // console.log(quizData);
+
     try {
-      await fetch("http://localhost:3000/save-user-data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(quizData),
-      });
+      await axios.post(`${apiUrl}/account/quiz-grade`, {
+        quizData: quizData
+    }, { withCredentials: true });
     } catch (err) {
       console.error("Error saving quiz summary:", err);
     }
@@ -168,8 +185,8 @@ function QuestionaireForUsers() {
       hard: Math.round(10 + hardPerformance * 30),
     };
 
-    console.log({ easyPerformance, mediumPerformance, hardPerformance });
-    console.log("Ideal Slope:", idealSlope);
+    // console.log({ easyPerformance, mediumPerformance, hardPerformance });
+    // console.log("Ideal Slope:", idealSlope);
 
     const userData = JSON.parse(localStorage.getItem("userData")) || {};
     localStorage.setItem(
