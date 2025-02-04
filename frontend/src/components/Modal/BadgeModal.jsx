@@ -1,4 +1,4 @@
-import "../../styles/modal/BadgeModal.css";
+import "../../styles/Modal/BadgeModal.css";
 import closeBtn from "../../assets/closeBtn.svg";
 
 const BadgeModal = ({ closeBadgeModal, badgeData }) => {

@@ -1,4 +1,4 @@
-import "../../styles/modal/HintModal.css";
+import "../../styles/Modal/HintModal.css";
 import closeBtn from "../../assets/closeBtn.svg";
 
 const HintModal = ({ closeHintModal, hintData }) => {
