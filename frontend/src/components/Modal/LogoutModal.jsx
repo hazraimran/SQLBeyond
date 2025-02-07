@@ -1,17 +1,17 @@
-import "../../styles/modal/LogoutModal.css";
+import "../../styles/Modal/LogoutModal.css";
 import { useAuth } from "../Login/AuthContext";
 
 const LogoutModal = ({ closeLogoutModal }) => {
   const auth = useAuth();
-  
+
   const handleClick = (choice) => {
-    if(!choice){
+    if (!choice) {
       return closeLogoutModal();
     }
-      
+
     auth.logout();
     return closeLogoutModal();
-  }
+  };
 
   return (
     <div className="logoutModal-container">
