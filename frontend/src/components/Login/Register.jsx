@@ -27,7 +27,7 @@ function Register() {
     <section className="log-section">
       <div className="log-box">
         <div className="log-text">
-          <h1>SQL Game</h1>
+          <h1>NEXUS</h1>
           <p>Sign up</p>
           <p>Already have an account yet? <Link to="/">Sign in</Link></p>
         </div>

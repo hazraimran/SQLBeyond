@@ -1,5 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import IntroQuestion from "./components/IntroQuestion";
 import QuestionaireForUsers from "./components/QuestionaireForUsers";
 import SQLEditor from "./components/SQLEditor";
 import Authentication from "./components/Login/Authentication";
@@ -15,8 +14,7 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         <Route element={<PrivateRoute />}>
-          <Route path="/intro" element={<IntroQuestion />} />
-          <Route path="/query" element={<QuestionaireForUsers />} />
+          <Route path="/quiz" element={<QuestionaireForUsers />} />
           <Route path="/SQLEditor" element={<SQLEditor />} />
         </Route>
       </Routes>
