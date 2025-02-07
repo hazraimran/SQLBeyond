@@ -5,6 +5,8 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import logToCSV from "../../../utils/logger";
 
+import { motion } from "framer-motion";
+
 const AIAssistant = ({
   handleUseHint,
   hintsUsed,
@@ -191,8 +193,8 @@ Hint:`;
 
   return (
     <div className="ai-assistant">
-      <div className="assistant-header">
-        {/* <FaRobot className="assistant-icon" /> */}
+      {/* <div className="assistant-header">
+        <FaRobot className="assistant-icon" />
         <h4>SAGE</h4>
       </div>
       <div className="assistant-message">
@@ -201,14 +203,6 @@ Hint:`;
           <button
             className="hint-button"
             onClick={handleHintSequence}
-            style={{
-              backgroundColor:
-                clickStage === 0
-                  ? "#4caf50"
-                  : clickStage === 1
-                    ? "blue"
-                    : "purple",
-            }}
           >
             Ask SAGE
           </button>
@@ -216,6 +210,38 @@ Hint:`;
             SAGE's Wisdom Log
           </button>
         </div>
+      </div> */}
+
+      <motion.div
+        className="motion-div-avatar"
+        animate={{ scale: [1, 1.1, 1] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        <div className="ping-bubble"></div>
+        <div className="sage-bubble">
+          <p>SAGE</p>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="motion-div-bubble"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        "Need help? I'm here to guide you through SQL!"
+      </motion.div>
+
+      <div className="assistant-buttons">
+        <button
+          className="hint-button"
+          onClick={handleHintSequence}
+        >
+          Ask SAGE
+        </button>
+        <button className="show-hints-button" onClick={handleToggleModal}>
+          Hints Log
+        </button>
       </div>
 
       {/* Hint/Error Card */}

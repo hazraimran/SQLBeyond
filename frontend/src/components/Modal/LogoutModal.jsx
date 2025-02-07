@@ -19,7 +19,7 @@ const LogoutModal = ({ closeLogoutModal }) => {
         <div className="logoutModal">
             <h1>Are you sure you want to logout?</h1>
             <span className="logout-btns">
-              <button onClick={() => handleClick(false)}>No</button>
+              <button onClick={() => handleClick(false)}>Stay</button>
               <button onClick={() => handleClick(true)}>Logout</button>
             </span>
         </div>
