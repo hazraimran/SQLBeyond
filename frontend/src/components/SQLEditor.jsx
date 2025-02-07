@@ -9,6 +9,7 @@ import badgesData from "../data/badges";
 import logToCSV from "../utils/logger";
 import "../styles/SQLEditor.css";
 
+
 import { useAuth } from "./Login/AuthContext";
 
 import DisplayTables from "./SQLEditorComponents/DisplayTables";

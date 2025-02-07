@@ -17,11 +17,11 @@ const LogoutModal = ({ closeLogoutModal }) => {
     <div className="logoutModal-container">
       <div className="logoutModal-container-2">
         <div className="logoutModal">
-            <h1>Are you sure you want to logout?</h1>
-            <span className="logout-btns">
-              <button onClick={() => handleClick(false)}>Stay</button>
-              <button onClick={() => handleClick(true)}>Logout</button>
-            </span>
+          <h1>Are you sure you want to leave?</h1>
+          <span className="logout-btns">
+            <button onClick={() => handleClick(false)}>Stay</button>
+            <button onClick={() => handleClick(true)}>Logout</button>
+          </span>
         </div>
       </div>
     </div>

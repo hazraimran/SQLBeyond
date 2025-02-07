@@ -21,13 +21,13 @@ router.get("/login", async (req, res) => {
         const db = await connectToMongoDB();
         const collection = db.collection('users');
         // make the request to the database with the username
-        try{
-            const user = await collection.findOne({username: req.session.user.username});
-            if(user)
+        try {
+            const user = await collection.findOne({ username: req.session.user.username });
+            if (user)
                 return res.json({ user: user });
 
-            throw new Error(); 
-        } catch(err){
+            throw new Error();
+        } catch (err) {
             console.error("Not able to load user data: ", err);
         }
     }
@@ -40,21 +40,16 @@ router.post("/login", async (req, res) => {
     const collection = db.collection('users');
 
     // make the request to the database with the username
-    const user = await collection.findOne({username: username});
-    if(user){
-        try{
+    const user = await collection.findOne({ username: username });
+    if (user) {
+        try {
             const response = await bcrypt.compare(password, user.password);
             if (response) {
-                req.session.user = {username: username};
-                if(user.company && user.position){
-                    if(!user.quizData)
-                        res.send({ user: user, missingQuiz: true });
-                    else
-                        res.send({ user: user });
-                }
-                else{
-                    res.send({ user: user, isFirstTime: true });
-                }
+                req.session.user = { username: username };
+                if (!user.quizData)
+                    res.send({ user: user, missingQuiz: true });
+                else
+                    res.send({ user: user });
             }
             else {
                 res.send({ msg: "Username and password don't match!" });
@@ -63,7 +58,7 @@ router.post("/login", async (req, res) => {
             console.error("Failed to check the password", err);
         }
     }
-    else{
+    else {
         //user not found
         res.send({ msg: "Username and password don't match!" });
     }
@@ -72,13 +67,13 @@ router.post("/login", async (req, res) => {
 router.post("/register", async (req, res) => {
     const { firstName, lastName, username, password } = req.body;
     //check if user name already exists 
-    try{
+    try {
         const db = await connectToMongoDB();
         const collection = db.collection('users');
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(password, salt);
 
-        try{
+        try {
             await collection.insertOne({
                 firstName: firstName,
                 lastName: lastName,
@@ -86,19 +81,19 @@ router.post("/register", async (req, res) => {
                 password: hash,
                 isOauth: false,
                 badges: []
-            }); 
-            const userData = { user: { firstName: firstName, lastName: lastName, username: username, isOauth: false, badges: [] }};
+            });
+            const userData = { user: { firstName: firstName, lastName: lastName, username: username, isOauth: false, badges: [] } };
             //store only the userID
-            req.session.user =  { username: username };
+            req.session.user = { username: username };
             res.json(userData);
-        }catch(err){
+        } catch (err) {
             console.error("Failed to insert new user: ", err);
-            res.json({status: "failed"});
+            res.json({ status: "failed" });
         }
 
-    }catch(err){
+    } catch (err) {
         console.error("Failed to generate a hash password: ", err);
-        res.json({status: "failed"});
+        res.json({ status: "failed" });
     }
 });
 
@@ -110,35 +105,31 @@ router.post('/google-oauth-login', async (req, res) => {
 
         let userData;
 
-        const checkUser = await collection.findOne({username: email});
+        const checkUser = await collection.findOne({ username: email });
         // when adding to the database, just check if the user exists, if it doesn't we add it to the database, otherwise just return the data given by google
-        if(!checkUser){
-            try{
+        if (!checkUser) {
+            try {
                 await collection.insertOne({
                     firstName: given_name,
                     lastName: family_name,
                     username: email,
-                    password: null,
                     isOauth: true,
                     badges: []
-                });   
-                userData = { user: { firstName: given_name, lastName: family_name, username: email, isOauth: true, badges: []}, isFirstTime: true };  
-            }catch(err){
+                });
+                userData = { user: { firstName: given_name, lastName: family_name, username: email, isOauth: true, badges: [] },  missingQuiz: true };
+            } catch (err) {
                 console.error("Failed to insert new user: ", err);
-                res.json({status: "failed"});
+                res.json({ status: "failed" });
             }
         }
-        else{
+        else {
             // console.log(checkUser);
-            if(checkUser.company && checkUser.position){
-                if(!checkUser.quizData)
-                    userData = { user: checkUser, missingQuiz: true };
-                else
-                    userData = { user: checkUser };
-            }
+            if (!checkUser.quizData)
+                userData = { user: checkUser, missingQuiz: true };
             else
-                userData = { user: checkUser, isFirstTime: true };
+                userData = { user: checkUser };
         }
+
         //save only the userID
         req.session.user = { username: email };
         res.json(userData);
@@ -157,31 +148,8 @@ router.post("/logout", (req, res) => {
         }
 
         res.clearCookie('connect.sid');
-        res.json({message: "Logout succesfull"});
+        res.json({ message: "Logout succesfull" });
     })
-});
-
-router.post("/application-details", async (req, res) => {
-    const { company, position } = req.body;
-    const db = await connectToMongoDB();
-    const collection = db.collection('users');
-
-    // console.log(req.session.user);
-
-    try{
-        await collection.updateOne({
-            username: req.session.user.username
-        }, {
-            $set: {
-                company: company,
-                position: position
-            }
-        });   
-        res.json({success: true}); 
-    }catch(err){
-        console.error("Failed to update user: ", err);
-        res.json({status: "failed"});
-    }
 });
 
 router.post("/quiz-grade", async (req, res) => {
@@ -191,18 +159,18 @@ router.post("/quiz-grade", async (req, res) => {
 
     console.log(req.session.user);
 
-    try{
+    try {
         await collection.updateOne({
             username: req.session.user.username
         }, {
             $set: {
                 quizData: quizData
             }
-        });   
-        res.json({success: true}); 
-    }catch(err){
+        });
+        res.json({ success: true });
+    } catch (err) {
         console.error("Failed to update user: ", err);
-        res.json({status: "failed"});
+        res.json({ status: "failed" });
     }
 });
 

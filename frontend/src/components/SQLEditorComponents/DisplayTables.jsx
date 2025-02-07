@@ -10,9 +10,9 @@ const DisplayTables = ({ tableContent, removeTable }) => {
                     ?
                     <h1>There's 0 tables pinned!</h1>
                     :
-                    tableContent.map(table => {
+                    tableContent.map((table, index) => {
                         return (
-                            <TableTab table={table} removeTable={removeTable}/>
+                            <TableTab key={index} table={table} removeTable={removeTable}/>
                         );
                     })
                 }

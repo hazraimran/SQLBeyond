@@ -30,8 +30,7 @@ const AuthProvider = ({ children }) => {
                 console.log(data.user);
                 setUser(data.user);
                 setLoading(false);
-                navigate("/intro");
-                navigate(0);
+                navigate("/quiz");
                 return;
             }
             throw new Error(response.message);
@@ -54,15 +53,10 @@ const AuthProvider = ({ children }) => {
             // console.log("inside login: ", data.user);
             if (data.user) {
                 setUser(data.user);
-
-                // console.log(data.user);
-
                 setLoading(false);
-                if(response.data.isFirstTime)
-                    return navigate("/intro");
 
                 if(response.data.missingQuiz)
-                    return navigate("/query")
+                    return navigate("/quiz")
 
                 return navigate("/SQLEditor");
             }
@@ -116,11 +110,8 @@ const AuthProvider = ({ children }) => {
 
                     // console.log(response.data);
 
-                    if(response.data.isFirstTime)
-                        return navigate("/intro");
-
                     if(response.data.missingQuiz)
-                        return navigate("/query")
+                        return navigate("/quiz")
 
                     return navigate("/SQLEditor");
                 }

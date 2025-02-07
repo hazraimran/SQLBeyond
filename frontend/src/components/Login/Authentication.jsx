@@ -74,7 +74,7 @@ function Authentication() {
     <section className="log-section">
       <div className="log-box">
         <div className="log-text">
-          <h1>SQL Game</h1>
+          <h1>NEXUS</h1>
           <p>Log in</p>
           <p>Don't have account yet? <Link to="/register">Sign up</Link></p>
         </div>

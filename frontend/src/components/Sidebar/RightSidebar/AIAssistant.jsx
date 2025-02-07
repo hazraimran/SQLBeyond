@@ -7,6 +7,8 @@ import logToCSV from "../../../utils/logger";
 
 import { motion } from "framer-motion";
 
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
 const AIAssistant = ({
   handleUseHint,
   hintsUsed,
@@ -16,7 +18,7 @@ const AIAssistant = ({
   retries,
   errorHint,
 }) => {
-  const [message, setMessage] = useState("Need help? I’m here for you!");
+  const [message, setMessage] = useState("Need help? I'm here for you!");
   const [response, setResponse] = useState(""); // Current hint or error message
   const [hints, setHints] = useState([]); // Store all provided hints
   const [showCard, setShowCard] = useState(false); // Control hint/error card visibility
@@ -70,7 +72,7 @@ const AIAssistant = ({
     handleUseHint(); // Deduct points for hints
 
     try {
-      const res = await axios.post("http://localhost:5001/get-hint", {
+      const res = await axios.post(`${apiUrl}/get-hint`, {
         userQuery: query,
         taskDescription,
         retries,
@@ -113,7 +115,7 @@ const AIAssistant = ({
 Hint:`;
 
     try {
-      const res = await axios.post("http://localhost:5001/generate-sql", {
+      const res = await axios.post(`${apiUrl}/generate-sql`, {
         prompt,
       });
 
@@ -154,7 +156,7 @@ Hint:`;
         taskDescription: taskDescription,
       });
 
-      const res = await axios.post("http://localhost:5001/personalized-hint", {
+      const res = await axios.post(`${apiUrl}/personalized-hint`, {
         userQuery: query,
         taskDescription: taskDescription,
       });

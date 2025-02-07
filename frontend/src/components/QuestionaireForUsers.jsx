@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
 import axios from "axios";
+import "../styles/IntroQuestion.css";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
