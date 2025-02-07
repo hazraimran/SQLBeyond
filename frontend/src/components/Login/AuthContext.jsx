@@ -42,6 +42,7 @@ const AuthProvider = ({ children }) => {
     }
 
     const login = async (formData) => {
+        console.log("backend url ", import.meta.env.VITE_API_URL);
         // console.log(formData)
         try {
             const response = await axios.post(`${apiUrl}/account/login`, {

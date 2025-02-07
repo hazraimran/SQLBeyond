@@ -20,6 +20,8 @@ const PORT = process.env.PORT || 3000;
 const MYSQL_URL = process.env.MYSQL_URL;
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 
+const FRONTED_URL = process.env.FRONTED_URL || "http://localhost:5173";
+
 if (!MYSQL_URL || !HUGGINGFACE_API_KEY) {
   console.error("Error: Missing required environment variables.");
   process.exit(1);
@@ -30,7 +32,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: FRONTED_URL,
     credentials: true,
   })
 );
