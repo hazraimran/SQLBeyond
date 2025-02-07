@@ -25,12 +25,14 @@ if (!MYSQL_URL || !HUGGINGFACE_API_KEY) {
   process.exit(1);
 }
 
+const FRONTED_URL = process.env.FRONTED_URL || "http://localhost:5173"
+
 // Express app setup
 const app = express();
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: FRONTED_URL,
     credentials: true,
   })
 );
@@ -327,4 +329,3 @@ const closeConnections = async () => {
 };
 
 process.on("SIGINT", () => closeConnections());
-process.on("SIGUSR2", () => closeConnections());

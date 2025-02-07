@@ -31,7 +31,6 @@ const AuthProvider = ({ children }) => {
                 setUser(data.user);
                 setLoading(false);
                 navigate("/intro");
-                navigate(0);
                 return;
             }
             throw new Error(response.message);
