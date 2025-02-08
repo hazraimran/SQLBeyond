@@ -14,10 +14,18 @@ body {
   max-width: 500px;
   min-width: 250px;
   background: #ffffff; /* White background for contrast */
-  border-radius: 4px;
+  border-radius: 10px;
   margin-top: 100px;
+  border: 1px solid #d3d3d3; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-small-container{
   padding: 30px 60px;
-  border: 1px solid #d3d3d3; /* Light Gray border */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .quiz-container .active-question-no {
@@ -40,8 +48,7 @@ body {
 }
 
 .quiz-container ul {
-  margin-top: 20px;
-  margin-left: -40px;
+  width: 100%;
 }
 
 .quiz-container ul li {
@@ -59,19 +66,23 @@ body {
 }
 
 .quiz-container ul li:hover {
-  background: #f1f1f1; /* Light background on hover */
+  background: #f1f1f1;
   transform: scale(1.02); /* Slightly enlarge on hover */
 }
 
 .quiz-container ul .selected-answer {
-  background: #d6a9a1; /* Dusty Rose for selected answer */
+  background: #3B82F6; /* Dusty Rose for selected answer */
   border: 1px solid #708090; /* Slate Gray */
   transform: scale(1.05); /* Slightly enlarge when selected */
   transition: background 0.3s ease, transform 0.3s ease; /* Ensure selected state has the same transition */
 }
 
+.quiz-container ul .selected-answer:hover{
+  background-color: #2563EB;
+}
+
 .quiz-container button {
-  background: #a8b400; /* Soft Olive Green */
+  background: #22C55E; /* Soft Olive Green */
   border-radius: 9px;
   font-size: 18px;
   color: #ffffff; /* White text */
@@ -102,11 +113,6 @@ body {
 .result p {
   font-size: 16px;
   font-weight: 500;
-}
-
-.result p span {
-  color: #a8b400; /* Soft Olive Green for results */
-  font-size: 22px;
 }
 
 .container-fade-enter {
@@ -146,16 +152,39 @@ li {
   padding: 4px;
 }
 
-li:hover {
+/* li:hover {
   background-color: #f0f0f0;
-}
+} */
 
 /* styles.css */
 .result {
-  padding: 20px;
   border: 2px solid #4caf50;
   border-radius: 8px;
   background-color: #f9f9f9;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
+
+.quest-result{
+  padding: 30px !important;
+  border-radius: 10px !important;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+

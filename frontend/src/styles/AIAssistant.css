@@ -1,71 +1,20 @@
 .ai-assistant {
+  position: relative;
+  background-color: #fff;
+  color: #333;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  /* Adjusts content spacing */
-  background-color: #f3f4f6;
-  /* Light grey to match the sidebar */
-  border-radius: 8px;
+
   padding: 1rem;
-  height: auto;
-  /* Automatic height to prevent it from taking excessive space */
-  /* max-height: 250px; */
-  /* Set max height to keep it compact */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
-  color: #333;
+
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
-/* .assistant-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.5rem;
-
-  flex: 1;
-  width: 100%;
-  position: relative;
-} */
-
-/* .assistant-header h4{
-  margin: 0;
-  background: linear-gradient(153deg, rgba(13,13,13,1) 12%, rgba(138,43,226,1) 49%, rgba(13,13,13,1) 89%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 2em;
-  font-weight: bold;
-  display: inline-block;
-} */
-
-
-/* .assistant-icon {
-  font-size: 1.5rem;
-  color: #4caf50;
-  margin-bottom: 0.3rem;
-} */
-
-h4 {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-}
-
-/* .assistant-message {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.assistant-message p {
-  color: #555;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-} */
 
 .assistant-buttons {
   display: flex;
@@ -83,21 +32,6 @@ h4 {
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: bold;
-}
-
-/* .help-button:hover,
-.encourage-button:hover {
-  background-color: #45a049;
-} */
-
-/* AI Assistant Container */
-.ai-assistant {
-  position: relative;
-  padding: 35px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Animated Hint Card */
@@ -233,8 +167,8 @@ h4 {
   justify-content: center;
   gap: 100px;
   background-color: #3B82F6;
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   font-weight: bold;
   color: white;
   text-align: center;
@@ -273,7 +207,6 @@ h4 {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
-
 
 .hint-button{
   background-color: #3B82F6;

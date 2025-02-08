@@ -2,7 +2,7 @@ const questions = {
   easy: [
     {
       question:
-        "easy 1 Retrieve the full names (firstName, lastName), admission reason, and calculate BMI (weight in kg / (height in meters squared)) for all admitted patients sorted by admission date in descending order.",
+        "Retrieve the full names (firstName, lastName), admission reason, and calculate BMI (weight in kg / (height in meters squared)) for all admitted patients sorted by admission date in descending order.",
       concepts: ["SELECT", "FROM", "JOIN", "ORDER BY", "AS"], // Concepts for S1
       columnNames: [
         "firstName",
@@ -42,7 +42,7 @@ const questions = {
     },
     {
       question:
-        "easy 2 Retrieve the full names (firstName, lastName), admission reason, and calculate BMI (weight in kg / (height in meters squared)) for all admitted patients sorted by admission date in descending order.",
+        "Retrieve the full names (firstName, lastName), admission reason, and calculate BMI (weight in kg / (height in meters squared)) for all admitted patients sorted by admission date in descending order.",
       concepts: ["SELECT", "FROM", "JOIN", "ORDER BY", "AS"], // Concepts for S1
       columnNames: [
         "firstName",
@@ -82,7 +82,7 @@ const questions = {
     },
     {
       question:
-        "easy 3 Retrieve the full names (firstName, lastName), admission reason, and calculate BMI (weight in kg / (height in meters squared)) for all admitted patients sorted by admission date in descending order.",
+        "Retrieve the full names (firstName, lastName), admission reason, and calculate BMI (weight in kg / (height in meters squared)) for all admitted patients sorted by admission date in descending order.",
       concepts: ["SELECT", "FROM", "JOIN", "ORDER BY", "AS"], // Concepts for S1
       columnNames: [
         "firstName",
@@ -124,7 +124,7 @@ const questions = {
   medium: [
     {
       question:
-        "medium 1 Retrieve the firstName, lastName, and the total number of admissions for each patient.",
+        "Retrieve the firstName, lastName, and the total number of admissions for each patient.",
       concepts: ["SELECT", "FROM", "JOIN", "GROUP BY", "COUNT"], // Concepts for S1
       columnNames: ["firstName", "lastName", "admissions"], // Columns for S1
       hints: {
@@ -157,7 +157,7 @@ const questions = {
     },
     {
       question:
-        "medium 2 Retrieve the firstName, lastName, and the total number of admissions for each patient.",
+        "Retrieve the firstName, lastName, and the total number of admissions for each patient.",
       concepts: ["SELECT", "FROM", "JOIN", "GROUP BY", "COUNT"], // Concepts for S1
       columnNames: ["firstName", "lastName", "admissions"], // Columns for S1
       hints: {
@@ -190,7 +190,7 @@ const questions = {
     },
     {
       question:
-        "medium 3 Retrieve the firstName, lastName, and the total number of admissions for each patient.",
+        "Retrieve the firstName, lastName, and the total number of admissions for each patient.",
       concepts: ["SELECT", "FROM", "JOIN", "GROUP BY", "COUNT"], // Concepts for S1
       columnNames: ["firstName", "lastName", "admissions"], // Columns for S1
       hints: {
@@ -225,7 +225,7 @@ const questions = {
   hard: [
     {
       question:
-        "hard 1 Retrieve the firstName, lastName, and calculate the average BMI for each doctor’s patients.",
+        "Retrieve the firstName, lastName, and calculate the average BMI for each doctor’s patients.",
       concepts: ["SELECT", "FROM", "JOIN", "GROUP BY", "AVG", "AS"], // Concepts for S1
       columnNames: ["firstName", "lastName", "averageBMI"], // Columns for S1
       hints: {

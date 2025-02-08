@@ -17,8 +17,12 @@ const LeftSidebar = ({
   expectedOutput,
 }) => {
   const [expandedTable, setExpandedTable] = useState(null);
+  const [showPinMessage, setShowPinMessage] = useState(false);
 
   const handleToggle = (tableName, index) => {
+    if (!expandedTable)
+      setShowPinMessage(true);
+
     setExpandedTable(expandedTable === tableName ? null : tableName);
   };
 
@@ -117,11 +121,14 @@ const LeftSidebar = ({
                 <span className="tables-headers">
                   <div>{table.name}</div>
                   {expandedTable === table.name && (
-                    <FontAwesomeIcon
-                      icon={faThumbtack}
-                      className="pin-icon"
-                      onClick={() => handleTableContent(table)}
-                    />
+                    <div className="tooltip-container">
+                      <FontAwesomeIcon
+                        icon={faThumbtack}
+                        className="pin-icon"
+                        onClick={() => handleTableContent(table)}
+                      />
+                      <span className="tooltip">Pin this table</span>
+                    </div>
                   )}
                 </span>
               </div>

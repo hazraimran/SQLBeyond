@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
 import axios from "axios";
-import "../styles/IntroQuestion.css";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -201,7 +200,7 @@ function QuestionaireForUsers() {
   return (
     <div className="quiz-container">
       {!showResult ? (
-        <div>
+        <div className="quiz-small-container">
           <h2>{questions[activeQuestion].question}</h2>
           <ul>
             {questions[activeQuestion].choices.map((choice, index) => (
@@ -219,7 +218,7 @@ function QuestionaireForUsers() {
           </button>
         </div>
       ) : (
-        <div className="result">
+        <div className="result quest-result">
           <h3>Quiz Completed</h3>
           <p>Total Questions: {questions.length}</p>
           <p>Score: {result.score}</p>

@@ -202,7 +202,6 @@
   flex-direction: column;
   justify-content: center;
   overflow: scroll;
-  padding: 8px;
   padding-left: 0;
   gap: 3px;
 }
@@ -297,4 +296,15 @@
 /* Smooth Line Animation */
 .canvas-wrapper canvas {
   transition: all 0.2s ease-in-out; /* Smoothly resize or animate */
+}
+
+.points-ps {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.points-ps p{
+  font-size: 19.5px;
+  margin-bottom: 0;
 }

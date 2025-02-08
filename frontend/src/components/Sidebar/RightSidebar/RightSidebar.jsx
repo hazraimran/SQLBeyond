@@ -66,13 +66,15 @@ const RightSidebar = ({
           <button onClick={handleLogout}>Logout</button>
         </span>
 
-        <p>
-          <strong>Current Points:</strong> {progress} / 100
-        </p>
-        <p>
-          <strong>Points for this Question:</strong> {adjustedQuestionPoints}
-        </p>
-        <div className="progress-bar-container">
+        <div className="points-ps">
+          <p>
+            <strong>Current Points:</strong> <br/> {progress} / 100
+          </p>
+          <p>
+            <strong>Points for this Question:</strong> {adjustedQuestionPoints}
+          </p>
+        </div>
+        {/* <div className="progress-bar-container">
           <div className="progress-bar">
             <div
               className="progress-bar-fill"
@@ -82,7 +84,7 @@ const RightSidebar = ({
               }}
             ></div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Achievements */}
@@ -93,9 +95,8 @@ const RightSidebar = ({
             return (
               <div
                 key={badge.name}
-                className={`badge-container ${
-                  badges.includes(badge.name) ? "" : "gray-image"
-                }`}
+                className={`badge-container ${badges.includes(badge.name) ? "" : "gray-image"
+                  }`}
                 onClick={() => openBadgeModal(badge)}
               >
                 <img src={badge.badge} alt={badge.name} />

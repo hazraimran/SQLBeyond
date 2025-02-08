@@ -49,7 +49,7 @@ const Editor = ({
           </button>
         </div>
       </div>
-      <div className="editor">
+      <div className="editor" >
         <CodeMirror
           value={content}
           extensions={[sql()]}
