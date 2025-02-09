@@ -41,6 +41,45 @@
   background-color: #d9534f;
 }
 
-.run {
-  background-color: #5cb85c;
+.submit {
+  background-color: #3B82F6;
+}
+
+.submit:hover {
+  background-color: #2563EB;
+}
+
+.clear {
+  background-color: #d9534f;
+}
+
+.clear:hover {
+  background-color: #d02722 !important;
+}
+
+
+.tooltip-container-editor {
+  position: relative;
+}
+
+.tooltip-container-editor .tooltip {
+  font-size: 18px;
+  right: 0px;
+  top: 40px;
+  z-index: 2;
+}
+
+.run:hover + .tooltip {
+  display: block;
+  opacity: 1;
+}
+
+.clear:hover + .tooltip {
+  display: block;
+  opacity: 1;
+}
+
+.submit:hover + .tooltip {
+  display: block;
+  opacity: 1;
 }

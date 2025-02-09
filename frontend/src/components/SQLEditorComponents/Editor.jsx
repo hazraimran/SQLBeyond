@@ -17,36 +17,49 @@ const Editor = ({
     <div className="editor-container">
       <div className="editor-header">
         <div className="buttons">
-          <button
-            className="clear button"
-            onClick={() => {
-              setQuery("");
-              setContent("");
-            }}
-            disabled={buttonsDisabled}
-          >
-            Clear
-          </button>
-          <button
-            className="run button"
-            onClick={() => {
-              setQuery(content);
-              executeQuery(content, true); // Pass true to fetch only 10 rows
-            }}
-            disabled={buttonsDisabled}
-          >
-            Run
-          </button>
-          <button
-            className="submit button"
-            onClick={() => {
-              setQuery(content);
-              submitQuery(content); // Submit query for full comparison
-            }}
-            disabled={buttonsDisabled}
-          >
-            Submit
-          </button>
+
+          <div className="tooltip-container-editor">
+            <button
+              className="clear button"
+              onClick={() => {
+                setQuery("");
+                setContent("");
+              }}
+              disabled={buttonsDisabled}
+            >
+              Clear
+            </button>
+            <span className="tooltip">Clear the editor!</span>
+          </div>
+
+          <div className="tooltip-container-editor">
+            <button
+              className="run button"
+              onClick={() => {
+                setQuery(content);
+                executeQuery(content, true); // Pass true to fetch only 10 rows
+              }}
+              disabled={buttonsDisabled}
+            >
+              Run
+            </button>
+            <span className="tooltip">Run the query (test)!</span>
+          </div>
+
+
+          <div className="tooltip-container-editor">
+            <button
+              className="submit button"
+              onClick={() => {
+                setQuery(content);
+                submitQuery(content); // Submit query for full comparison
+              }}
+              disabled={buttonsDisabled}
+            >
+              Submit
+            </button>
+            <span className="tooltip">Submit to evaluate your query!</span>
+          </div>
         </div>
       </div>
       <div className="editor" >

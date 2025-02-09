@@ -106,17 +106,7 @@
   justify-content: center;
   padding: 0 1rem;
   max-height: min-content;
-  /* border: 3px solid #007bff; */
-  /* Adds a prominent blue border */
-  /* border-radius: 30px; */
-  /* Adds a rounded corner for style */
-  /* background-color: #f0f8ff; */
-  /* Light blue background to complement the border */
-  /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15); */
-  /* Adds a stronger shadow */
   margin: 0.1rem;
-
-  /* position: relative; */
 }
 
 .message {
@@ -176,20 +166,22 @@
 
 .tooltip {
   position: absolute;
-  background-color: rgba(0, 0, 0, 0.412);
+  background-color: rgba(0, 0, 0, 0.693);
   color: white;
   padding: 5px 8px;
   border-radius: 4px;
   font-size: 14px;
   white-space: nowrap;
-  visibility: hidden;
+  display: none;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
   right: 55px;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .pin-icon:hover + .tooltip {
-  visibility: visible;
+  display: block;
   opacity: 1;
 }
 

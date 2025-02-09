@@ -1,12 +1,18 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import "../../styles/Authentication.css";
 import { useAuth } from "./AuthContext";
 
 function Register() {
-  // const navigate = useNavigate(); // To navigate to another route
   const [formData, setFormData] = useState({ firstName:"", lastName:"", username: "", password: "" });
   const auth = useAuth();
+
+  if(auth.user){
+      if(auth.user.quizData)
+        return <Navigate to="/SQLEditor" replace />;
+  
+      return <Navigate to="/quiz" replace />;
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;

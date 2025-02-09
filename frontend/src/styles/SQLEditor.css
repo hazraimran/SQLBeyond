@@ -60,14 +60,6 @@
   color: #fff;
 }
 
-.clear {
-  background-color: #d9534f;
-}
-
-.run {
-  background-color: #5cb85c;
-}
-
 .result {
   display: flex;
   flex-direction: column; /* Ensures child elements stack vertically */
@@ -151,3 +143,15 @@
   flex-direction: row;
   gap: 10px;
 }
+
+
+.jump-animation {
+  animation: jump 0.75s ease-in-out;
+}
+
+@keyframes jump {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+  100% { transform: translateY(0); }
+}
+

@@ -15,14 +15,11 @@ const LeftSidebar = ({
   message,
   handleTableContent,
   expectedOutput,
+  handleAnimationClick,
 }) => {
   const [expandedTable, setExpandedTable] = useState(null);
-  const [showPinMessage, setShowPinMessage] = useState(false);
 
   const handleToggle = (tableName, index) => {
-    if (!expandedTable)
-      setShowPinMessage(true);
-
     setExpandedTable(expandedTable === tableName ? null : tableName);
   };
 
@@ -125,7 +122,10 @@ const LeftSidebar = ({
                       <FontAwesomeIcon
                         icon={faThumbtack}
                         className="pin-icon"
-                        onClick={() => handleTableContent(table)}
+                        onClick={() => {
+                          handleAnimationClick();
+                          handleTableContent(table);
+                        }}
                       />
                       <span className="tooltip">Pin this table</span>
                     </div>

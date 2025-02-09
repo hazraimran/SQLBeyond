@@ -1,14 +1,22 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { Navigate, Link } from "react-router-dom";
 import "../../styles/Authentication.css";
 import { useAuth } from "./AuthContext";
 
 
 // const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-function Authentication() {
+function Login() {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const auth = useAuth();
+
+  if(auth.user){
+    if(auth.user.quizData)
+      return <Navigate to="/SQLEditor" replace />;
+
+    return <Navigate to="/quiz" replace />;
+  }
+    
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,58 +25,8 @@ function Authentication() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Here you could add authentication logic, e.g., API call
     auth.login(formData);
-
-    // Navigate to the intro page
-    // navigate("/intro");
   };
-
-
-  
-  
-
-  // return (
-  //   <div className="auth-container">
-  //     <div className="auth-card">
-  //       <h1>Login</h1>
-  //       <form onSubmit={handleSubmit}>
-  //         <div className="form-group">
-  //           <label htmlFor="username">Username</label>
-  //           <input
-  //             type="text"
-              // id="username"
-              // name="username"
-  //             value={formData.username}
-  //             onChange={handleChange}
-  //             placeholder="Enter your username"
-  //             required
-  //           />
-  //         </div>
-
-  //         <div className="form-group">
-  //           <label htmlFor="password">Password</label>
-  //           <input
-  //             type="password"
-  //             id="password"
-  //             name="password"
-  //             value={formData.password}
-  //             onChange={handleChange}
-  //             placeholder="Enter your password"
-  //             required
-  //           />
-  //         </div>
-
-  //         <button type="submit" className="submit-button">
-  //           Login
-  //         </button>
-  //       </form>
-  //     </div>
-  //   </div>
-  // );
-
-  // console.log(formData);
 
   return (
     <section className="log-section">
@@ -114,4 +72,4 @@ function Authentication() {
   )
 }
 
-export default Authentication;
+export default Login;

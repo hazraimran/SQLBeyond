@@ -190,6 +190,10 @@
   background-color: #d9534f;
 }
 
+.right-sidebar-header button:hover {
+  transform: scale(1.2);
+}
+
 /* .achievements h3 {
   margin-bottom: 0;
 } */

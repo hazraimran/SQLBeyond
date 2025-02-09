@@ -142,7 +142,7 @@ function SQLEditor() {
   }, [currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
 
   const saveUserData = async (data) => {
-    console.log("save user data function", data);
+    // console.log("save user data function", data);
   };
 
   const checkAnswer = useCallback(
@@ -450,6 +450,17 @@ function SQLEditor() {
     setLogoutModal(false);
   }
 
+  // ---------------------- Pinned table animation ----------------------
+  const [animationClass, setAnimationClass] = useState("");
+
+  const handleAnimationClick = () => {
+    setAnimationClass("jump-animation");
+    setTimeout(() => {
+      setAnimationClass("");
+    }, 1000);
+  }
+
+
   // ---------------------- SQLEditor return ----------------------
   return (
     <div className="sql-editor-container">
@@ -470,6 +481,7 @@ function SQLEditor() {
         message={message}
         handleTableContent={addTableContent}
         expectedOutput={expectedOutput}
+        handleAnimationClick={handleAnimationClick}
       />
       <div className="main-editor">
         <Editor
@@ -483,7 +495,7 @@ function SQLEditor() {
           <div className="result-btns">
             {/* <button onClick={downloadLogs}>Download Logs</button> */}
             <button onClick={() => setIsTableOn(false)}>Query Results</button>
-            <button onClick={handleTableActions}>Pinned Tables</button>
+            <button onClick={handleTableActions} className={animationClass}>Pinned Tables</button>
           </div>
 
           {isTableOn ? (
