@@ -8,7 +8,7 @@ const DisplayTables = ({ tableContent, removeTable }) => {
                 {
                     tableContent.length === 0 
                     ?
-                    <h1>There's 0 tables pinned!</h1>
+                    <h1>No tables pinned!</h1>
                     :
                     tableContent.map((table, index) => {
                         return (
