@@ -1,17 +1,12 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 import "../../../styles/LeftSidebar.css";
 import tables from "../../../data/tables";
-import thinkingImage from "../../../assets/Thinking.png";
-import helpfulImage from "../../../assets/Helpful.webp";
-import happyImage from "../../../assets/Happy.png";
-import Typewriter from "typewriter-effect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 
 const LeftSidebar = ({
-  imageState,
   message,
   handleTableContent,
   expectedOutput,
@@ -23,16 +18,16 @@ const LeftSidebar = ({
     setExpandedTable(expandedTable === tableName ? null : tableName);
   };
 
-  const getImageSrc = () => {
-    switch (imageState) {
-      case "helpful":
-        return helpfulImage;
-      case "happy":
-        return happyImage;
-      default:
-        return thinkingImage;
-    }
-  };
+  // const getImageSrc = () => {
+  //   switch (imageState) {
+  //     case "helpful":
+  //       return helpfulImage;
+  //     case "happy":
+  //       return happyImage;
+  //     default:
+  //       return thinkingImage;
+  //   }
+  // };
 
   return (
     <div className="left-sidebar">
@@ -44,31 +39,6 @@ const LeftSidebar = ({
                 Current Task: <span>{message}</span>
               </p>
               <h4>Expected Output (Top 5 Rows):</h4>
-              {/* <table className="sample-table">
-                <thead>
-                  <tr>
-                    {expectedOutput.length > 0 &&
-                      Object.keys(expectedOutput[0]).map((col, index) => (
-                        <th key={index}>{col}</th>
-                      ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {expectedOutput.length > 0 ? (
-                    expectedOutput.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        {Object.values(row).map((val, colIndex) => (
-                          <td key={colIndex}>{val}</td>
-                        ))}
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="100%">No data available</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table> */}
               <div className="sample-table-container">
                 <table className="sample-table">
                   <thead>
@@ -152,7 +122,7 @@ const LeftSidebar = ({
 };
 
 LeftSidebar.propTypes = {
-  imageState: PropTypes.string.isRequired,
+  // imageState: PropTypes.string.isRequired,
   message: PropTypes.string,
   handleTableContent: PropTypes.func.isRequired,
   expectedOutput: PropTypes.array,

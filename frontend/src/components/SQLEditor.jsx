@@ -9,35 +9,29 @@ import badgesData from "../data/badges";
 import logToCSV from "../utils/logger";
 import "../styles/SQLEditor.css";
 
-
 import { useAuth } from "./Login/AuthContext";
 
 import DisplayTables from "./SQLEditorComponents/DisplayTables";
-import HintModal from "./Modal/HintModal";
 import BadgeModal from "./Modal/BadgeModal";
 import LogoutModal from "./Modal/LogoutModal";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 function SQLEditor() {
-  // console.log("SQLEditor");
   const location = useLocation();
-  const savedUserData = JSON.parse(localStorage.getItem("userData")) || {};
   const user = useAuth().user;
 
   const {
     name = `${user.firstName} ${user.lastName}`,
-    company = savedUserData.company,
-    position = savedUserData.position,
   } = location.state || {};
 
   // State variables
   const [query, setQuery] = useState(
     "SELECT P.firstName, P.lastName, A.reason, (P.weight / ((P.height / 100) * (P.height / 100))) AS BMI FROM Patient P JOIN Admission A ON P.healthNum = A.pID ORDER BY A.date DESC;"
   );
+
   const [result, setResult] = useState([]);
   const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
-  const [imageState, setImageState] = useState("thinking");
   const [message, setMessage] = useState("");
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState({
@@ -94,8 +88,6 @@ function SQLEditor() {
 
   const loadQuestion = useCallback(async () => {
     setHintsUsedForQuestion(0);
-
-    setImageState("thinking");
     setButtonsDisabled(true);
 
     const questionList = questions[currentDifficulty];
@@ -103,13 +95,12 @@ function SQLEditor() {
       (q) => !usedQuestions[currentDifficulty].includes(q.question)
     );
 
+    console.log(remainingQuestions);
+
     let selectedQuestion;
 
     if (remainingQuestions.length > 0) {
-      selectedQuestion =
-        remainingQuestions[
-        Math.floor(Math.random() * remainingQuestions.length)
-        ];
+      selectedQuestion = remainingQuestions[Math.floor(Math.random() * remainingQuestions.length)];
       setUsedQuestions((prev) => ({
         ...prev,
         [currentDifficulty]: [
@@ -119,19 +110,14 @@ function SQLEditor() {
       }));
     } else {
       setUsedQuestions((prev) => ({ ...prev, [currentDifficulty]: [] }));
-      selectedQuestion =
-        questionList[Math.floor(Math.random() * questionList.length)];
+      selectedQuestion = questionList[Math.floor(Math.random() * questionList.length)];
     }
 
     if (selectedQuestion) {
       setCurrentQuestion(selectedQuestion); // Keep the entire question object in the state
       setStartTime(Date.now());
-      // const correctResult = await fetchCorrectAnswerResult(
-      //   selectedQuestion.answer
-      // );
-      const correctResult = await fetchCorrectAnswerResult(
-        selectedQuestion.answer
-      );
+      const correctResult = await fetchCorrectAnswerResult(selectedQuestion.answer);
+
       setCorrectAnswerResult(correctResult);
       setExpectedOutput(correctResult ? correctResult.slice(0, 5) : []); // ✅ Store top 5 rows
 
@@ -147,11 +133,11 @@ function SQLEditor() {
 
   const checkAnswer = useCallback(
     async (userResult) => {
-      const correct =
-        JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
-
+      const correct = JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
       const questionDifficulty = currentQuestion.difficulty;
+
       let earnedPoints = correct ? currentQuestion.points : 0;
+
       earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0); // Deduct hints used
 
       setPlayerPoints((prevPoints) => {
@@ -164,7 +150,6 @@ function SQLEditor() {
       });
 
       const questionData = {
-        userId: "user123",
         question: currentQuestion.question,
         difficulty: questionDifficulty,
         correctAnswer: currentQuestion.answer,
@@ -177,14 +162,16 @@ function SQLEditor() {
 
       saveUserData(questionData);
 
+      // this is not very accurate with the 100, 120, 140/160 points
       if (correct) {
+        // loadQuestion();
+
         setPoints((prevPoints) => {
           const newPoints = prevPoints + earnedPoints;
           if (currentDifficulty == "easy") {
             if (
               newPoints >= 100 &&
-              playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0])
-                .length >= 4
+              playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 4
             ) {
               let nextDifficulty = currentDifficulty;
               let message = "";
@@ -192,10 +179,11 @@ function SQLEditor() {
               if (currentDifficulty === "easy") {
                 nextDifficulty = "medium";
                 message = "Congratulations! You've advanced to Medium Level.";
-              } else if (currentDifficulty === "medium") {
-                nextDifficulty = "hard";
-                message = "Amazing! You've advanced to Hard Level.";
               }
+              // else if (currentDifficulty === "medium") {
+              //   nextDifficulty = "hard";
+              //   message = "Amazing! You've advanced to Hard Level.";
+              // }
 
               setMessage(message);
               setTimeout(() => {
@@ -250,7 +238,7 @@ function SQLEditor() {
         setRetryCount((prev) => prev + 1);
         setMessage("❌ Try again");
         setTimeout(() => {
-          setImageState("thinking");
+          // setImageState("thinking");
           setMessage(`Current Task: ${currentQuestion.question}`);
         }, 3000);
       }
@@ -361,7 +349,7 @@ function SQLEditor() {
         ]);
       }
     }
-  }, [hasExecuted, loadQuestion, name, company, position]);
+  }, [hasExecuted, loadQuestion, name]);
 
   useEffect(() => {
     if (user.badges) {
@@ -473,11 +461,8 @@ function SQLEditor() {
       )}
 
       {logoutModal && <LogoutModal closeLogoutModal={closeLogoutModal} />}
-
-      {/* {hintState && <HintModal closeHintModal={closeHintModal} />} */}
-
       <LeftSidebar
-        imageState={imageState}
+        // imageState={imageState}
         message={message}
         handleTableContent={addTableContent}
         expectedOutput={expectedOutput}
