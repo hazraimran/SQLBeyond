@@ -16,7 +16,7 @@ const sqlParser = require("sql-parser"); // SQL Parser for syntax validation
 const { closeMongodbConnection } = require("./utils/mongodb");
 
 // Load and validate environment variables
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5001;
 const MYSQL_URL = process.env.MYSQL_URL;
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
 

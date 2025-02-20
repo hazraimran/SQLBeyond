@@ -14,6 +14,7 @@ import { useAuth } from "./Login/AuthContext";
 import DisplayTables from "./SQLEditorComponents/DisplayTables";
 import BadgeModal from "./Modal/BadgeModal";
 import LogoutModal from "./Modal/LogoutModal";
+import axios from "axios";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -27,13 +28,17 @@ function SQLEditor() {
 
   // State variables
   const [query, setQuery] = useState(
-    "SELECT P.firstName, P.lastName, A.reason, (P.weight / ((P.height / 100) * (P.height / 100))) AS BMI FROM Patient P JOIN Admission A ON P.healthNum = A.pID ORDER BY A.date DESC;"
+`example:
+SELECT P.firstName, P.lastName, A.reason, (P.weight / ((P.height / 100) * (P.height / 100))) AS BMI 
+FROM Patient P JOIN Admission A ON P.healthNum = A.pID 
+ORDER BY A.date DESC;`
   );
 
   const [result, setResult] = useState([]);
   const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
   const [message, setMessage] = useState("");
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
+  //yes
   const [currentQuestion, setCurrentQuestion] = useState({
     question: "",
     answer: "",
@@ -43,9 +48,13 @@ function SQLEditor() {
 
   const [startTime, setStartTime] = useState(null);
   const [points, setPoints] = useState(0);
-  const [badges, setBadges] = useState(["Query Novice", "JOIN Master"]);
+
+  //yes
+  const [badges, setBadges] = useState([]);
   const [retryCount, setRetryCount] = useState(0);
-  const [currentDifficulty, setCurrentDifficulty] = useState("easy");
+
+  //yes
+  const [currentDifficulty, setCurrentDifficulty] = useState(user.currentLevel ? user.currentLevel : "easy");
   const [usedQuestions, setUsedQuestions] = useState({
     easy: [],
     medium: [],
@@ -254,10 +263,6 @@ function SQLEditor() {
     ]
   );
 
-  useEffect(() => {
-    loadQuestion(); // ✅ Load a new question when difficulty changes
-  }, [currentDifficulty]);
-
   const executeQuery = async (userQuery, limitRows = false) => {
     try {
       const response = await fetch(`${apiUrl}/execute-query`, {
@@ -275,12 +280,19 @@ function SQLEditor() {
         setResult(limitedResult);
       } else {
         setResult([{ error: "Syntax error or invalid query." }]);
-        setMessage("Try again");
+        setMessage("❌ Try again");
+        // setTimeout(() => {
+
+        //   setMessage(`Current Task: ${currentQuestion.question}`);
+        // }, 3000);
       }
     } catch (error) {
       console.error("Error:", error);
       setResult([{ error: "Error connecting to server." }]);
-      setMessage("Try again");
+      setMessage("❌ Try again");
+      setTimeout(() => {
+        setMessage(`Current Task: ${currentQuestion.question}`);
+      }, 3000);
     }
   };
 
@@ -337,6 +349,35 @@ function SQLEditor() {
     });
   };
 
+  const saveUserLevel = (level) => {
+    try{
+      axios.post(`${apiUrl}/game/current-level`, {
+        username: user.username,
+        currentLevel: level
+      }, { withCredentials: true });
+    }
+    catch(err){
+      console.log(err);
+    }
+  }
+
+  const saveCurrQuestion = (level) => {
+    try{
+      axios.post(`${apiUrl}/game/current-question`, {
+        username: user.username,
+        currentLevel: level
+      }, { withCredentials: true });
+    }
+    catch(err){
+      console.log(err);
+    }
+  }
+
+  useEffect(() => {
+    loadQuestion(); // ✅ Load a new question when difficulty changes
+    saveUserLevel(currentDifficulty);
+  }, [currentDifficulty]);
+
   useEffect(() => {
     if (!hasExecuted) {
       setHasExecuted(true);
@@ -352,9 +393,13 @@ function SQLEditor() {
   }, [hasExecuted, loadQuestion, name]);
 
   useEffect(() => {
-    if (user.badges) {
+    if (user.badges) 
       setBadges(user.badges);
-    }
+
+    if(!user.currentLevel)
+      saveUserLevel(currentDifficulty);
+
+
   }, []);
 
   // when user clicks in the badge, open a modal with the image, the name, and how to get it.

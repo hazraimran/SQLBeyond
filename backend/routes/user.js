@@ -70,6 +70,8 @@ router.post("/register", async (req, res) => {
     try {
         const db = await connectToMongoDB();
         const collection = db.collection('users');
+        const gameCollection = db.collection('game');
+
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(password, salt);
 
@@ -82,6 +84,12 @@ router.post("/register", async (req, res) => {
                 isOauth: false,
                 badges: []
             });
+
+            await gameCollection.insertOne({
+                username: username,
+                badges: []
+            });
+
             const userData = { user: { firstName: firstName, lastName: lastName, username: username, isOauth: false, badges: [] } };
             //store only the userID
             req.session.user = { username: username };
@@ -102,6 +110,7 @@ router.post('/google-oauth-login', async (req, res) => {
         const { given_name, family_name, email } = req.body.user;
         const db = await connectToMongoDB();
         const collection = db.collection('users');
+        const gameCollection = db.collection('game');
 
         let userData;
 
@@ -116,6 +125,12 @@ router.post('/google-oauth-login', async (req, res) => {
                     isOauth: true,
                     badges: []
                 });
+
+                await gameCollection.insertOne({
+                    username: username,
+                    badges: []
+                });
+                
                 userData = { user: { firstName: given_name, lastName: family_name, username: email, isOauth: true, badges: [] },  missingQuiz: true };
             } catch (err) {
                 console.error("Failed to insert new user: ", err);
@@ -170,7 +185,7 @@ router.post("/quiz-grade", async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error("Failed to update user: ", err);
-        res.json({ status: "failed" });
+        res.json({ success: false });
     }
 });
 

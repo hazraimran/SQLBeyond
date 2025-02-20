@@ -3,35 +3,64 @@ const { connectToMongoDB } = require('../utils/mongodb');
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
+router.get("/load-data", async (req, res) => {
+    const { username } = req.body;
+    const db = await connectToMongoDB();
+    const collection = db.collection('game');
 
+    try {
+        const gameData = await collection.findOne({ username: username});
+        if (gameData)
+            return res.json({ gameData: gameData });
+
+        throw new Error();
+    } catch (err) {
+        console.error("Not able to load game data: ", err);
+    }
 })
 
-// router.post("/login", async (req, res) => {
-//     const { username, password } = req.body;
-//     const db = await connectToMongoDB();
-//     const collection = db.collection('users');
+router.post("/quiz-grade", async (req, res) => {
+    const { quizData } = req.body;
+    const db = await connectToMongoDB();
+    const collection = db.collection('game');
 
-//     // make the request to the database with the username
-//     const user = await collection.findOne({username: username});
-//     if(user){
-//         try{
-//             const response = await bcrypt.compare(password, user.password);
-//             if (response) {
-//                 req.session.user = {username: username};
-//                 res.send({ user: user });
-//             }
-//             else {
-//                 res.send({ msg: "Username and password don't match!" });
-//             }
-//         } catch (err) {
-//             console.error("Failed to check the password", err);
-//         }
-//     }
-//     else{
-//         //user not found
-//         res.send({ msg: "Username and password don't match!" });
-//     }
-// });
+    console.log(req.session.user);
+
+    try {
+        await collection.updateOne({
+            username: req.session.user.username
+        }, {
+            $set: {
+                quizData: quizData
+            }
+        });
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Failed to update user: ", err);
+        res.json({ success: false });
+    }
+});
+
+router.post("/current-level", async (req, res) => {
+    const { username, currentLevel } = req.body;
+    const db = await connectToMongoDB();
+    const collection = db.collection('users');
+
+    try{
+        await collection.updateOne({
+            username: username
+        }, {
+            $set: {
+                currentLevel: currentLevel
+            }
+        });
+        res.json({ success: true });
+    }
+    catch(err){ 
+        console.error("Failed to save current level in the database: ", err);
+        return res.json({ success: false,  msg: "Failed to save current level in the database!" });     
+    };
+})
+
 
 module.exports = router;

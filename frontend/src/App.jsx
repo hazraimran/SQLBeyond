@@ -5,19 +5,22 @@ import Login from "./components/Login/Login";
 import Register from "./components/Login/Register";
 import AuthProvider from "./components/Login/AuthContext";
 import PrivateRoute from "./components/Login/PrivateRoute";
+import GameProvider from "./components/Context/GameContext";
 
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+      <GameProvider>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        <Route element={<PrivateRoute />}>
-          <Route path="/quiz" element={<QuestionaireForUsers />} />
-          <Route path="/SQLEditor" element={<SQLEditor />} />
-        </Route>
-      </Routes>
+          <Route element={<PrivateRoute />}>
+            <Route path="/quiz" element={<QuestionaireForUsers />} />
+            <Route path="/SQLEditor" element={<SQLEditor />} />
+          </Route>
+        </Routes>
+      </GameProvider>
     </AuthProvider>
   );
 }

@@ -25,6 +25,7 @@ async function connectToMongoDB() {
             dbConnection = client.db('sql_game');
 
             await dbConnection.collection("users").createIndex({ username: 1 }, { unique: true });
+            await dbConnection.collection("game").createIndex({ username: 1 }, { unique: true });
         } catch (err) {
             console.error(err);
             throw err;
