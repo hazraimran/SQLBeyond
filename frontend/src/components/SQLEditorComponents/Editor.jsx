@@ -47,10 +47,12 @@ const Editor = ({
           </div>
 
 
+          {/* little bug here, when user clicks submit it doesn't sometimes */}
           <div className="tooltip-container-editor">
             <button
               className="submit button"
               onClick={() => {
+                console.log("sub clicked");
                 setQuery(content);
                 submitQuery(content); // Submit query for full comparison
               }}

@@ -4,7 +4,11 @@ import confetti from "canvas-confetti";
 import LeftSidebar from "./Sidebar/LeftSidebar/LeftSidebar";
 import RightSidebar from "./Sidebar/RightSidebar/RightSidebar";
 import Editor from "./SQLEditorComponents/Editor";
-import questions from "../data/questions";
+
+// for test only 
+import questions from "../data/oldQuestions-backup";
+// import questions from "../data/questions";
+
 import badgesData from "../data/badges";
 import logToCSV from "../utils/logger";
 import "../styles/SQLEditor.css";
@@ -16,11 +20,15 @@ import BadgeModal from "./Modal/BadgeModal";
 import LogoutModal from "./Modal/LogoutModal";
 import axios from "axios";
 
+import { useGame } from "./Context/GameContext";
+
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 function SQLEditor() {
   const location = useLocation();
   const user = useAuth().user;
+  const gameMethods = useGame();
+  const gameData = useGame().gameData;
 
   const {
     name = `${user.firstName} ${user.lastName}`,
@@ -28,33 +36,34 @@ function SQLEditor() {
 
   // State variables
   const [query, setQuery] = useState(
-`example:
-SELECT P.firstName, P.lastName, A.reason, (P.weight / ((P.height / 100) * (P.height / 100))) AS BMI 
-FROM Patient P JOIN Admission A ON P.healthNum = A.pID 
-ORDER BY A.date DESC;`
-  );
+    `example:
+SELECT fields
+FROM table_name;`);
+
 
   const [result, setResult] = useState([]);
   const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
   const [message, setMessage] = useState("");
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
+
   //yes
-  const [currentQuestion, setCurrentQuestion] = useState({
-    question: "",
-    answer: "",
-    points: 0,
-  });
+  // const [currentQuestion, setCurrentQuestion] = useState({
+  //   question: "",
+  //   answer: "",
+  //   points: 0,
+  // });
+
   const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
 
   const [startTime, setStartTime] = useState(null);
-  const [points, setPoints] = useState(0);
+  // const [points, setPoints] = useState(0);
 
   //yes
   const [badges, setBadges] = useState([]);
   const [retryCount, setRetryCount] = useState(0);
 
   //yes
-  const [currentDifficulty, setCurrentDifficulty] = useState(user.currentLevel ? user.currentLevel : "easy");
+  // const [currentDifficulty, setCurrentDifficulty] = useState(user.currentLevel ? user.currentLevel : "easy");
   const [usedQuestions, setUsedQuestions] = useState({
     easy: [],
     medium: [],
@@ -98,43 +107,57 @@ ORDER BY A.date DESC;`
   const loadQuestion = useCallback(async () => {
     setHintsUsedForQuestion(0);
     setButtonsDisabled(true);
+    // console.log(gameData.currentDifficulty);
 
-    const questionList = questions[currentDifficulty];
+    // const questionList = questions[currentDifficulty];
+    // here
+    const questionList = questions[gameData.currentDifficulty];
     const remainingQuestions = questionList.filter(
-      (q) => !usedQuestions[currentDifficulty].includes(q.question)
+      (q) => !usedQuestions[gameData.currentDifficulty].includes(q.question)
     );
-
-    console.log(remainingQuestions);
 
     let selectedQuestion;
 
     if (remainingQuestions.length > 0) {
       selectedQuestion = remainingQuestions[Math.floor(Math.random() * remainingQuestions.length)];
+      // old curr
+      // setUsedQuestions((prev) => ({
+      //   ...prev,
+      //   [currentDifficulty]: [
+      //     ...prev[currentDifficulty],
+      //     selectedQuestion.question,
+      //   ],
+      // }));
+
       setUsedQuestions((prev) => ({
         ...prev,
-        [currentDifficulty]: [
-          ...prev[currentDifficulty],
+        [gameData.currentDifficulty]: [
+          ...prev[gameData.currentDifficulty],
           selectedQuestion.question,
         ],
       }));
     } else {
-      setUsedQuestions((prev) => ({ ...prev, [currentDifficulty]: [] }));
+      setUsedQuestions((prev) => ({ ...prev, [gameData.currentDifficulty]: [] }));
       selectedQuestion = questionList[Math.floor(Math.random() * questionList.length)];
     }
 
     if (selectedQuestion) {
-      setCurrentQuestion(selectedQuestion); // Keep the entire question object in the state
+      gameMethods.updateGameData("currentQuestion", selectedQuestion)
       setStartTime(Date.now());
+
+      // make a request to the database and save the time 
+      // create a method in GameContext to setStartTime
+
       const correctResult = await fetchCorrectAnswerResult(selectedQuestion.answer);
 
-      setCorrectAnswerResult(correctResult);
+      // setCorrectAnswerResult(correctResult);
       setExpectedOutput(correctResult ? correctResult.slice(0, 5) : []); // ✅ Store top 5 rows
 
       setCorrectAnswerResult(correctResult);
       setMessage(`${selectedQuestion.question}`);
       setTimeout(() => setButtonsDisabled(false), 2000);
     }
-  }, [currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
+  }, [gameData.currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
 
   const saveUserData = async (data) => {
     // console.log("save user data function", data);
@@ -143,9 +166,9 @@ ORDER BY A.date DESC;`
   const checkAnswer = useCallback(
     async (userResult) => {
       const correct = JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
-      const questionDifficulty = currentQuestion.difficulty;
+      const questionDifficulty = gameData.currentQuestion.difficulty;
 
-      let earnedPoints = correct ? currentQuestion.points : 0;
+      let earnedPoints = correct ? gameData.currentQuestion.points : 0;
 
       earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0); // Deduct hints used
 
@@ -158,84 +181,89 @@ ORDER BY A.date DESC;`
         return updatedPoints;
       });
 
-      const questionData = {
-        question: currentQuestion.question,
-        difficulty: questionDifficulty,
-        correctAnswer: currentQuestion.answer,
-        userAnswerResult: userResult,
-        isCorrect: correct,
-        timeTaken: (Date.now() - startTime) / 1000,
-        pointsEarned: earnedPoints,
-        timestamp: new Date(),
-      };
+      // const questionData = {
+      //   question: gameData.currentQuestion.question,
+      //   difficulty: questionDifficulty,
+      //   correctAnswer: gameData.currentQuestion.answer,
+      //   userAnswerResult: userResult,
+      //   isCorrect: correct,
+      //   timeTaken: (Date.now() - startTime) / 1000,
+      //   pointsEarned: earnedPoints,
+      //   timestamp: new Date(),
+      // };
 
-      saveUserData(questionData);
+      // saveUserData(questionData);
 
       // this is not very accurate with the 100, 120, 140/160 points
       if (correct) {
         // loadQuestion();
 
-        setPoints((prevPoints) => {
-          const newPoints = prevPoints + earnedPoints;
-          if (currentDifficulty == "easy") {
-            if (
-              newPoints >= 100 &&
-              playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 4
-            ) {
-              let nextDifficulty = currentDifficulty;
-              let message = "";
+        // setPoints((prevPoints) => {
+        //   const newPoints = prevPoints + earnedPoints;
+        //   if (gameData.currentDifficulty == "easy") {
+        //     if (
+        //       newPoints >= 100 &&
+        //       playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 4
+        //     ) {
+        //       // let nextDifficulty = currentDifficulty;
+        //       // let message = "";
 
-              if (currentDifficulty === "easy") {
-                nextDifficulty = "medium";
-                message = "Congratulations! You've advanced to Medium Level.";
-              }
-              // else if (currentDifficulty === "medium") {
-              //   nextDifficulty = "hard";
-              //   message = "Amazing! You've advanced to Hard Level.";
-              // }
+        //       // if (currentDifficulty === "easy") {
+        //       //   nextDifficulty = "medium";
+        //       //   message = "Congratulations! You've advanced to Medium Level.";
+        //       // }
+        //       // else if (currentDifficulty === "medium") {
+        //       //   nextDifficulty = "hard";
+        //       //   message = "Amazing! You've advanced to Hard Level.";
+        //       // }
 
-              setMessage(message);
-              setTimeout(() => {
-                setCurrentDifficulty(nextDifficulty);
-                setPoints(0); // Reset points
-                setMessage(""); // Clear congratulatory message
-                loadQuestion(); // ✅ Load new question after the message
-              }, 3000);
+        //       setMessage("Congratulations! You've advanced to Medium Level.");
+        //       setTimeout(() => {
+        //         // gameMethods.setCurrentDifficulty("medium");
+        //         gameMethods.updateGameData("currentDifficulty", "medium"); 
+        //         // setPoints(0); // Reset points
+        //         gameMethods.updateGameData("points", 0);
+        //         setMessage(""); // Clear congratulatory message
+        //         loadQuestion(); // ✅ Load new question after the message
+        //       }, 3000);
 
-              return 0; // Reset points
-            }
-          } else if (currentDifficulty == "medium") {
-            if (
-              newPoints >= 120 &&
-              playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0])
-                .length >= 3
-            ) {
-              let nextDifficulty = currentDifficulty;
-              let message = "";
+        //       return 0; // Reset points
+        //     }
+        //   } 
+        //   else if (gameData.currentDifficulty == "medium") {
+        //     if (
+        //       newPoints >= 120 &&
+        //       playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0])
+        //         .length >= 3
+        //     ) {
+        //       // let nextDifficulty = currentDifficulty;
+        //       // let message = "";
 
-              if (currentDifficulty === "easy") {
-                nextDifficulty = "medium";
-                message = "Congratulations! You've advanced to Medium Level.";
-              } else if (currentDifficulty === "medium") {
-                nextDifficulty = "hard";
-                message = "Amazing! You've advanced to Hard Level.";
-              }
+        //       // if (currentDifficulty === "easy") {
+        //       //   nextDifficulty = "medium";
+        //       //   message = "Congratulations! You've advanced to Medium Level.";
+        //       // } else if (currentDifficulty === "medium") {
+        //       //   nextDifficulty = "hard";
+        //       //   message = "Amazing! You've advanced to Hard Level.";
+        //       // }
 
-              setMessage(message);
-              setTimeout(() => {
-                setCurrentDifficulty(nextDifficulty);
-                setPoints(0); // Reset points
-                setMessage(""); // Clear congratulatory message
-                loadQuestion(); // ✅ Load new question after the message
-              }, 3000);
+        //       setMessage("Amazing! You've advanced to Hard Level.");
+        //       setTimeout(() => {
+        //         gameMethods.updateGameData("currentDifficulty", "hard"); 
+        //         // setPoints(0); // Reset points
+        //         gameMethods.updateGameData("points", 0);
+        //         setMessage(""); // Clear congratulatory message
+        //         loadQuestion(); // ✅ Load new question after the message
+        //       }, 3000);
 
-              return 0; // Reset points
-            }
-          }
+        //       return 0; // Reset points
+        //     }
+        //   }
 
-          return newPoints;
-        });
+        //   return newPoints;
+        // });
 
+        gameMethods.updatePoints(gameData.points, earnedPoints, playerPoints);
         setMessage("✅ Good job!");
         triggerConfetti();
 
@@ -248,17 +276,17 @@ ORDER BY A.date DESC;`
         setMessage("❌ Try again");
         setTimeout(() => {
           // setImageState("thinking");
-          setMessage(`Current Task: ${currentQuestion.question}`);
+          setMessage(`Current Task: ${gameData.currentQuestion.question}`);
         }, 3000);
       }
     },
     [
       correctAnswerResult,
-      currentQuestion,
-      currentDifficulty,
+      gameData.currentQuestion,
+      gameData.currentDifficulty,
       playerPoints,
       startTime,
-      points,
+      gameData.points,
       hintsUsedForQuestion,
     ]
   );
@@ -291,7 +319,7 @@ ORDER BY A.date DESC;`
       setResult([{ error: "Error connecting to server." }]);
       setMessage("❌ Try again");
       setTimeout(() => {
-        setMessage(`Current Task: ${currentQuestion.question}`);
+        setMessage(`Current Task: ${gameData.currentQuestion.question}`);
       }, 3000);
     }
   };
@@ -349,35 +377,20 @@ ORDER BY A.date DESC;`
     });
   };
 
-  const saveUserLevel = (level) => {
-    try{
-      axios.post(`${apiUrl}/game/current-level`, {
-        username: user.username,
-        currentLevel: level
-      }, { withCredentials: true });
-    }
-    catch(err){
-      console.log(err);
-    }
-  }
-
-  const saveCurrQuestion = (level) => {
-    try{
-      axios.post(`${apiUrl}/game/current-question`, {
-        username: user.username,
-        currentLevel: level
-      }, { withCredentials: true });
-    }
-    catch(err){
-      console.log(err);
-    }
-  }
-
   useEffect(() => {
-    loadQuestion(); // ✅ Load a new question when difficulty changes
-    saveUserLevel(currentDifficulty);
-  }, [currentDifficulty]);
+    if (gameData.currentDifficulty !== "easy") {
+      setMessage(`Congratulations! You've advanced to ${gameData.currentDifficulty} Level.`);
+      setTimeout(() => {
+        setMessage(""); // Clear congratulatory message
+        loadQuestion(); // ✅ Load new question after the message
+      }, 3000);
+      return;
+    }
+    loadQuestion();
+  }, [gameData.currentDifficulty]);
 
+
+  // i dont know what this is doing ask manraj
   useEffect(() => {
     if (!hasExecuted) {
       setHasExecuted(true);
@@ -393,13 +406,8 @@ ORDER BY A.date DESC;`
   }, [hasExecuted, loadQuestion, name]);
 
   useEffect(() => {
-    if (user.badges) 
+    if (user.badges)
       setBadges(user.badges);
-
-    if(!user.currentLevel)
-      saveUserLevel(currentDifficulty);
-
-
   }, []);
 
   // when user clicks in the badge, open a modal with the image, the name, and how to get it.
@@ -540,11 +548,11 @@ ORDER BY A.date DESC;`
       </div>
 
       <RightSidebar
-        progress={points}
-        setProgress={setPoints}
+        progress={gameData.points}
+        // setProgress={setPoints}
         query={query}
-        taskDescription={currentQuestion}
-        currentQuestionPoints={currentQuestion.points}
+        taskDescription={gameData.currentQuestion}
+        currentQuestionPoints={gameData.currentQuestion.points}
         retries={retryCount}
         badges={badges}
         badgesData={badgesData}

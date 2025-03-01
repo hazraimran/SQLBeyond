@@ -43,7 +43,7 @@ const RightSidebar = ({
     console.log("Hint used! Points deducted.");
   };
 
-  const progressPercentage = Math.min((progress / 100) * 100, 100); // Cap at 100%
+  // const progressPercentage = Math.min((progress / 100) * 100, 100); // Cap at 100%
 
   useEffect(() => {
     if (progress >= 100) {
@@ -128,7 +128,7 @@ const RightSidebar = ({
 
 RightSidebar.propTypes = {
   progress: PropTypes.number.isRequired,
-  setProgress: PropTypes.func.isRequired,
+  // setProgress: PropTypes.func.isRequired,
   query: PropTypes.string.isRequired,
   taskDescription: PropTypes.object.isRequired,
   currentQuestionPoints: PropTypes.number.isRequired,
