@@ -1,26 +1,29 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import confetti from "canvas-confetti";
+import axios from "axios";
+import React from "react";
+import PropTypes from "prop-types";
+
 import LeftSidebar from "./Sidebar/LeftSidebar/LeftSidebar";
 import RightSidebar from "./Sidebar/RightSidebar/RightSidebar";
 import Editor from "./SQLEditorComponents/Editor";
-
-// for test only 
-import questions from "../data/oldQuestions-backup";
-// import questions from "../data/questions";
-
-import badgesData from "../data/badges";
-import logToCSV from "../utils/logger";
-import "../styles/SQLEditor.css";
-
-import { useAuth } from "./Login/AuthContext";
-
 import DisplayTables from "./SQLEditorComponents/DisplayTables";
 import BadgeModal from "./Modal/BadgeModal";
 import LogoutModal from "./Modal/LogoutModal";
-import axios from "axios";
 
+import { useAuth } from "./Login/AuthContext";
 import { useGame } from "./Context/GameContext";
+
+import badgesData from "../data/badges";
+// For test only:
+import questions from "../data/oldQuestions-backup";
+// import questions from "../data/questions";
+
+import logToCSV from "../utils/logger";
+import evaluateBadges from "../utils/badgeEvaluator"; // <-- import the badge evaluator
+
+import "../styles/SQLEditor.css";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
@@ -30,40 +33,31 @@ function SQLEditor() {
   const gameMethods = useGame();
   const gameData = useGame().gameData;
 
-  const {
-    name = `${user.firstName} ${user.lastName}`,
-  } = location.state || {};
+  // Default name from user data
+  const { name = `${user.firstName} ${user.lastName}` } = location.state || {};
 
-  // State variables
+  // ---------------------- Local States ----------------------
   const [query, setQuery] = useState(
     `example:
 SELECT fields
-FROM table_name;`);
-
-
+FROM table_name;`
+  );
   const [result, setResult] = useState([]);
   const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
   const [message, setMessage] = useState("");
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
 
-  //yes
-  // const [currentQuestion, setCurrentQuestion] = useState({
-  //   question: "",
-  //   answer: "",
-  //   points: 0,
-  // });
-
   const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
-
-  const [startTime, setStartTime] = useState(null);
-  // const [points, setPoints] = useState(0);
-
-  //yes
-  const [badges, setBadges] = useState([]);
   const [retryCount, setRetryCount] = useState(0);
 
-  //yes
-  // const [currentDifficulty, setCurrentDifficulty] = useState(user.currentLevel ? user.currentLevel : "easy");
+  const [startTime, setStartTime] = useState(null);
+
+  const [badges, setBadges] = useState([]);
+  const [badgeState, setBadgeState] = useState({
+    open: false,
+    badgeData: null,
+  });
+
   const [usedQuestions, setUsedQuestions] = useState({
     easy: [],
     medium: [],
@@ -76,9 +70,109 @@ FROM table_name;`);
   });
   const [dynamicIdealPoints, setDynamicIdealPoints] = useState([10, 50, 100]);
   const [hasExecuted, setHasExecuted] = useState(false);
-  const [errorHint, setErrorHint] = useState(""); // NEW STATE
-  const [expectedOutput, setExpectedOutput] = useState([]); // ✅ Store expected output
 
+  // For the AI Assistant error guidance
+  const [errorHint, setErrorHint] = useState("");
+
+  // ✅ Store expected output (top 5 rows) for the user to see
+  const [expectedOutput, setExpectedOutput] = useState([]);
+
+  // ---------------------- Player Stats for Badges ----------------------
+  const [playerStats, setPlayerStats] = useState({
+    successfulJoins: 0,
+    successfulLogicTasks: 0,
+    consecutiveTasksWithoutHints: 0,
+    lastTaskUsedHints: false,
+  });
+
+  // ---------------------- Table Pinning States ----------------------
+  const [isTableOn, setIsTableOn] = useState(false);
+  const [tableContent, setTableContent] = useState([]);
+  const checkTable = useRef(new Set());
+
+  // ---------------------- Logout Modal State ----------------------
+  const [logoutModal, setLogoutModal] = useState(false);
+
+  // ---------------------- Helper Functions ----------------------
+  const detectJoinUsage = (queryText) => /\bJOIN\b/i.test(queryText);
+  const detectLogicUsage = (queryText) => /\b(AND|OR|NOT)\b/i.test(queryText);
+
+  const calculateCompletionTime = () => {
+    if (!startTime) return 999999; // fallback if not set
+    return Math.floor((Date.now() - startTime) / 1000); // in seconds
+  };
+
+  // Update local playerStats after a correct answer
+  const updatePlayerStats = (userQuery, usedHints) => {
+    setPlayerStats((prev) => {
+      const usedHintThisTask = usedHints > 0;
+      return {
+        successfulJoins: detectJoinUsage(userQuery)
+          ? prev.successfulJoins + 1
+          : prev.successfulJoins,
+        successfulLogicTasks: detectLogicUsage(userQuery)
+          ? prev.successfulLogicTasks + 1
+          : prev.successfulLogicTasks,
+        consecutiveTasksWithoutHints: usedHintThisTask
+          ? 0
+          : prev.consecutiveTasksWithoutHints + 1,
+        lastTaskUsedHints: usedHintThisTask,
+      };
+    });
+  };
+
+  // Evaluate which badges should unlock, then open modals for new ones
+  const evaluateAndUnlockBadges = () => {
+    const completedTasks = [
+      ...usedQuestions.easy,
+      ...usedQuestions.medium,
+      ...usedQuestions.hard,
+    ];
+
+    const unlockedBadges = evaluateBadges({
+      playerPoints,
+      retries: retryCount,
+      hintsUsedForQuestion,
+      completedTasks,
+      currentLevel: gameData.currentDifficulty,
+      currentTask: gameData.currentQuestion,
+      successfulJoins: playerStats.successfulJoins,
+      successfulLogicTasks: playerStats.successfulLogicTasks,
+      consecutiveTasksWithoutHints: playerStats.consecutiveTasksWithoutHints,
+      completionTime: calculateCompletionTime(),
+      reflectiveQuestionsCorrect:
+        gameData.currentQuestion.reflectiveQuestionsCorrect || false,
+    });
+
+    // Filter out badges the user already has
+    const newBadges = unlockedBadges.filter((b) => !badges.includes(b));
+
+    if (newBadges.length > 0) {
+      // Add to local state
+      setBadges((prev) => [...prev, ...newBadges]);
+
+      // Optionally save to user in DB
+      // saveUserData({ ...user, badges: [...badges, ...newBadges] });
+
+      // Trigger confetti or show modal for each new badge
+      newBadges.forEach((badgeName) => {
+        const foundBadge = badgesData.find((bd) => bd.name === badgeName);
+        if (foundBadge) {
+          openBadgeModal(foundBadge);
+        }
+      });
+    }
+  };
+
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  };
+
+  // ---------------------- DB Query Functions ----------------------
   const fetchCorrectAnswerResult = useCallback(async (correctQuery) => {
     try {
       const response = await fetch(`${apiUrl}/execute-query`, {
@@ -94,203 +188,6 @@ FROM table_name;`);
     }
   }, []);
 
-  const downloadLogs = () => {
-    const logs = localStorage.getItem("userLogs");
-    const blob = new Blob([logs], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "user_logs.csv";
-    a.click();
-  };
-
-  const loadQuestion = useCallback(async () => {
-    setHintsUsedForQuestion(0);
-    setButtonsDisabled(true);
-    // console.log(gameData.currentDifficulty);
-
-    // const questionList = questions[currentDifficulty];
-    // here
-    const questionList = questions[gameData.currentDifficulty];
-    const remainingQuestions = questionList.filter(
-      (q) => !usedQuestions[gameData.currentDifficulty].includes(q.question)
-    );
-
-    let selectedQuestion;
-
-    if (remainingQuestions.length > 0) {
-      selectedQuestion = remainingQuestions[Math.floor(Math.random() * remainingQuestions.length)];
-      // old curr
-      // setUsedQuestions((prev) => ({
-      //   ...prev,
-      //   [currentDifficulty]: [
-      //     ...prev[currentDifficulty],
-      //     selectedQuestion.question,
-      //   ],
-      // }));
-
-      setUsedQuestions((prev) => ({
-        ...prev,
-        [gameData.currentDifficulty]: [
-          ...prev[gameData.currentDifficulty],
-          selectedQuestion.question,
-        ],
-      }));
-    } else {
-      setUsedQuestions((prev) => ({ ...prev, [gameData.currentDifficulty]: [] }));
-      selectedQuestion = questionList[Math.floor(Math.random() * questionList.length)];
-    }
-
-    if (selectedQuestion) {
-      gameMethods.updateGameData("currentQuestion", selectedQuestion)
-      setStartTime(Date.now());
-
-      // make a request to the database and save the time 
-      // create a method in GameContext to setStartTime
-
-      const correctResult = await fetchCorrectAnswerResult(selectedQuestion.answer);
-
-      // setCorrectAnswerResult(correctResult);
-      setExpectedOutput(correctResult ? correctResult.slice(0, 5) : []); // ✅ Store top 5 rows
-
-      setCorrectAnswerResult(correctResult);
-      setMessage(`${selectedQuestion.question}`);
-      setTimeout(() => setButtonsDisabled(false), 2000);
-    }
-  }, [gameData.currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
-
-  const saveUserData = async (data) => {
-    // console.log("save user data function", data);
-  };
-
-  const checkAnswer = useCallback(
-    async (userResult) => {
-      const correct = JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
-      const questionDifficulty = gameData.currentQuestion.difficulty;
-
-      let earnedPoints = correct ? gameData.currentQuestion.points : 0;
-
-      earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0); // Deduct hints used
-
-      setPlayerPoints((prevPoints) => {
-        const updatedPoints = { ...prevPoints };
-        updatedPoints[questionDifficulty] = [
-          ...updatedPoints[questionDifficulty],
-          earnedPoints,
-        ];
-        return updatedPoints;
-      });
-
-      // const questionData = {
-      //   question: gameData.currentQuestion.question,
-      //   difficulty: questionDifficulty,
-      //   correctAnswer: gameData.currentQuestion.answer,
-      //   userAnswerResult: userResult,
-      //   isCorrect: correct,
-      //   timeTaken: (Date.now() - startTime) / 1000,
-      //   pointsEarned: earnedPoints,
-      //   timestamp: new Date(),
-      // };
-
-      // saveUserData(questionData);
-
-      // this is not very accurate with the 100, 120, 140/160 points
-      if (correct) {
-        // loadQuestion();
-
-        // setPoints((prevPoints) => {
-        //   const newPoints = prevPoints + earnedPoints;
-        //   if (gameData.currentDifficulty == "easy") {
-        //     if (
-        //       newPoints >= 100 &&
-        //       playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 4
-        //     ) {
-        //       // let nextDifficulty = currentDifficulty;
-        //       // let message = "";
-
-        //       // if (currentDifficulty === "easy") {
-        //       //   nextDifficulty = "medium";
-        //       //   message = "Congratulations! You've advanced to Medium Level.";
-        //       // }
-        //       // else if (currentDifficulty === "medium") {
-        //       //   nextDifficulty = "hard";
-        //       //   message = "Amazing! You've advanced to Hard Level.";
-        //       // }
-
-        //       setMessage("Congratulations! You've advanced to Medium Level.");
-        //       setTimeout(() => {
-        //         // gameMethods.setCurrentDifficulty("medium");
-        //         gameMethods.updateGameData("currentDifficulty", "medium"); 
-        //         // setPoints(0); // Reset points
-        //         gameMethods.updateGameData("points", 0);
-        //         setMessage(""); // Clear congratulatory message
-        //         loadQuestion(); // ✅ Load new question after the message
-        //       }, 3000);
-
-        //       return 0; // Reset points
-        //     }
-        //   } 
-        //   else if (gameData.currentDifficulty == "medium") {
-        //     if (
-        //       newPoints >= 120 &&
-        //       playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0])
-        //         .length >= 3
-        //     ) {
-        //       // let nextDifficulty = currentDifficulty;
-        //       // let message = "";
-
-        //       // if (currentDifficulty === "easy") {
-        //       //   nextDifficulty = "medium";
-        //       //   message = "Congratulations! You've advanced to Medium Level.";
-        //       // } else if (currentDifficulty === "medium") {
-        //       //   nextDifficulty = "hard";
-        //       //   message = "Amazing! You've advanced to Hard Level.";
-        //       // }
-
-        //       setMessage("Amazing! You've advanced to Hard Level.");
-        //       setTimeout(() => {
-        //         gameMethods.updateGameData("currentDifficulty", "hard"); 
-        //         // setPoints(0); // Reset points
-        //         gameMethods.updateGameData("points", 0);
-        //         setMessage(""); // Clear congratulatory message
-        //         loadQuestion(); // ✅ Load new question after the message
-        //       }, 3000);
-
-        //       return 0; // Reset points
-        //     }
-        //   }
-
-        //   return newPoints;
-        // });
-
-        gameMethods.updatePoints(gameData.points, earnedPoints, playerPoints);
-        setMessage("✅ Good job!");
-        triggerConfetti();
-
-        setTimeout(() => {
-          setMessage(""); // Clear message before loading next question
-          loadQuestion(); // ✅ Load the next question
-        }, 3000);
-      } else {
-        setRetryCount((prev) => prev + 1);
-        setMessage("❌ Try again");
-        setTimeout(() => {
-          // setImageState("thinking");
-          setMessage(`Current Task: ${gameData.currentQuestion.question}`);
-        }, 3000);
-      }
-    },
-    [
-      correctAnswerResult,
-      gameData.currentQuestion,
-      gameData.currentDifficulty,
-      playerPoints,
-      startTime,
-      gameData.points,
-      hintsUsedForQuestion,
-    ]
-  );
-
   const executeQuery = async (userQuery, limitRows = false) => {
     try {
       const response = await fetch(`${apiUrl}/execute-query`, {
@@ -298,7 +195,6 @@ FROM table_name;`);
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: userQuery, limitRows }),
       });
-
       const data = await response.json();
 
       if (response.ok) {
@@ -309,10 +205,6 @@ FROM table_name;`);
       } else {
         setResult([{ error: "Syntax error or invalid query." }]);
         setMessage("❌ Try again");
-        // setTimeout(() => {
-
-        //   setMessage(`Current Task: ${currentQuestion.question}`);
-        // }, 3000);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -324,6 +216,7 @@ FROM table_name;`);
     }
   };
 
+  // The main function to handle user query submission
   const submitQuery = async (userQuery) => {
     const timestamp = new Date().toISOString();
     try {
@@ -337,8 +230,10 @@ FROM table_name;`);
 
       if (response.ok) {
         setResult(data.results);
-        setErrorHint(""); // Clear error when query is correct
-        checkAnswer(data.results);
+        setErrorHint(""); // Clear error if query is correct
+        checkAnswer(data.results, userQuery);
+
+        // Logging
         logToCSV({
           timestamp,
           action: "Query Submitted",
@@ -347,7 +242,7 @@ FROM table_name;`);
           status: "Success",
         });
       } else {
-        setErrorHint("Your query has a syntax error or is invalid."); // SET ERROR FOR AI ASSISTANT
+        setErrorHint("Your query has a syntax error or is invalid."); // For AI Assistant
         logToCSV({
           timestamp,
           action: "Query Submitted",
@@ -358,7 +253,7 @@ FROM table_name;`);
       }
     } catch (error) {
       console.error("Error:", error);
-      setErrorHint("An error occurred while connecting to the server."); // SET ERROR FOR AI ASSISTANT
+      setErrorHint("An error occurred while connecting to the server.");
       logToCSV({
         timestamp,
         action: "Query Submitted",
@@ -369,28 +264,132 @@ FROM table_name;`);
     }
   };
 
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
-  };
+  // ---------------------- Answer Checking ----------------------
+  const checkAnswer = useCallback(
+    (userResult, userQuery) => {
+      const correct =
+        JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
 
+      const questionDifficulty = gameData.currentQuestion.difficulty;
+      let earnedPoints = correct ? gameData.currentQuestion.points : 0;
+      // Deduct points for using hints
+      earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0);
+
+      if (correct) {
+        // Update local points
+        setPlayerPoints((prevPoints) => {
+          const updatedPoints = { ...prevPoints };
+          updatedPoints[questionDifficulty] = [
+            ...updatedPoints[questionDifficulty],
+            earnedPoints,
+          ];
+          return updatedPoints;
+        });
+
+        // Update global game points (if needed)
+        gameMethods.updatePoints(gameData.points, earnedPoints, playerPoints);
+
+        // Track stats for badges
+        updatePlayerStats(userQuery, hintsUsedForQuestion);
+
+        // Congratulate user
+        setMessage("✅ Good job!");
+        triggerConfetti();
+
+        // Evaluate & unlock badges
+        evaluateAndUnlockBadges();
+
+        // Move to next question after 3 seconds
+        setTimeout(() => {
+          setMessage(""); // Clear message
+          loadQuestion(); // Load next question
+        }, 3000);
+      } else {
+        // If incorrect
+        setRetryCount((prev) => prev + 1);
+        setMessage("❌ Try again");
+        setTimeout(() => {
+          setMessage(`Current Task: ${gameData.currentQuestion.question}`);
+        }, 3000);
+      }
+    },
+    [
+      correctAnswerResult,
+      gameData.currentQuestion,
+      gameData.currentDifficulty,
+      hintsUsedForQuestion,
+      gameData.points,
+      playerPoints,
+    ]
+  );
+
+  // ---------------------- Loading Questions ----------------------
+  const loadQuestion = useCallback(async () => {
+    setHintsUsedForQuestion(0);
+    setButtonsDisabled(true);
+
+    const questionList = questions[gameData.currentDifficulty];
+    const remainingQuestions = questionList.filter(
+      (q) => !usedQuestions[gameData.currentDifficulty].includes(q.question)
+    );
+
+    let selectedQuestion;
+    if (remainingQuestions.length > 0) {
+      selectedQuestion =
+        remainingQuestions[
+          Math.floor(Math.random() * remainingQuestions.length)
+        ];
+      setUsedQuestions((prev) => ({
+        ...prev,
+        [gameData.currentDifficulty]: [
+          ...prev[gameData.currentDifficulty],
+          selectedQuestion.question,
+        ],
+      }));
+    } else {
+      // Reset usedQuestions if all are used
+      setUsedQuestions((prev) => ({
+        ...prev,
+        [gameData.currentDifficulty]: [],
+      }));
+      selectedQuestion =
+        questionList[Math.floor(Math.random() * questionList.length)];
+    }
+
+    if (selectedQuestion) {
+      // Update context
+      gameMethods.updateGameData("currentQuestion", selectedQuestion);
+      setStartTime(Date.now());
+
+      // Get the correct result for comparison
+      const correctResult = await fetchCorrectAnswerResult(
+        selectedQuestion.answer
+      );
+      setExpectedOutput(correctResult ? correctResult.slice(0, 5) : []);
+      setCorrectAnswerResult(correctResult);
+
+      setMessage(`${selectedQuestion.question}`);
+      setTimeout(() => setButtonsDisabled(false), 2000);
+    }
+  }, [gameData.currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
+
+  // ---------------------- Effects ----------------------
   useEffect(() => {
+    // If user has advanced beyond 'easy', show a message then load next question
     if (gameData.currentDifficulty !== "easy") {
-      setMessage(`Congratulations! You've advanced to ${gameData.currentDifficulty} Level.`);
+      setMessage(
+        `Congratulations! You've advanced to ${gameData.currentDifficulty} Level.`
+      );
       setTimeout(() => {
-        setMessage(""); // Clear congratulatory message
-        loadQuestion(); // ✅ Load new question after the message
+        setMessage("");
+        loadQuestion();
       }, 3000);
       return;
     }
     loadQuestion();
   }, [gameData.currentDifficulty]);
 
-
-  // i dont know what this is doing ask manraj
+  // This checks if there's an ideal slope in localStorage
   useEffect(() => {
     if (!hasExecuted) {
       setHasExecuted(true);
@@ -405,16 +404,15 @@ FROM table_name;`);
     }
   }, [hasExecuted, loadQuestion, name]);
 
+  // Load user's existing badges from DB if present
   useEffect(() => {
-    if (user.badges)
+    if (user.badges) {
       setBadges(user.badges);
-  }, []);
+    }
+  }, [user.badges]);
 
-  // when user clicks in the badge, open a modal with the image, the name, and how to get it.
-  const [badgeState, setBadgeState] = useState({ open: false, name: "" });
-
+  // ---------------------- Badge Modal ----------------------
   const openBadgeModal = (badge) => {
-    console.log(badge);
     setBadgeState({ open: true, badgeData: badge });
   };
 
@@ -422,90 +420,44 @@ FROM table_name;`);
     setBadgeState({ open: false, badgeData: null });
   };
 
-  // ---------------------- query result ----------------------
-  const QueryResult = () => {
-    return (
-      <>
-        <h3>Query Result:</h3>
-        <div className="table-container">
-          {Array.isArray(result) ? (
-            <table>
-              <thead>
-                <tr>
-                  {result.length > 0 &&
-                    Object.keys(result[0]).map((key) => (
-                      <th key={key}>{key}</th>
-                    ))}
-                </tr>
-              </thead>
-              <tbody>
-                {result.map((row, index) => (
-                  <tr key={index}>
-                    {Object.values(row).map((value, i) => (
-                      <td key={i}>{value}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <pre>{result}</pre>
-          )}
-        </div>
-      </>
-    );
-  };
-
-  // ---------------------- tables ----------------------
-
-  const [isTableOn, setIsTableOn] = useState(false);
-  const [tableContent, setTableContent] = useState([]);
-  const checkTable = useRef(new Set());
-
+  // ---------------------- Table Toggling ----------------------
   const handleTableActions = () => {
-    isTableOn ? setIsTableOn(false) : setIsTableOn(true);
+    setIsTableOn((prev) => !prev);
   };
 
   const addTableContent = (table) => {
     if (checkTable.current.has(table.name)) return;
-
     checkTable.current.add(table.name);
-    setTableContent([...tableContent, table]);
+    setTableContent((prev) => [...prev, table]);
   };
 
   const removeTableContent = (table) => {
     if (!checkTable.current.has(table.name)) return;
-
     checkTable.current.delete(table.name);
-    setTableContent(tableContent.filter((t) => t.name !== table.name));
+    setTableContent((prev) => prev.filter((t) => t.name !== table.name));
   };
 
-  // ---------------------- Logout modal ----------------------
-  const [logoutModal, setLogoutModal] = useState(false);
-
+  // ---------------------- Logout Modal ----------------------
   const openLogoutModal = () => {
     setLogoutModal(true);
-  }
-
+  };
   const closeLogoutModal = () => {
     setLogoutModal(false);
-  }
+  };
 
-  // ---------------------- Pinned table animation ----------------------
+  // ---------------------- Pinned Table Animation ----------------------
   const [animationClass, setAnimationClass] = useState("");
-
   const handleAnimationClick = () => {
     setAnimationClass("jump-animation");
     setTimeout(() => {
       setAnimationClass("");
     }, 1000);
-  }
+  };
 
-
-  // ---------------------- SQLEditor return ----------------------
+  // ---------------------- Render ----------------------
   return (
     <div className="sql-editor-container">
-      {/* open this div as the modal for the badge */}
+      {/* Badge modal */}
       {badgeState.open && (
         <BadgeModal
           closeBadgeModal={closeBadgeModal}
@@ -513,27 +465,37 @@ FROM table_name;`);
         />
       )}
 
+      {/* Logout modal */}
       {logoutModal && <LogoutModal closeLogoutModal={closeLogoutModal} />}
+
+      {/* Left Sidebar */}
       <LeftSidebar
-        // imageState={imageState}
         message={message}
         handleTableContent={addTableContent}
         expectedOutput={expectedOutput}
         handleAnimationClick={handleAnimationClick}
       />
+
+      {/* Main Editor */}
       <div className="main-editor">
         <Editor
-          setQuery={(updatedQuery) => setQuery(updatedQuery)}
+          setQuery={setQuery}
           query={query}
           executeQuery={(content) => executeQuery(content, true)}
           submitQuery={submitQuery}
           buttonsDisabled={buttonsDisabled}
         />
+
+        {/* Result Section */}
         <div className="result">
           <div className="result-btns">
+            {/* Example log download button (commented) */}
             {/* <button onClick={downloadLogs}>Download Logs</button> */}
+
             <button onClick={() => setIsTableOn(false)}>Query Results</button>
-            <button onClick={handleTableActions} className={animationClass}>Pinned Tables</button>
+            <button onClick={handleTableActions} className={animationClass}>
+              Pinned Tables
+            </button>
           </div>
 
           {isTableOn ? (
@@ -542,14 +504,14 @@ FROM table_name;`);
               removeTable={removeTableContent}
             />
           ) : (
-            QueryResult()
+            <QueryResult result={result} />
           )}
         </div>
       </div>
 
+      {/* Right Sidebar */}
       <RightSidebar
         progress={gameData.points}
-        // setProgress={setPoints}
         query={query}
         taskDescription={gameData.currentQuestion}
         currentQuestionPoints={gameData.currentQuestion.points}
@@ -568,5 +530,49 @@ FROM table_name;`);
     </div>
   );
 }
+
+// ---------------------- Sub-Components ----------------------
+function QueryResult({ result }) {
+  return (
+    <>
+      <h3>Query Result:</h3>
+      <div className="table-container">
+        {Array.isArray(result) ? (
+          <table>
+            <thead>
+              <tr>
+                {result.length > 0 &&
+                  Object.keys(result[0]).map((key) => <th key={key}>{key}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {result.map((row, index) => (
+                <tr key={index}>
+                  {Object.values(row).map((value, i) => (
+                    <td key={i}>{value}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <pre>{result}</pre>
+        )}
+      </div>
+    </>
+  );
+}
+
+// Add prop types for QueryResult
+QueryResult.propTypes = {
+  result: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.object),
+    PropTypes.string,
+  ]).isRequired,
+};
+
+QueryResult.defaultProps = {
+  result: [],
+};
 
 export default SQLEditor;

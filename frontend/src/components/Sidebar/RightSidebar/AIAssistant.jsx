@@ -195,25 +195,6 @@ Hint:`;
 
   return (
     <div className="ai-assistant">
-      {/* <div className="assistant-header">
-        <FaRobot className="assistant-icon" />
-        <h4>SAGE</h4>
-      </div>
-      <div className="assistant-message">
-        <p>{message}</p>
-        <div className="assistant-buttons">
-          <button
-            className="hint-button"
-            onClick={handleHintSequence}
-          >
-            Ask SAGE
-          </button>
-          <button className="show-hints-button" onClick={handleToggleModal}>
-            SAGE's Wisdom Log
-          </button>
-        </div>
-      </div> */}
-
       <motion.div
         className="motion-div-avatar"
         animate={{ scale: [1, 1.1, 1] }}
@@ -235,10 +216,7 @@ Hint:`;
       </motion.div>
 
       <div className="assistant-buttons">
-        <button
-          className="hint-button"
-          onClick={handleHintSequence}
-        >
+        <button className="hint-button" onClick={handleHintSequence}>
           Ask SAGE
         </button>
         <button className="show-hints-button" onClick={handleToggleModal}>
