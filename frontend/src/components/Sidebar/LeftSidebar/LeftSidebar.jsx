@@ -74,36 +74,41 @@ const LeftSidebar = ({
       <h2 className="sidebar-heading">Tables</h2>
       <div className="left-sidebar-bottom">
         <ul>
-          {tables.map((table, index) => (
-            <li key={index}>
-              <div
-                onClick={() => handleToggle(table.name, index)}
-                className="table-name"
-              >
-                {expandedTable === table.name ? (
-                  <FaChevronDown />
-                ) : (
-                  <FaChevronRight />
-                )}
-                <span className="tables-headers">
-                  <div>{table.name}</div>
-                  {expandedTable === table.name && (
-                    <div className="tooltip-container">
-                      <FontAwesomeIcon
-                        icon={faThumbtack}
-                        className="pin-icon"
-                        onClick={() => {
-                          handleAnimationClick();
-                          handleTableContent(table);
-                        }}
-                      />
-                      <span className="tooltip">Pin this table</span>
-                    </div>
-                  )}
-                </span>
-              </div>
-              {expandedTable === table.name && (
-                <div className="table-columns">
+          {tables.map((table, index) => {
+            const isExpanded = expandedTable === table.name;
+
+            return (
+              <li key={index}>
+                <div
+                  onClick={() => handleToggle(table.name, index)}
+                  className="table-name"
+                >
+                  {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
+                  <span className="tables-headers">
+                    <div>{table.name}</div>
+                    {isExpanded && (
+                      <div className="tooltip-container">
+                        <FontAwesomeIcon
+                          icon={faThumbtack}
+                          className="pin-icon"
+                          onClick={() => {
+                            handleAnimationClick();
+                            handleTableContent(table);
+                          }}
+                        />
+                        <span className="tooltip">Pin this table</span>
+                      </div>
+                    )}
+                  </span>
+                </div>
+
+                {/* 
+        Always render this div, 
+        but toggle "expanded" class based on isExpanded 
+      */}
+                <div
+                  className={`table-columns ${isExpanded ? "expanded" : ""}`}
+                >
                   <ul>
                     {table.columns.map((column, idx) => (
                       <li key={idx} className="column">
@@ -112,9 +117,9 @@ const LeftSidebar = ({
                     ))}
                   </ul>
                 </div>
-              )}
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>

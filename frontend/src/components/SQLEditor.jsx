@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import confetti from "canvas-confetti";
-import axios from "axios";
-import React from "react";
 import PropTypes from "prop-types";
 
 import LeftSidebar from "./Sidebar/LeftSidebar/LeftSidebar";

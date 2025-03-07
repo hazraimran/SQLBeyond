@@ -188,10 +188,17 @@
 .right-sidebar-header button {
   width: 100px;
   background-color: #d9534f;
+
+  /* This ensures any change to transform happens smoothly over 0.2s */
+  transition: transform 0.2s ease-in-out;
 }
 
 .right-sidebar-header button:hover {
+  /* transform: scale(1.2); */
+
+  cursor: pointer;
   transform: scale(1.2);
+  z-index: 1;
 }
 
 /* .achievements h3 {
@@ -213,6 +220,9 @@
 .badge-container {
   width: 75px;
   height: 75px;
+
+  /* This ensures any change to transform happens smoothly over 0.2s */
+  transition: transform 0.2s ease-in-out;
 }
 
 .badge-container:hover {
