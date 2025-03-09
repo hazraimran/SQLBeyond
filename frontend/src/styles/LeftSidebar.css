@@ -96,6 +96,7 @@
   height: 50%;
   text-align: center;
   border-bottom: 2px solid #ddd;
+  background-color: #f9f9f9;
 }
 
 .message-container {

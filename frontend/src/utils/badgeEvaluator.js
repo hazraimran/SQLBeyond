@@ -1,6 +1,6 @@
 // frontend/src/utils/badgeEvaluator.js
 
-const TOTAL_TASKS_COUNT = 50; // Update based on your actual total number of tasks
+const TOTAL_TASKS_COUNT = 2; // Update based on your actual total number of tasks
 
 const evaluateBadges = ({
   playerPoints,
