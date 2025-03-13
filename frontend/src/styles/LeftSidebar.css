@@ -251,7 +251,7 @@
 
 /* 2) Expanded state */
 .table-columns.expanded {
-  max-height: 200px; /* Or a larger value if needed */
+  max-height: 100%; /*Or a larger value if needed */
   border-color: #007bff;
   padding: 10px;
   background-color: #dfecfa; /* Or any color you like */

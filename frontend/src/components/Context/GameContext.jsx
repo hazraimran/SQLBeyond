@@ -7,40 +7,8 @@ const GameContext = createContext();
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const GameProvider = ({ children }) => {
-    // const [result, setResult] = useState([]); // related to the results of the "run" or "submit"
-    // const [correctAnswerResult, setCorrectAnswerResult] = useState(null);
-    // const [message, setMessage] = useState("");
-    // const [buttonsDisabled, setButtonsDisabled] = useState(true);
-
-    // ---------------------------------------
-
-
-    // const [currentQuestion, setCurrentQuestion] = useState({
-    //     question: "",
-    //     answer: "",
-    //     points: 0,
-    // });
-    // const [currentDifficulty, setCurrentDifficulty] = useState(user.currentLevel ? user.currentLevel : "easy");
-    // const [startTime, setStartTime] = useState(null);
-    // const [points, setPoints] = useState(0);
-    // const [badges, setBadges] = useState([]);
-    // const [retryCount, setRetryCount] = useState(0);
-    // const [usedQuestions, setUsedQuestions] = useState({
-    //     easy: [],
-    //     medium: [],
-    //     hard: [],
-    // });
-    // const [playerPoints, setPlayerPoints] = useState({
-    //     easy: [],
-    //     medium: [],
-    //     hard: [],
-    // });
-
-
     const [dynamicIdealPoints, setDynamicIdealPoints] = useState([10, 50, 100]);
     const [hasExecuted, setHasExecuted] = useState(false);
-
-    // ----------------------------------------
 
     const [gameData, setGameData] = useState({
         currentDifficulty: "easy", // completed
@@ -76,12 +44,32 @@ const GameProvider = ({ children }) => {
         }));
     };
 
+    const updateGameDataObjects = (key, value) => {
+        setGameData((prev) => ({
+            ...prev,
+            [key]: {
+                ...prev[key],
+                [gameData.currentDifficulty]: [...prev[key][gameData.currentDifficulty], value]
+            }
+        }));
+    };
+
+    const resetUsedQuestions = () => {
+        setGameData((prev) => ({
+            ...prev,
+            usedQuestions: {
+                ...prev.usedQuestions,
+                [gameData.currentDifficulty]: []
+            }
+        }));
+    }
+
     // for now playerPoints is passed as a parameter, but after it will be from the gameData
-    const updatePoints = (prevPoints, earnedPoints, playerPoints) => {
+    const updatePoints = (prevPoints, earnedPoints) => {
         const newPoints = prevPoints + earnedPoints;
         if (gameData.currentDifficulty == "easy" 
             && newPoints >= 100
-            && playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 4
+            && gameData.playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 4
         ){
             updateGameData("currentDifficulty", "medium");
             updateGameData("points", 0);
@@ -89,7 +77,7 @@ const GameProvider = ({ children }) => {
         else if (gameData.currentDifficulty == "medium" 
             && newPoints >= 120
             // this part doesn't seem to be correct
-            && playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 3
+            && gameData.playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 3
         ){
             updateGameData("currentDifficulty", "hard");
             updateGameData("points", 0);
@@ -98,18 +86,6 @@ const GameProvider = ({ children }) => {
             updateGameData("points", newPoints);
         }   
     };
-
-    // const saveUserLevel = (level) => {
-    //     try{
-    //       axios.post(`${apiUrl}/game/current-level`, {
-    //         username: user.username,
-    //         currentLevel: level
-    //       }, { withCredentials: true });
-    //     }
-    //     catch(err){
-    //       console.log(err);
-    //     }
-    // }
 
     // useEffect(() => {
     //     const fetchGameData = async () => {
@@ -128,8 +104,10 @@ const GameProvider = ({ children }) => {
     //     fetchGameData();
     // }, []);
 
+    console.log(gameData);
+
     return (
-        <GameContext.Provider value={{ gameData, loading, error, updateGameData, updatePoints }}>
+        <GameContext.Provider value={{ gameData, loading, error, updateGameData, updatePoints, updateGameDataObjects, resetUsedQuestions }}>
             {children}
         </GameContext.Provider>
     );

@@ -15,8 +15,8 @@ import { useGame } from "./Context/GameContext";
 
 import badgesData from "../data/badges";
 // For test only:
-import questions from "../data/oldQuestions-backup";
-// import questions from "../data/questions";
+// import questions from "../data/oldQuestions-backup";
+import questions from "../data/questions";
 
 import logToCSV from "../utils/logger";
 import evaluateBadges from "../utils/badgeEvaluator"; // <-- import the badge evaluator
@@ -46,27 +46,27 @@ FROM table_name;`
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
 
   const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
-  const [retryCount, setRetryCount] = useState(0);
+  // const [retryCount, setRetryCount] = useState(0);
 
   // const [startTime, setStartTime] = useState(null);
   // const [points, setPoints] = useState(0);
 
-  const [badges, setBadges] = useState([]);
+  // const [badges, setBadges] = useState([]);
   const [badgeState, setBadgeState] = useState({
     open: false,
     badgeData: null,
   });
 
-  const [usedQuestions, setUsedQuestions] = useState({
-    easy: [],
-    medium: [],
-    hard: [],
-  });
-  const [playerPoints, setPlayerPoints] = useState({
-    easy: [],
-    medium: [],
-    hard: [],
-  });
+  // const [usedQuestions, setUsedQuestions] = useState({
+  //   easy: [],
+  //   medium: [],
+  //   hard: [],
+  // });
+  // const [playerPoints, setPlayerPoints] = useState({
+  //   easy: [],
+  //   medium: [],
+  //   hard: [],
+  // });
   const [dynamicIdealPoints, setDynamicIdealPoints] = useState([10, 50, 100]);
   const [hasExecuted, setHasExecuted] = useState(false);
 
@@ -97,8 +97,8 @@ FROM table_name;`
   const detectLogicUsage = (queryText) => /\b(AND|OR|NOT)\b/i.test(queryText);
 
   const calculateCompletionTime = () => {
-    if (!startTime) return 999999; // fallback if not set
-    return Math.floor((Date.now() - startTime) / 1000); // in seconds
+    if (!gameData.startTime) return 999999; // fallback if not set
+    return Math.floor((Date.now() - gameData.startTime) / 1000); // in seconds
   };
 
   // Update local playerStats after a correct answer
@@ -123,14 +123,14 @@ FROM table_name;`
   // Evaluate which badges should unlock, then open modals for new ones
   const evaluateAndUnlockBadges = () => {
     const completedTasks = [
-      ...usedQuestions.easy,
-      ...usedQuestions.medium,
-      ...usedQuestions.hard,
+      ...gameData.usedQuestions.easy,
+      ...gameData.usedQuestions.medium,
+      ...gameData.usedQuestions.hard,
     ];
 
     const unlockedBadges = evaluateBadges({
-      playerPoints,
-      retries: retryCount,
+      playerPoints: gameData.playerPoints,
+      retries: gameData.retryCount,
       hintsUsedForQuestion,
       completedTasks,
       currentLevel: gameData.currentDifficulty,
@@ -144,14 +144,13 @@ FROM table_name;`
     });
 
     // Filter out badges the user already has
-    const newBadges = unlockedBadges.filter((b) => !badges.includes(b));
+    const newBadges = unlockedBadges.filter((b) => !gameData.badges.includes(b));
+
+    console.log(newBadges);
 
     if (newBadges.length > 0) {
       // Add to local state
       setBadges((prev) => [...prev, ...newBadges]);
-
-      // Optionally save to user in DB
-      // saveUserData({ ...user, badges: [...badges, ...newBadges] });
 
       // Trigger confetti or show modal for each new badge
       newBadges.forEach((badgeName) => {
@@ -276,17 +275,19 @@ FROM table_name;`
 
       if (correct) {
         // Update local points
-        setPlayerPoints((prevPoints) => {
-          const updatedPoints = { ...prevPoints };
-          updatedPoints[questionDifficulty] = [
-            ...updatedPoints[questionDifficulty],
-            earnedPoints,
-          ];
-          return updatedPoints;
-        });
+        // setPlayerPoints((prevPoints) => {
+        //   const updatedPoints = { ...prevPoints };
+        //   updatedPoints[questionDifficulty] = [
+        //     ...updatedPoints[questionDifficulty],
+        //     earnedPoints,
+        //   ];
+        //   return updatedPoints;
+        // });
+
+        gameMethods.updateGameDataObjects('playerPoints', earnedPoints);
 
         // Update global game points (if needed)
-        gameMethods.updatePoints(gameData.points, earnedPoints, playerPoints);
+        gameMethods.updatePoints(gameData.points, earnedPoints);
 
         // Track stats for badges
         updatePlayerStats(userQuery, hintsUsedForQuestion);
@@ -296,7 +297,7 @@ FROM table_name;`
         triggerConfetti();
 
         // Evaluate & unlock badges
-        evaluateAndUnlockBadges();
+        // evaluateAndUnlockBadges();
 
         // Move to next question after 3 seconds
         setTimeout(() => {
@@ -305,7 +306,8 @@ FROM table_name;`
         }, 3000);
       } else {
         // If incorrect
-        setRetryCount((prev) => prev + 1);
+        // setRetryCount((prev) => prev + 1);
+        gameMethods.updateGameData("retryCount", (gameData.retryCount + 1));
         setMessage("❌ Try again");
         setTimeout(() => {
           setMessage(`Current Task: ${gameData.currentQuestion.question}`);
@@ -318,7 +320,7 @@ FROM table_name;`
       gameData.currentDifficulty,
       hintsUsedForQuestion,
       gameData.points,
-      playerPoints,
+      gameData.playerPoints,
     ]
   );
 
@@ -329,36 +331,42 @@ FROM table_name;`
 
     const questionList = questions[gameData.currentDifficulty];
     const remainingQuestions = questionList.filter(
-      (q) => !usedQuestions[gameData.currentDifficulty].includes(q.question)
+      (q) => !gameData.usedQuestions[gameData.currentDifficulty].includes(q.question)
     );
+
+    console.log(gameData.usedQuestions);
 
     let selectedQuestion;
     if (remainingQuestions.length > 0) {
       selectedQuestion =
         remainingQuestions[
-          Math.floor(Math.random() * remainingQuestions.length)
+        Math.floor(Math.random() * remainingQuestions.length)
         ];
-      setUsedQuestions((prev) => ({
-        ...prev,
-        [gameData.currentDifficulty]: [
-          ...prev[gameData.currentDifficulty],
-          selectedQuestion.question,
-        ],
-      }));
+
+      gameMethods.updateGameDataObjects("usedQuestions", selectedQuestion.question);
+      // setUsedQuestions((prev) => ({
+      //   ...prev,
+      //   [gameData.currentDifficulty]: [
+      //     ...prev[gameData.currentDifficulty],
+      //     selectedQuestion.question,
+      //   ],
+      // }));
     } else {
       // Reset usedQuestions if all are used
-      setUsedQuestions((prev) => ({
-        ...prev,
-        [gameData.currentDifficulty]: [],
-      }));
-      selectedQuestion =
-        questionList[Math.floor(Math.random() * questionList.length)];
+      // setUsedQuestions((prev) => ({
+      //   ...prev,
+      //   [gameData.currentDifficulty]: [],
+      // }));
+      gameMethods.resetUsedQuestions();
+      selectedQuestion = questionList[Math.floor(Math.random() * questionList.length)];
     }
 
     if (selectedQuestion) {
       // Update context
       gameMethods.updateGameData("currentQuestion", selectedQuestion);
-      setStartTime(Date.now());
+
+      gameMethods.updateGameData("startTime", Date.now());
+      // setStartTime(Date.now());
 
       // Get the correct result for comparison
       const correctResult = await fetchCorrectAnswerResult(
@@ -367,10 +375,10 @@ FROM table_name;`
       setExpectedOutput(correctResult ? correctResult.slice(0, 5) : []);
       setCorrectAnswerResult(correctResult);
 
-      setMessage(`${selectedQuestion.question}`);
+      setMessage(`${gameData.currentQuestion.question}`);
       setTimeout(() => setButtonsDisabled(false), 2000);
     }
-  }, [gameData.currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
+  }, [gameData.currentDifficulty, fetchCorrectAnswerResult, gameData.usedQuestions]);
 
   // ---------------------- Effects ----------------------
   useEffect(() => {
@@ -402,10 +410,6 @@ FROM table_name;`
       }
     }
   }, [hasExecuted, loadQuestion, name]);
-
-  // useEffect(() => {
-  //   if (gameData.badges) setBadges(gameData.badges);
-  // }, []);
 
   // ---------------------- Badge Modal ----------------------
   const openBadgeModal = (badge) => {
@@ -515,7 +519,7 @@ FROM table_name;`
         badges={gameData.badges}
         badgesData={badgesData}
         openBadgeModal={openBadgeModal}
-        pointsData={playerPoints}
+        pointsData={gameData.playerPoints}
         idealPoints={dynamicIdealPoints}
         errorHint={errorHint}
         hintsUsedForQuestion={hintsUsedForQuestion}
