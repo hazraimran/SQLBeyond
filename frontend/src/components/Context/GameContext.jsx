@@ -50,9 +50,9 @@ const GameProvider = ({ children }) => {
             points: 0,
         }, // completed
         points: 0, // completed
-        startTime: 0,
-        badges: [],
-        retryCount: 0,
+        startTime: 0, // ask if it's been used
+        badges: ["joinExpert", "quickSolver"], // it's working, just gotta add it to user properly
+        retryCount: 0, // completed
         usedQuestions: {
             easy: [],
             medium: [],

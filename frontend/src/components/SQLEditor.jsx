@@ -55,11 +55,11 @@ FROM table_name;`);
 
   const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
 
-  const [startTime, setStartTime] = useState(null);
+  // const [startTime, setStartTime] = useState(null);
   // const [points, setPoints] = useState(0);
 
   //yes
-  const [badges, setBadges] = useState([]);
+  // const [badges, setBadges] = useState([]);
   const [retryCount, setRetryCount] = useState(0);
 
   //yes
@@ -113,7 +113,8 @@ FROM table_name;`);
     // here
     const questionList = questions[gameData.currentDifficulty];
     const remainingQuestions = questionList.filter(
-      (q) => !usedQuestions[gameData.currentDifficulty].includes(q.question)
+      //here usedQuestions
+      (q) => !gameData.usedQuestions[gameData.currentDifficulty].includes(q.question)
     );
 
     let selectedQuestion;
@@ -143,7 +144,8 @@ FROM table_name;`);
 
     if (selectedQuestion) {
       gameMethods.updateGameData("currentQuestion", selectedQuestion)
-      setStartTime(Date.now());
+      // think about this one
+      // setStartTime(Date.now());
 
       // make a request to the database and save the time 
       // create a method in GameContext to setStartTime
@@ -157,7 +159,8 @@ FROM table_name;`);
       setMessage(`${selectedQuestion.question}`);
       setTimeout(() => setButtonsDisabled(false), 2000);
     }
-  }, [gameData.currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
+  }, [gameData.currentDifficulty, fetchCorrectAnswerResult, gameData.usedQuestions]);
+  //here usedQuestions
 
   const saveUserData = async (data) => {
     // console.log("save user data function", data);
@@ -272,7 +275,8 @@ FROM table_name;`);
           loadQuestion(); // ✅ Load the next question
         }, 3000);
       } else {
-        setRetryCount((prev) => prev + 1);
+        // setRetryCount((prev) => prev + 1);
+        gameMethods.updateGameData("retryCount", (gameData.retryCount + 1));
         setMessage("❌ Try again");
         setTimeout(() => {
           // setImageState("thinking");
@@ -285,7 +289,7 @@ FROM table_name;`);
       gameData.currentQuestion,
       gameData.currentDifficulty,
       playerPoints,
-      startTime,
+      // startTime,
       gameData.points,
       hintsUsedForQuestion,
     ]
@@ -405,10 +409,9 @@ FROM table_name;`);
     }
   }, [hasExecuted, loadQuestion, name]);
 
-  useEffect(() => {
-    if (user.badges)
-      setBadges(user.badges);
-  }, []);
+  // useEffect(() => {
+  //   if (gameData.badges) setBadges(gameData.badges);
+  // }, []);
 
   // when user clicks in the badge, open a modal with the image, the name, and how to get it.
   const [badgeState, setBadgeState] = useState({ open: false, name: "" });
@@ -553,8 +556,8 @@ FROM table_name;`);
         query={query}
         taskDescription={gameData.currentQuestion}
         currentQuestionPoints={gameData.currentQuestion.points}
-        retries={retryCount}
-        badges={badges}
+        retries={gameData.retryCount}
+        badges={gameData.badges}
         badgesData={badgesData}
         openBadgeModal={openBadgeModal}
         pointsData={playerPoints}
