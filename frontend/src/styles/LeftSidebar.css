@@ -30,7 +30,6 @@
   margin: 0;
 }
 
-
 .table-name {
   font-weight: bold;
   cursor: pointer;
@@ -97,6 +96,7 @@
   height: 50%;
   text-align: center;
   border-bottom: 2px solid #ddd;
+  background-color: #f9f9f9;
 }
 
 .message-container {
@@ -117,7 +117,7 @@
   max-width: 90%;
 }
 
-.message  p span{
+.message p span {
   font-weight: 300;
 }
 
@@ -234,4 +234,39 @@
 
 .sample-table tbody tr:hover {
   background-color: #f9f9f9;
+}
+
+/* Existing styles from your snippet remain the same... */
+
+/* 1) Base collapsed state */
+.table-columns {
+  max-height: 0; /* Start fully collapsed */
+  overflow: hidden; /* Hide content when collapsed */
+  transition: max-height 0.3s ease, padding 0.3s ease, border-color 0.3s ease;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  margin: 0 1rem; /* A little horizontal margin */
+  padding: 0; /* No padding when collapsed */
+}
+
+/* 2) Expanded state */
+.table-columns.expanded {
+  max-height: 200px; /* Or a larger value if needed */
+  border-color: #007bff;
+  padding: 10px;
+  background-color: #dfecfa; /* Or any color you like */
+}
+
+/* Optional: refine the UL styling inside the expanded section */
+.table-columns ul {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none; /* Hide bullet points */
+}
+
+/* If you want each column to have a slight hover effect */
+.table-columns ul li:hover {
+  background-color: #eaf3ff; /* A lighter highlight */
 }

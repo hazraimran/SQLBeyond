@@ -16,11 +16,11 @@ body {
   background: #ffffff; /* White background for contrast */
   border-radius: 10px;
   margin-top: 100px;
-  border: 1px solid #d3d3d3; 
+  border: 1px solid #d3d3d3;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-.quiz-small-container{
+.quiz-small-container {
   padding: 30px 60px;
   display: flex;
   flex-direction: column;
@@ -71,18 +71,18 @@ body {
 }
 
 .quiz-container ul .selected-answer {
-  background: #3B82F6; /* Dusty Rose for selected answer */
+  background: #3b82f6; /* Dusty Rose for selected answer */
   border: 1px solid #708090; /* Slate Gray */
   transform: scale(1.05); /* Slightly enlarge when selected */
   transition: background 0.3s ease, transform 0.3s ease; /* Ensure selected state has the same transition */
 }
 
-.quiz-container ul .selected-answer:hover{
-  background-color: #2563EB;
+.quiz-container ul .selected-answer:hover {
+  background-color: #2563eb;
 }
 
 .quiz-container button {
-  background: #22C55E; /* Soft Olive Green */
+  background: #22c55e; /* Soft Olive Green */
   border-radius: 9px;
   font-size: 18px;
   color: #ffffff; /* White text */
@@ -165,7 +165,7 @@ li {
   text-align: center;
 }
 
-.quest-result{
+.quest-result {
   padding: 30px !important;
   border-radius: 10px !important;
 }
@@ -187,4 +187,3 @@ button {
 button:hover {
   background-color: #45a049;
 }
-

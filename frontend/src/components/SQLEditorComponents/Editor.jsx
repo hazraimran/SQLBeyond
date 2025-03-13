@@ -17,7 +17,6 @@ const Editor = ({
     <div className="editor-container">
       <div className="editor-header">
         <div className="buttons">
-
           <div className="tooltip-container-editor">
             <button
               className="clear button"
@@ -46,7 +45,6 @@ const Editor = ({
             <span className="tooltip">Run the query (test)!</span>
           </div>
 
-
           {/* little bug here, when user clicks submit it doesn't sometimes */}
           <div className="tooltip-container-editor">
             <button
@@ -64,7 +62,7 @@ const Editor = ({
           </div>
         </div>
       </div>
-      <div className="editor" >
+      <div className="editor">
         <CodeMirror
           value={content}
           extensions={[sql()]}
@@ -72,6 +70,8 @@ const Editor = ({
             setContent(value);
             setQuery(value); // Update the parent query state in real-time
           }}
+          style={{ height: "100%" }}
+          height="100%"
         />
       </div>
     </div>

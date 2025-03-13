@@ -34,7 +34,7 @@ const RightSidebar = ({
   }, [currentQuestionPoints, setHintsUsedForQuestion, taskDescription]);
 
   const handleLogout = () => {
-    openLogoutModal(true)
+    openLogoutModal(true);
   };
 
   const handleUseHint = () => {
@@ -68,23 +68,12 @@ const RightSidebar = ({
 
         <div className="points-ps">
           <p>
-            <strong>Current Points:</strong> <br/> {progress} / 100
+            <strong>Current Points:</strong> <br /> {progress} / 100
           </p>
           <p>
             <strong>Points for this Question:</strong> {adjustedQuestionPoints}
           </p>
         </div>
-        {/* <div className="progress-bar-container">
-          <div className="progress-bar">
-            <div
-              className="progress-bar-fill"
-              style={{
-                width: displayFullProgress ? "100%" : `${progressPercentage}%`,
-                backgroundColor: progress >= 100 ? "green" : "#4caf50",
-              }}
-            ></div>
-          </div>
-        </div> */}
       </div>
 
       {/* Achievements */}
@@ -95,8 +84,9 @@ const RightSidebar = ({
             return (
               <div
                 key={badge.name}
-                className={`badge-container ${badges.includes(badge.name) ? "" : "gray-image"
-                  }`}
+                className={`badge-container ${
+                  badges.includes(badge.name) ? "" : "gray-image"
+                }`}
                 onClick={() => openBadgeModal(badge)}
               >
                 <img src={badge.badge} alt={badge.name} />
@@ -128,7 +118,6 @@ const RightSidebar = ({
 
 RightSidebar.propTypes = {
   progress: PropTypes.number.isRequired,
-  // setProgress: PropTypes.func.isRequired,
   query: PropTypes.string.isRequired,
   taskDescription: PropTypes.object.isRequired,
   currentQuestionPoints: PropTypes.number.isRequired,
