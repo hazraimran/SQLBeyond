@@ -196,10 +196,10 @@ FROM table_name;`
       console.error("Error:", error);
       setResult([{ error: "Error connecting to server." }]);
       setMessage("❌ Try again");
-      setTimeout(() => {
-        setMessage(`Current Task: ${gameData.currentQuestion.question}`);
-      }, 3000);
     }
+    setTimeout(() => {
+      setMessage(`Current Task: ${gameData.currentQuestion.question}`);
+    }, 3000);
   };
 
   // The main function to handle user query submission
@@ -350,7 +350,7 @@ FROM table_name;`
       setCorrectAnswerResult(correctResult);
 
       setMessage(`${gameData.currentQuestion.question}`);
-      setTimeout(() => setButtonsDisabled(false), 2000);
+      setTimeout(() => setButtonsDisabled(false), 1000);
     }
   }, [gameData.currentDifficulty, fetchCorrectAnswerResult, gameData.usedQuestions]);
 
@@ -385,9 +385,13 @@ FROM table_name;`
     }
   }, [hasExecuted, loadQuestion, name]);
 
+  // this use effect will be setting up the initial values for the states in this component
+  // it will be the first one to run when loaded or reloaded
+  // some other variables might have to be set here as well with the values coming from gameData (user data from the DB)
   useEffect(() => {
     if(gameData){
       setMessage(gameData.currentQuestion.question);
+      setTimeout(() => setButtonsDisabled(false), 1000);
     }
   }, []);
 

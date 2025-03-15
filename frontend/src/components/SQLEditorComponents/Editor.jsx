@@ -25,6 +25,7 @@ const Editor = ({
             <button
               className="clear button"
               onClick={() => {
+                console.log("clear click")
                 setQuery("");
                 setContent("");
               }}
