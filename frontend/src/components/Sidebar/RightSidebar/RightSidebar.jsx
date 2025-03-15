@@ -18,7 +18,7 @@ const RightSidebar = ({
   user,
   openLogoutModal,
   gameData,
-  gameMethods
+  gameMethods,
 }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
 
@@ -27,7 +27,10 @@ const RightSidebar = ({
   };
 
   const handleUseHint = () => {
-    gameMethods.updateGameData("hintsUsedForQuestion", (gameData.hintsUsedForQuestion + 1));
+    gameMethods.updateGameData(
+      "hintsUsedForQuestion",
+      gameData.hintsUsedForQuestion + 1
+    );
     console.log("Hint used! Points deducted.");
   };
 
@@ -50,7 +53,7 @@ const RightSidebar = ({
       {/* Points and Achievements */}
       <div className="points-system">
         <span className="right-sidebar-header">
-          <h3>Hi, {`${user.firstName} ${user.lastName}`}</h3>
+          <h2>Hi, {`${user.firstName} ${user.lastName}`}</h2>
           <button onClick={handleLogout}>Logout</button>
         </span>
 

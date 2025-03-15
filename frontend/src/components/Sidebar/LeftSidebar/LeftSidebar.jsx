@@ -11,23 +11,27 @@ const LeftSidebar = ({
   handleTableContent,
   expectedOutput,
   handleAnimationClick,
-  gameData
+  gameData,
 }) => {
   const [expandedTable, setExpandedTable] = useState(null);
 
-  // console.log(message);
-
-  const adjustedPoints = gameData.currentQuestion.points - gameData.hintsUsedForQuestion;
+  // Safely compute adjustedPoints with optional chaining:
+  // If gameData or currentQuestion is undefined, fallback to 0
+  const adjustedPoints =
+    (gameData?.currentQuestion?.points ?? 0) -
+    (gameData?.hintsUsedForQuestion ?? 0);
 
   const handleToggle = (tableName, index) => {
     setExpandedTable(expandedTable === tableName ? null : tableName);
   };
+
   return (
     <div className="left-sidebar">
       <div className="left-sidebar-top">
         <div className="message-container">
           {message && (
             <div className="message">
+              {/* Now "adjustedPoints" won't crash if gameData is missing */}
               <p>
                 Points for this question: <span>{adjustedPoints}</span>
               </p>
@@ -100,10 +104,6 @@ const LeftSidebar = ({
                   </span>
                 </div>
 
-                {/* 
-        Always render this div, 
-        but toggle "expanded" class based on isExpanded 
-      */}
                 <div
                   className={`table-columns ${isExpanded ? "expanded" : ""}`}
                 >
@@ -125,15 +125,11 @@ const LeftSidebar = ({
 };
 
 LeftSidebar.propTypes = {
-  // imageState: PropTypes.string.isRequired,
   message: PropTypes.string,
   handleTableContent: PropTypes.func.isRequired,
   expectedOutput: PropTypes.array,
-  // currentQuestion: PropTypes.shape({
-  //   question: PropTypes.string.isRequired,
-  //   difficulty: PropTypes.string.isRequired,
-  //   expectedOutput: PropTypes.array, // Array of objects representing expected output
-  // }).isRequired,
+  handleAnimationClick: PropTypes.func.isRequired,
+  gameData: PropTypes.object, // The shape containing currentQuestion, hintsUsedForQuestion, etc.
 };
 
 export default LeftSidebar;

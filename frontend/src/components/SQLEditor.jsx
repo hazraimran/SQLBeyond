@@ -25,14 +25,29 @@ import "../styles/SQLEditor.css";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
+/**
+ * Helper function to compare two result sets ignoring row order.
+ * Sorts both arrays by their JSON string so row order doesn't matter.
+ */
+function compareResultSets(userRows, correctRows) {
+  if (!Array.isArray(userRows) || !Array.isArray(correctRows)) return false;
+  if (userRows.length !== correctRows.length) return false;
+
+  const sortedUser = [...userRows].sort((a, b) =>
+    JSON.stringify(a).localeCompare(JSON.stringify(b))
+  );
+  const sortedCorrect = [...correctRows].sort((a, b) =>
+    JSON.stringify(a).localeCompare(JSON.stringify(b))
+  );
+
+  return JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
+}
+
 function SQLEditor() {
   const location = useLocation();
   const user = useAuth().user;
   const gameMethods = useGame();
   const gameData = useGame().gameData;
-  // console.log(gameData);
-
-  // console.log(user);
 
   // Default name from user data
   const { name = `${user.firstName} ${user.lastName}` } = location.state || {};
@@ -49,12 +64,26 @@ FROM table_name;`
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
 
   const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
 
+  const [startTime, setStartTime] = useState(null);
+
+  const [badges, setBadges] = useState([]);
   const [badgeState, setBadgeState] = useState({
     open: false,
     badgeData: null,
   });
 
+  const [usedQuestions, setUsedQuestions] = useState({
+    easy: [],
+    medium: [],
+    hard: [],
+  });
+  const [playerPoints, setPlayerPoints] = useState({
+    easy: [],
+    medium: [],
+    hard: [],
+  });
   const [dynamicIdealPoints, setDynamicIdealPoints] = useState([10, 50, 100]);
   const [hasExecuted, setHasExecuted] = useState(false);
 
@@ -85,8 +114,8 @@ FROM table_name;`
   const detectLogicUsage = (queryText) => /\b(AND|OR|NOT)\b/i.test(queryText);
 
   const calculateCompletionTime = () => {
-    if (!gameData.startTime) return 999999; // fallback if not set
-    return Math.floor((Date.now() - gameData.startTime) / 1000); // in seconds
+    if (!startTime) return 999999; // fallback if not set
+    return Math.floor((Date.now() - startTime) / 1000); // in seconds
   };
 
   // Update local playerStats after a correct answer
@@ -111,15 +140,15 @@ FROM table_name;`
   // Evaluate which badges should unlock, then open modals for new ones
   const evaluateAndUnlockBadges = () => {
     const completedTasks = [
-      ...gameData.usedQuestions.easy,
-      ...gameData.usedQuestions.medium,
-      ...gameData.usedQuestions.hard,
+      ...usedQuestions.easy,
+      ...usedQuestions.medium,
+      ...usedQuestions.hard,
     ];
 
     const unlockedBadges = evaluateBadges({
-      playerPoints: gameData.playerPoints,
-      retries: gameData.retryCount,
-      hintsUsedForQuestion: gameData.hintsUsedForQuestion,
+      playerPoints,
+      retries: retryCount,
+      hintsUsedForQuestion,
       completedTasks,
       currentLevel: gameData.currentDifficulty,
       currentTask: gameData.currentQuestion,
@@ -132,13 +161,14 @@ FROM table_name;`
     });
 
     // Filter out badges the user already has
-    const newBadges = unlockedBadges.filter((b) => !gameData.badges.includes(b));
-
-    // console.log(newBadges);
+    const newBadges = unlockedBadges.filter((b) => !badges.includes(b));
 
     if (newBadges.length > 0) {
       // Add to local state
       setBadges((prev) => [...prev, ...newBadges]);
+
+      // Optionally save to user in DB
+      // saveUserData({ ...user, badges: [...badges, ...newBadges] });
 
       // Trigger confetti or show modal for each new badge
       newBadges.forEach((badgeName) => {
@@ -196,13 +226,12 @@ FROM table_name;`
       console.error("Error:", error);
       setResult([{ error: "Error connecting to server." }]);
       setMessage("❌ Try again");
+      setTimeout(() => {
+        setMessage(`Current Task: ${gameData.currentQuestion.question}`);
+      }, 3000);
     }
-    setTimeout(() => {
-      setMessage(`Current Task: ${gameData.currentQuestion.question}`);
-    }, 3000);
   };
 
-  // The main function to handle user query submission
   const submitQuery = async (userQuery) => {
     const timestamp = new Date().toISOString();
     try {
@@ -228,7 +257,7 @@ FROM table_name;`
           status: "Success",
         });
       } else {
-        setErrorHint("Your query has a syntax error or is invalid."); // For AI Assistant
+        setErrorHint("Your query has a syntax error or is invalid.");
         logToCSV({
           timestamp,
           action: "Query Submitted",
@@ -251,31 +280,31 @@ FROM table_name;`
   };
 
   // ---------------------- Answer Checking ----------------------
+  //
+  //  MODIFIED to ignore row order by sorting both arrays before compare
+  //
   const checkAnswer = useCallback(
     (userResult, userQuery) => {
-      const correct =
-        JSON.stringify(userResult) === JSON.stringify(correctAnswerResult);
+      // Sort and compare ignoring row order
+      const correct = compareResultSets(userResult, correctAnswerResult);
 
       const questionDifficulty = gameData.currentQuestion.difficulty;
       let earnedPoints = correct ? gameData.currentQuestion.points : 0;
-      // Deduct points for using hints
       earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0);
 
       if (correct) {
         // Update local points
-        // setPlayerPoints((prevPoints) => {
-        //   const updatedPoints = { ...prevPoints };
-        //   updatedPoints[questionDifficulty] = [
-        //     ...updatedPoints[questionDifficulty],
-        //     earnedPoints,
-        //   ];
-        //   return updatedPoints;
-        // });
-
-        gameMethods.updateGameDataObjects('playerPoints', earnedPoints);
+        setPlayerPoints((prevPoints) => {
+          const updatedPoints = { ...prevPoints };
+          updatedPoints[questionDifficulty] = [
+            ...updatedPoints[questionDifficulty],
+            earnedPoints,
+          ];
+          return updatedPoints;
+        });
 
         // Update global game points (if needed)
-        gameMethods.updatePoints(gameData.points, earnedPoints);
+        gameMethods.updatePoints(gameData.points, earnedPoints, playerPoints);
 
         // Track stats for badges
         updatePlayerStats(userQuery, hintsUsedForQuestion);
@@ -285,17 +314,16 @@ FROM table_name;`
         triggerConfetti();
 
         // Evaluate & unlock badges
-        // evaluateAndUnlockBadges();
+        evaluateAndUnlockBadges();
 
         // Move to next question after 3 seconds
         setTimeout(() => {
-          setMessage(""); // Clear message
-          loadQuestion(); // Load next question
+          setMessage("");
+          loadQuestion();
         }, 3000);
       } else {
         // If incorrect
-        // setRetryCount((prev) => prev + 1);
-        gameMethods.updateGameData("retryCount", (gameData.retryCount + 1));
+        setRetryCount((prev) => prev + 1);
         setMessage("❌ Try again");
         setTimeout(() => {
           setMessage(`Current Task: ${gameData.currentQuestion.question}`);
@@ -308,39 +336,47 @@ FROM table_name;`
       gameData.currentDifficulty,
       hintsUsedForQuestion,
       gameData.points,
-      gameData.playerPoints,
+      playerPoints,
     ]
   );
 
   // ---------------------- Loading Questions ----------------------
   const loadQuestion = useCallback(async () => {
-    gameMethods.updateGameData("hintsUsedForQuestion", 0);
+    setHintsUsedForQuestion(0);
     setButtonsDisabled(true);
 
     const questionList = questions[gameData.currentDifficulty];
     const remainingQuestions = questionList.filter(
-      (q) => !gameData.usedQuestions[gameData.currentDifficulty].includes(q.question)
+      (q) => !usedQuestions[gameData.currentDifficulty].includes(q.question)
     );
 
     let selectedQuestion;
     if (remainingQuestions.length > 0) {
       selectedQuestion =
         remainingQuestions[
-        Math.floor(Math.random() * remainingQuestions.length)
+          Math.floor(Math.random() * remainingQuestions.length)
         ];
-
-      gameMethods.updateGameDataObjects("usedQuestions", selectedQuestion.question);
+      setUsedQuestions((prev) => ({
+        ...prev,
+        [gameData.currentDifficulty]: [
+          ...prev[gameData.currentDifficulty],
+          selectedQuestion.question,
+        ],
+      }));
     } else {
-      gameMethods.resetUsedQuestions();
-      selectedQuestion = questionList[Math.floor(Math.random() * questionList.length)];
+      // Reset usedQuestions if all are used
+      setUsedQuestions((prev) => ({
+        ...prev,
+        [gameData.currentDifficulty]: [],
+      }));
+      selectedQuestion =
+        questionList[Math.floor(Math.random() * questionList.length)];
     }
 
     if (selectedQuestion) {
       // Update context
       gameMethods.updateGameData("currentQuestion", selectedQuestion);
-
-      gameMethods.updateGameData("startTime", Date.now());
-      // setStartTime(Date.now());
+      setStartTime(Date.now());
 
       // Get the correct result for comparison
       const correctResult = await fetchCorrectAnswerResult(
@@ -349,14 +385,13 @@ FROM table_name;`
       setExpectedOutput(correctResult ? correctResult.slice(0, 5) : []);
       setCorrectAnswerResult(correctResult);
 
-      setMessage(`${gameData.currentQuestion.question}`);
-      setTimeout(() => setButtonsDisabled(false), 1000);
+      setMessage(`${selectedQuestion.question}`);
+      setTimeout(() => setButtonsDisabled(false), 2000);
     }
-  }, [gameData.currentDifficulty, fetchCorrectAnswerResult, gameData.usedQuestions]);
+  }, [gameData.currentDifficulty, fetchCorrectAnswerResult, usedQuestions]);
 
   // ---------------------- Effects ----------------------
   useEffect(() => {
-    // If user has advanced beyond 'easy', show a message then load next question
     if (gameData.currentDifficulty !== "easy") {
       setMessage(
         `Congratulations! You've advanced to ${gameData.currentDifficulty} Level.`
@@ -367,14 +402,14 @@ FROM table_name;`
       }, 3000);
       return;
     }
-    // loadQuestion();
+    loadQuestion();
   }, [gameData.currentDifficulty]);
 
-  // This checks if there's an ideal slope in localStorage
   useEffect(() => {
     if (!hasExecuted) {
       setHasExecuted(true);
       const userData = JSON.parse(localStorage.getItem("userData")) || {};
+      console.log("idealSlope", userData.idealSlope);
       if (userData.idealSlope) {
         setDynamicIdealPoints([
           userData.idealSlope.easy,
@@ -385,14 +420,8 @@ FROM table_name;`
     }
   }, [hasExecuted, loadQuestion, name]);
 
-  // this use effect will be setting up the initial values for the states in this component
-  // it will be the first one to run when loaded or reloaded
-  // some other variables might have to be set here as well with the values coming from gameData (user data from the DB)
   useEffect(() => {
-    if(gameData){
-      setMessage(gameData.currentQuestion.question);
-      setTimeout(() => setButtonsDisabled(false), 1000);
-    }
+    if (user.badges) setBadges(user.badges);
   }, []);
 
   // ---------------------- Badge Modal ----------------------
@@ -458,14 +487,11 @@ FROM table_name;`
         handleTableContent={addTableContent}
         expectedOutput={expectedOutput}
         handleAnimationClick={handleAnimationClick}
-        gameMethods={gameMethods}
-        gameData={gameData}
       />
 
       {/* Main Editor */}
       <div className="main-editor">
         <Editor
-          progress={gameData.points}
           setQuery={setQuery}
           query={query}
           executeQuery={(content) => executeQuery(content, true)}
@@ -476,9 +502,6 @@ FROM table_name;`
         {/* Result Section */}
         <div className="result">
           <div className="result-btns">
-            {/* Example log download button (commented) */}
-            {/* <button onClick={downloadLogs}>Download Logs</button> */}
-
             <button onClick={() => setIsTableOn(false)}>Query Results</button>
             <button onClick={handleTableActions} className={animationClass}>
               Pinned Tables
@@ -498,22 +521,21 @@ FROM table_name;`
 
       {/* Right Sidebar */}
       <RightSidebar
+        progress={gameData.points}
         query={query}
         taskDescription={gameData.currentQuestion}
         currentQuestionPoints={gameData.currentQuestion.points}
-        retries={gameData.retryCount}
-        badges={gameData.badges}
+        retries={retryCount}
+        badges={badges}
         badgesData={badgesData}
         openBadgeModal={openBadgeModal}
-        pointsData={gameData.playerPoints}
+        pointsData={playerPoints}
         idealPoints={dynamicIdealPoints}
         errorHint={errorHint}
         hintsUsedForQuestion={hintsUsedForQuestion}
         setHintsUsedForQuestion={setHintsUsedForQuestion}
         user={user}
         openLogoutModal={openLogoutModal}
-        gameMethods={gameMethods}
-        gameData={gameData}
       />
     </div>
   );
