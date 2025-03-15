@@ -118,8 +118,7 @@ FROM table_name;`
     return Math.floor((Date.now() - startTime) / 1000); // in seconds
   };
 
-  // Update local playerStats after a correct answer
-  const updatePlayerStats = (userQuery, usedHints) => {
+  function updatePlayerStats(userQuery, usedHints) {
     setPlayerStats((prev) => {
       const usedHintThisTask = usedHints > 0;
       return {
@@ -135,10 +134,9 @@ FROM table_name;`
         lastTaskUsedHints: usedHintThisTask,
       };
     });
-  };
+  }
 
-  // Evaluate which badges should unlock, then open modals for new ones
-  const evaluateAndUnlockBadges = () => {
+  function evaluateAndUnlockBadges() {
     const completedTasks = [
       ...usedQuestions.easy,
       ...usedQuestions.medium,
@@ -160,17 +158,10 @@ FROM table_name;`
         gameData.currentQuestion.reflectiveQuestionsCorrect || false,
     });
 
-    // Filter out badges the user already has
     const newBadges = unlockedBadges.filter((b) => !badges.includes(b));
 
     if (newBadges.length > 0) {
-      // Add to local state
       setBadges((prev) => [...prev, ...newBadges]);
-
-      // Optionally save to user in DB
-      // saveUserData({ ...user, badges: [...badges, ...newBadges] });
-
-      // Trigger confetti or show modal for each new badge
       newBadges.forEach((badgeName) => {
         const foundBadge = badgesData.find((bd) => bd.name === badgeName);
         if (foundBadge) {
@@ -178,15 +169,15 @@ FROM table_name;`
         }
       });
     }
-  };
+  }
 
-  const triggerConfetti = () => {
+  function triggerConfetti() {
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
     });
-  };
+  }
 
   // ---------------------- DB Query Functions ----------------------
   const fetchCorrectAnswerResult = useCallback(async (correctQuery) => {
@@ -204,7 +195,7 @@ FROM table_name;`
     }
   }, []);
 
-  const executeQuery = async (userQuery, limitRows = false) => {
+  async function executeQuery(userQuery, limitRows = false) {
     try {
       const response = await fetch(`${apiUrl}/execute-query`, {
         method: "POST",
@@ -230,9 +221,9 @@ FROM table_name;`
         setMessage(`Current Task: ${gameData.currentQuestion.question}`);
       }, 3000);
     }
-  };
+  }
 
-  const submitQuery = async (userQuery) => {
+  async function submitQuery(userQuery) {
     const timestamp = new Date().toISOString();
     try {
       const response = await fetch(`${apiUrl}/execute-query`, {
@@ -240,15 +231,13 @@ FROM table_name;`
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: userQuery }),
       });
-
       const data = await response.json();
 
       if (response.ok) {
         setResult(data.results);
-        setErrorHint(""); // Clear error if query is correct
+        setErrorHint("");
         checkAnswer(data.results, userQuery);
 
-        // Logging
         logToCSV({
           timestamp,
           action: "Query Submitted",
@@ -277,15 +266,11 @@ FROM table_name;`
         status: "Error",
       });
     }
-  };
+  }
 
   // ---------------------- Answer Checking ----------------------
-  //
-  //  MODIFIED to ignore row order by sorting both arrays before compare
-  //
   const checkAnswer = useCallback(
     (userResult, userQuery) => {
-      // Sort and compare ignoring row order
       const correct = compareResultSets(userResult, correctAnswerResult);
 
       const questionDifficulty = gameData.currentQuestion.difficulty;
@@ -293,7 +278,7 @@ FROM table_name;`
       earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0);
 
       if (correct) {
-        // Update local points
+        // update local points
         setPlayerPoints((prevPoints) => {
           const updatedPoints = { ...prevPoints };
           updatedPoints[questionDifficulty] = [
@@ -303,26 +288,34 @@ FROM table_name;`
           return updatedPoints;
         });
 
-        // Update global game points (if needed)
+        // update total XP
         gameMethods.updatePoints(gameData.points, earnedPoints, playerPoints);
 
-        // Track stats for badges
+        // check if new total XP is enough to level up
+        const newTotalPoints = gameData.points + earnedPoints;
+        if (newTotalPoints >= 100 && gameData.currentDifficulty === "easy") {
+          gameMethods.updateGameData("currentDifficulty", "medium");
+          setMessage("✨ You've leveled up to Medium! ✨");
+        } else if (
+          newTotalPoints >= 200 &&
+          gameData.currentDifficulty === "medium"
+        ) {
+          gameMethods.updateGameData("currentDifficulty", "hard");
+          setMessage("✨ You've leveled up to Hard! ✨");
+        }
+
         updatePlayerStats(userQuery, hintsUsedForQuestion);
 
-        // Congratulate user
-        setMessage("✅ Good job!");
         triggerConfetti();
-
-        // Evaluate & unlock badges
         evaluateAndUnlockBadges();
 
-        // Move to next question after 3 seconds
         setTimeout(() => {
+          // reset hints for the next question
+          setHintsUsedForQuestion(0);
           setMessage("");
           loadQuestion();
         }, 3000);
       } else {
-        // If incorrect
         setRetryCount((prev) => prev + 1);
         setMessage("❌ Try again");
         setTimeout(() => {
@@ -342,6 +335,7 @@ FROM table_name;`
 
   // ---------------------- Loading Questions ----------------------
   const loadQuestion = useCallback(async () => {
+    // also reset hints here if we want to be extra sure
     setHintsUsedForQuestion(0);
     setButtonsDisabled(true);
 
@@ -364,7 +358,6 @@ FROM table_name;`
         ],
       }));
     } else {
-      // Reset usedQuestions if all are used
       setUsedQuestions((prev) => ({
         ...prev,
         [gameData.currentDifficulty]: [],
@@ -374,11 +367,9 @@ FROM table_name;`
     }
 
     if (selectedQuestion) {
-      // Update context
       gameMethods.updateGameData("currentQuestion", selectedQuestion);
       setStartTime(Date.now());
 
-      // Get the correct result for comparison
       const correctResult = await fetchCorrectAnswerResult(
         selectedQuestion.answer
       );
@@ -409,7 +400,6 @@ FROM table_name;`
     if (!hasExecuted) {
       setHasExecuted(true);
       const userData = JSON.parse(localStorage.getItem("userData")) || {};
-      console.log("idealSlope", userData.idealSlope);
       if (userData.idealSlope) {
         setDynamicIdealPoints([
           userData.idealSlope.easy,
@@ -425,47 +415,47 @@ FROM table_name;`
   }, []);
 
   // ---------------------- Badge Modal ----------------------
-  const openBadgeModal = (badge) => {
+  function openBadgeModal(badge) {
     setBadgeState({ open: true, badgeData: badge });
-  };
+  }
 
-  const closeBadgeModal = () => {
+  function closeBadgeModal() {
     setBadgeState({ open: false, badgeData: null });
-  };
+  }
 
   // ---------------------- Table Toggling ----------------------
-  const handleTableActions = () => {
+  function handleTableActions() {
     setIsTableOn((prev) => !prev);
-  };
+  }
 
-  const addTableContent = (table) => {
+  function addTableContent(table) {
     if (checkTable.current.has(table.name)) return;
     checkTable.current.add(table.name);
     setTableContent((prev) => [...prev, table]);
-  };
+  }
 
-  const removeTableContent = (table) => {
+  function removeTableContent(table) {
     if (!checkTable.current.has(table.name)) return;
     checkTable.current.delete(table.name);
     setTableContent((prev) => prev.filter((t) => t.name !== table.name));
-  };
+  }
 
   // ---------------------- Logout Modal ----------------------
-  const openLogoutModal = () => {
+  function openLogoutModal() {
     setLogoutModal(true);
-  };
-  const closeLogoutModal = () => {
+  }
+  function closeLogoutModal() {
     setLogoutModal(false);
-  };
+  }
 
   // ---------------------- Pinned Table Animation ----------------------
   const [animationClass, setAnimationClass] = useState("");
-  const handleAnimationClick = () => {
+  function handleAnimationClick() {
     setAnimationClass("jump-animation");
     setTimeout(() => {
       setAnimationClass("");
     }, 1000);
-  };
+  }
 
   // ---------------------- Render ----------------------
   return (
@@ -487,6 +477,7 @@ FROM table_name;`
         handleTableContent={addTableContent}
         expectedOutput={expectedOutput}
         handleAnimationClick={handleAnimationClick}
+        gameData={gameData}
       />
 
       {/* Main Editor */}
@@ -497,6 +488,7 @@ FROM table_name;`
           executeQuery={(content) => executeQuery(content, true)}
           submitQuery={submitQuery}
           buttonsDisabled={buttonsDisabled}
+          progress={gameData?.points || 0}
         />
 
         {/* Result Section */}
@@ -521,7 +513,7 @@ FROM table_name;`
 
       {/* Right Sidebar */}
       <RightSidebar
-        progress={gameData.points}
+        progress={gameData?.points || 0}
         query={query}
         taskDescription={gameData.currentQuestion}
         currentQuestionPoints={gameData.currentQuestion.points}
@@ -536,6 +528,8 @@ FROM table_name;`
         setHintsUsedForQuestion={setHintsUsedForQuestion}
         user={user}
         openLogoutModal={openLogoutModal}
+        gameData={gameData}
+        gameMethods={gameMethods}
       />
     </div>
   );
@@ -573,7 +567,6 @@ function QueryResult({ result }) {
   );
 }
 
-// Add prop types for QueryResult
 QueryResult.propTypes = {
   result: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.object),
