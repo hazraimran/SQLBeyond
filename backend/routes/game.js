@@ -4,16 +4,15 @@ const { connectToMongoDB } = require('../utils/mongodb');
 const router = express.Router();
 
 router.get("/load-data", async (req, res) => {
-    const { username } = req.body;
     const db = await connectToMongoDB();
     const collection = db.collection('game');
-
+    
     try {
-        const gameData = await collection.findOne({ username: username});
+        const gameData = await collection.findOne({ username: req.session.user.username });
         if (gameData)
-            return res.json({ gameData: gameData });
+            return res.json({ gameData });
 
-        throw new Error();
+        return res.json({});
     } catch (err) {
         console.error("Not able to load game data: ", err);
     }
@@ -23,8 +22,6 @@ router.post("/quiz-grade", async (req, res) => {
     const { quizData } = req.body;
     const db = await connectToMongoDB();
     const collection = db.collection('game');
-
-    console.log(req.session.user);
 
     try {
         await collection.updateOne({
@@ -60,6 +57,24 @@ router.post("/current-level", async (req, res) => {
         console.error("Failed to save current level in the database: ", err);
         return res.json({ success: false,  msg: "Failed to save current level in the database!" });     
     };
+})
+
+router.post("/starter-game-data", async (req, res) => {
+    const { initialGameData } = req.body;
+    const db = await connectToMongoDB();
+    const collection = db.collection('game');
+
+    try {
+        await collection.insertOne({
+            username: req.session.user.username,
+            gameData: initialGameData
+        });
+        res.json({ok: true});
+    }
+    catch(err){
+        console.error(err);
+        res.json({ok: false});
+    }    
 })
 
 

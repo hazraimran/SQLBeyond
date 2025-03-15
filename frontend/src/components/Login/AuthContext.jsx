@@ -1,16 +1,17 @@
 import axios from "axios";
 import { useContext, createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGoogleLogin, googleLogout } from "@react-oauth/google";
+// import { useGoogleLogin, googleLogout } from "@react-oauth/google";
+import questions from "../../data/questions";
+import { useGame } from "../Context/GameContext";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
-
     const [loading, setLoading] = useState(true);
 
     const register = async (formData) => {
@@ -23,15 +24,13 @@ const AuthProvider = ({ children }) => {
             }, { withCredentials: true });
 
             const data = response.data;
-            
+
             console.log(data);
 
             if (data.user) {
-                console.log(data.user);
                 setUser(data.user);
                 setLoading(false);
-                navigate("/quiz");
-                return;
+                return navigate("/quiz");
             }
             throw new Error(response.message);
         }
@@ -55,7 +54,7 @@ const AuthProvider = ({ children }) => {
                 setUser(data.user);
                 setLoading(false);
 
-                if(response.data.missingQuiz)
+                if (response.data.missingQuiz)
                     return navigate("/quiz")
 
                 return navigate("/SQLEditor");
@@ -76,9 +75,9 @@ const AuthProvider = ({ children }) => {
             // console.log("trying to logout")
             await axios.post(`${apiUrl}/account/logout`, {}, { withCredentials: true });
             // console.log(response.data);
-            if(user.isOauth)
-                googleLogout();
-            
+            // if(user.isOauth)
+            //     googleLogout();
+
             setUser(null);
             setLoading(true);
             navigate("/");
@@ -88,42 +87,42 @@ const AuthProvider = ({ children }) => {
         }
     }
 
-    const googleOauth = useGoogleLogin({
-        onSuccess: async (resCode) => {
-            try {
-                const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: {
-                        Authorization: `Bearer ${resCode.access_token}`
-                    },
-                    withCredentials: false
-                })
+    // const googleOauth = useGoogleLogin({
+    //     onSuccess: async (resCode) => {
+    //         try {
+    //             const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+    //                 headers: {
+    //                     Authorization: `Bearer ${resCode.access_token}`
+    //                 },
+    //                 withCredentials: false
+    //             })
 
-                const data = userInfo.data;
+    //             const data = userInfo.data;
 
-                const response = await axios.post(`${apiUrl}/account/google-oauth-login`, {
-                    user: data
-                }, {withCredentials: true});
+    //             const response = await axios.post(`${apiUrl}/account/google-oauth-login`, {
+    //                 user: data
+    //             }, {withCredentials: true});
 
-                if (response.data.user) {
-                    setUser(response.data.user);
-                    setLoading(false);
+    //             if (response.data.user) {
+    //                 setUser(response.data.user);
+    //                 setLoading(false);
 
-                    // console.log(response.data);
+    //                 // console.log(response.data);
 
-                    if(response.data.missingQuiz)
-                        return navigate("/quiz")
+    //                 if(response.data.missingQuiz)
+    //                     return navigate("/quiz")
 
-                    return navigate("/SQLEditor");
-                }
-                throw new Error(response.message);
-            }
-            catch (err) {
-                alert("Not able to login with google. Try again!");
-                console.error(err);
-            }
-        },
-        onError: (err) => console.log(`Login failed: ${err}`)
-    });
+    //                 return navigate("/SQLEditor");
+    //             }
+    //             throw new Error(response.message);
+    //         }
+    //         catch (err) {
+    //             alert("Not able to login with google. Try again!");
+    //             console.error(err);
+    //         }
+    //     },
+    //     onError: (err) => console.log(`Login failed: ${err}`)
+    // });
 
 
     useEffect(() => {
@@ -132,14 +131,10 @@ const AuthProvider = ({ children }) => {
             try {
                 const response = await axios.get(`${apiUrl}/account/login`, { withCredentials: true });
                 // console.log(response.data);
-                if (response.data) {
-                    // console.log(response.data);
+                if (response.data) 
                     setUser(response.data.user);
-                }
-                else {
-                    setUser(null);
-                }
-                // console.log("loading");  
+                else 
+                    setUser(null); 
             }
             catch (err) {
                 setUser(null);
@@ -154,7 +149,7 @@ const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, register, login, logout, loading, googleOauth }}>
+        <AuthContext.Provider value={{ user, register, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useContext, createContext, useState, useEffect } from "react";
 import { useAuth } from "../Login/AuthContext";
+import questions from "../../data/questions";
 
 const GameContext = createContext();
 
@@ -10,32 +11,52 @@ const GameProvider = ({ children }) => {
     const [dynamicIdealPoints, setDynamicIdealPoints] = useState([10, 50, 100]);
     const [hasExecuted, setHasExecuted] = useState(false);
 
-    const [gameData, setGameData] = useState({
-        currentDifficulty: "easy", // completed
-        currentQuestion: {
-            question: "",
-            answer: "",
-            points: 0,
-        }, // completed
-        points: 0, // completed
-        startTime: 0, // ask if it's been used
-        badges: ["joinExpert", "quickSolver"], // it's working, just gotta add it to user properly
-        retryCount: 0, // completed
-        usedQuestions: {
-            easy: [],
-            medium: [],
-            hard: [],
-        },
-        playerPoints: {
-            easy: [],
-            medium: [],
-            hard: [],
-        }
-    });
-    const [loading, setLoading] = useState(false);
+    // const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
+
+    const [gameData, setGameData] = useState({});
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
-    const user = useAuth();
+    const selectInitialQuestion = () => {
+        const questionList = questions["easy"];
+        return questionList[Math.floor(Math.random() * questionList.length)];
+    }
+
+    const setDataNewUser = async (username) => {
+        const selectedQuestion = selectInitialQuestion();
+
+        const initialGameData = {
+            currentDifficulty: "easy",
+            currentQuestion: selectedQuestion,
+            points: 0,
+            startTime: Date.now(),
+            badges: [],
+            retryCount: 0,
+            usedQuestions: {
+                easy: [selectedQuestion],
+                medium: [],
+                hard: [],
+            },
+            playerPoints: {
+                easy: [],
+                medium: [],
+                hard: [],
+            },
+            hintsUsedForQuestion: 0,
+        };
+
+        setGameData(initialGameData);
+
+        try {
+            const response = await axios.post(`${apiUrl}/game/starter-game-data`, {
+                initialGameData
+            }, { withCredentials: true });
+            return;
+        }
+        catch(err) {
+            console.error(err);
+        }
+    }
 
     const updateGameData = (key, value) => {
         setGameData((prev) => ({
@@ -67,44 +88,46 @@ const GameProvider = ({ children }) => {
     // for now playerPoints is passed as a parameter, but after it will be from the gameData
     const updatePoints = (prevPoints, earnedPoints) => {
         const newPoints = prevPoints + earnedPoints;
-        if (gameData.currentDifficulty == "easy" 
+        if (gameData.currentDifficulty == "easy"
             && newPoints >= 100
             && gameData.playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 4
-        ){
+        ) {
             updateGameData("currentDifficulty", "medium");
             updateGameData("points", 0);
         }
-        else if (gameData.currentDifficulty == "medium" 
+        else if (gameData.currentDifficulty == "medium"
             && newPoints >= 120
             // this part doesn't seem to be correct
             && gameData.playerPoints.easy.filter((p) => p >= dynamicIdealPoints[0]).length >= 3
-        ){
+        ) {
             updateGameData("currentDifficulty", "hard");
             updateGameData("points", 0);
         }
         else {
             updateGameData("points", newPoints);
-        }   
+        }
     };
 
-    // useEffect(() => {
-    //     const fetchGameData = async () => {
-    //         try {
-    //             if(user.username){
-    //                 const response = await axios.get(`${apiUrl}/game/load-data`, {username: user.username});
-    //                 setGameData(response.data);
-    //             }
-    //         } catch (err) {
-    //             setError(err.message);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
+    const fetchGameData = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/game/load-data`, { withCredentials: true });
+            if(response.data.gameData)
+                setGameData(response.data.gameData.gameData);
+        }
+        catch (err) {
+            console.log(err);
+        }
+        finally{
+            setLoading(false);
+        }
+    }
 
-    //     fetchGameData();
-    // }, []);
-
-    console.log(gameData);
+    useEffect(() => {
+        fetchGameData();
+        if(Object.keys(gameData).length===0){
+            setDataNewUser();
+        }
+      }, []);
 
     return (
         <GameContext.Provider value={{ gameData, loading, error, updateGameData, updatePoints, updateGameDataObjects, resetUsedQuestions }}>

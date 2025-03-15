@@ -32,7 +32,7 @@ function Login() {
     <section className="log-section">
       <div className="log-box">
         <div className="log-text">
-          <h1>NEXUS</h1>
+          <h1>SQLBeyond</h1>
           <p>Log in</p>
           <p>Don't have account yet? <Link to="/register">Sign up</Link></p>
         </div>
@@ -56,7 +56,7 @@ function Login() {
             <button>Continue</button>
           </form>
 
-          <div className="log-divider">
+          {/* <div className="log-divider">
             <span>OR</span>
           </div>
 
@@ -65,7 +65,7 @@ function Login() {
               <span>Login with</span>
               <img className="google-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png" alt="google-logo"/>
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

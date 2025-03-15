@@ -11,13 +11,16 @@
 }
 
 .log-box {
-  height: 670px;
+  min-height: 450px;
   width: 450px;
   background-color: #f0f0f0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
+  gap: 30px;
+  padding: 35px 0;
 }
 
 .log-text {

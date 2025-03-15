@@ -30,6 +30,9 @@ function SQLEditor() {
   const user = useAuth().user;
   const gameMethods = useGame();
   const gameData = useGame().gameData;
+  // console.log(gameData);
+
+  // console.log(user);
 
   // Default name from user data
   const { name = `${user.firstName} ${user.lastName}` } = location.state || {};
@@ -46,27 +49,12 @@ FROM table_name;`
   const [buttonsDisabled, setButtonsDisabled] = useState(true);
 
   const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
-  // const [retryCount, setRetryCount] = useState(0);
 
-  // const [startTime, setStartTime] = useState(null);
-  // const [points, setPoints] = useState(0);
-
-  // const [badges, setBadges] = useState([]);
   const [badgeState, setBadgeState] = useState({
     open: false,
     badgeData: null,
   });
 
-  // const [usedQuestions, setUsedQuestions] = useState({
-  //   easy: [],
-  //   medium: [],
-  //   hard: [],
-  // });
-  // const [playerPoints, setPlayerPoints] = useState({
-  //   easy: [],
-  //   medium: [],
-  //   hard: [],
-  // });
   const [dynamicIdealPoints, setDynamicIdealPoints] = useState([10, 50, 100]);
   const [hasExecuted, setHasExecuted] = useState(false);
 
@@ -131,7 +119,7 @@ FROM table_name;`
     const unlockedBadges = evaluateBadges({
       playerPoints: gameData.playerPoints,
       retries: gameData.retryCount,
-      hintsUsedForQuestion,
+      hintsUsedForQuestion: gameData.hintsUsedForQuestion,
       completedTasks,
       currentLevel: gameData.currentDifficulty,
       currentTask: gameData.currentQuestion,
@@ -146,7 +134,7 @@ FROM table_name;`
     // Filter out badges the user already has
     const newBadges = unlockedBadges.filter((b) => !gameData.badges.includes(b));
 
-    console.log(newBadges);
+    // console.log(newBadges);
 
     if (newBadges.length > 0) {
       // Add to local state
@@ -326,15 +314,13 @@ FROM table_name;`
 
   // ---------------------- Loading Questions ----------------------
   const loadQuestion = useCallback(async () => {
-    setHintsUsedForQuestion(0);
+    gameMethods.updateGameData("hintsUsedForQuestion", 0);
     setButtonsDisabled(true);
 
     const questionList = questions[gameData.currentDifficulty];
     const remainingQuestions = questionList.filter(
       (q) => !gameData.usedQuestions[gameData.currentDifficulty].includes(q.question)
     );
-
-    console.log(gameData.usedQuestions);
 
     let selectedQuestion;
     if (remainingQuestions.length > 0) {
@@ -344,19 +330,7 @@ FROM table_name;`
         ];
 
       gameMethods.updateGameDataObjects("usedQuestions", selectedQuestion.question);
-      // setUsedQuestions((prev) => ({
-      //   ...prev,
-      //   [gameData.currentDifficulty]: [
-      //     ...prev[gameData.currentDifficulty],
-      //     selectedQuestion.question,
-      //   ],
-      // }));
     } else {
-      // Reset usedQuestions if all are used
-      // setUsedQuestions((prev) => ({
-      //   ...prev,
-      //   [gameData.currentDifficulty]: [],
-      // }));
       gameMethods.resetUsedQuestions();
       selectedQuestion = questionList[Math.floor(Math.random() * questionList.length)];
     }
@@ -393,7 +367,7 @@ FROM table_name;`
       }, 3000);
       return;
     }
-    loadQuestion();
+    // loadQuestion();
   }, [gameData.currentDifficulty]);
 
   // This checks if there's an ideal slope in localStorage
@@ -410,6 +384,12 @@ FROM table_name;`
       }
     }
   }, [hasExecuted, loadQuestion, name]);
+
+  useEffect(() => {
+    if(gameData){
+      setMessage(gameData.currentQuestion.question);
+    }
+  }, []);
 
   // ---------------------- Badge Modal ----------------------
   const openBadgeModal = (badge) => {
@@ -474,11 +454,14 @@ FROM table_name;`
         handleTableContent={addTableContent}
         expectedOutput={expectedOutput}
         handleAnimationClick={handleAnimationClick}
+        gameMethods={gameMethods}
+        gameData={gameData}
       />
 
       {/* Main Editor */}
       <div className="main-editor">
         <Editor
+          progress={gameData.points}
           setQuery={setQuery}
           query={query}
           executeQuery={(content) => executeQuery(content, true)}
@@ -511,7 +494,6 @@ FROM table_name;`
 
       {/* Right Sidebar */}
       <RightSidebar
-        progress={gameData.points}
         query={query}
         taskDescription={gameData.currentQuestion}
         currentQuestionPoints={gameData.currentQuestion.points}
@@ -526,6 +508,8 @@ FROM table_name;`
         setHintsUsedForQuestion={setHintsUsedForQuestion}
         user={user}
         openLogoutModal={openLogoutModal}
+        gameMethods={gameMethods}
+        gameData={gameData}
       />
     </div>
   );

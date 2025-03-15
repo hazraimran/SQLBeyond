@@ -5,6 +5,7 @@ import { sql } from "@codemirror/lang-sql";
 import "../../styles/Editor.css";
 
 const Editor = ({
+  progress, // Current progress/points
   setQuery,
   query,
   executeQuery,
@@ -16,6 +17,9 @@ const Editor = ({
   return (
     <div className="editor-container">
       <div className="editor-header">
+        <div>
+          Current XP: {progress}/100
+        </div>
         <div className="buttons">
           <div className="tooltip-container-editor">
             <button

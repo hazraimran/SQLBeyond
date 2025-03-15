@@ -11,24 +11,17 @@ const LeftSidebar = ({
   handleTableContent,
   expectedOutput,
   handleAnimationClick,
+  gameData
 }) => {
   const [expandedTable, setExpandedTable] = useState(null);
+
+  // console.log(message);
+
+  const adjustedPoints = gameData.currentQuestion.points - gameData.hintsUsedForQuestion;
 
   const handleToggle = (tableName, index) => {
     setExpandedTable(expandedTable === tableName ? null : tableName);
   };
-
-  // const getImageSrc = () => {
-  //   switch (imageState) {
-  //     case "helpful":
-  //       return helpfulImage;
-  //     case "happy":
-  //       return happyImage;
-  //     default:
-  //       return thinkingImage;
-  //   }
-  // };
-
   return (
     <div className="left-sidebar">
       <div className="left-sidebar-top">
@@ -36,8 +29,13 @@ const LeftSidebar = ({
           {message && (
             <div className="message">
               <p>
+                Points for this question: <span>{adjustedPoints}</span>
+              </p>
+
+              <p>
                 Current Task: <span>{message}</span>
               </p>
+
               <h4>Expected Output (Top 5 Rows):</h4>
               <div className="sample-table-container">
                 <table className="sample-table">

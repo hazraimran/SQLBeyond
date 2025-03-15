@@ -5,57 +5,45 @@ import AIAssistant from "./AIAssistant";
 import DifficultyChart from "./DifficultyChart"; // Import the chart
 
 const RightSidebar = ({
-  progress, // Current progress/points
   // setProgress, // Function to update progress/points
   query, // User's current query
   taskDescription, // Description of the current task/question
-  currentQuestionPoints, // Points allocated to the current question
   retries, // Retry count for the current question
   badges, // List of earned badges
   badgesData, // Metadata for all available badges
   openBadgeModal, // Function to open badge modal
-  openHintModal,
   pointsData, // Points distribution data for the chart
   idealPoints, // Ideal points for difficulty levels
   errorHint, // Error hints for AI Assistant
-  // hintsUsedForQuestion, // Number of hints used for the current question
-  setHintsUsedForQuestion, // Function to increment hints used for the current question
   user,
   openLogoutModal,
+  gameData,
+  gameMethods
 }) => {
   const [hintsUsed, setHintsUsed] = useState(0);
-  const [displayFullProgress, setDisplayFullProgress] = useState(false);
-  const [adjustedQuestionPoints, setAdjustedQuestionPoints] = useState(
-    currentQuestionPoints || 0
-  ); // Track points for the current question
-  useEffect(() => {
-    setAdjustedQuestionPoints(currentQuestionPoints || 0); // Reset points to the new question's points
-    setHintsUsedForQuestion(0); // Reset hints used for the new question
-  }, [currentQuestionPoints, setHintsUsedForQuestion, taskDescription]);
 
   const handleLogout = () => {
     openLogoutModal(true);
   };
 
   const handleUseHint = () => {
-    setHintsUsedForQuestion((prev) => prev + 1);
-    setAdjustedQuestionPoints((prevPoints) => Math.max(prevPoints - 1, 0)); // Deduct 1 points for each hint
+    gameMethods.updateGameData("hintsUsedForQuestion", (gameData.hintsUsedForQuestion + 1));
     console.log("Hint used! Points deducted.");
   };
 
   // const progressPercentage = Math.min((progress / 100) * 100, 100); // Cap at 100%
 
-  useEffect(() => {
-    if (progress >= 100) {
-      // Display 100% for 3 seconds, then reset back to the actual progress
-      setDisplayFullProgress(true);
-      const timer = setTimeout(() => {
-        setDisplayFullProgress(false);
-      }, 3000);
+  // useEffect(() => {
+  //   if (progress >= 100) {
+  //     // Display 100% for 3 seconds, then reset back to the actual progress
+  //     setDisplayFullProgress(true);
+  //     const timer = setTimeout(() => {
+  //       setDisplayFullProgress(false);
+  //     }, 3000);
 
-      return () => clearTimeout(timer);
-    }
-  }, [progress, badges]);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [progress, badges]);
 
   return (
     <div className="right-sidebar">
@@ -66,14 +54,14 @@ const RightSidebar = ({
           <button onClick={handleLogout}>Logout</button>
         </span>
 
-        <div className="points-ps">
+        {/* <div className="points-ps">
           <p>
             <strong>Current Points:</strong> <br /> {progress} / 100
           </p>
           <p>
             <strong>Points for this Question:</strong> {adjustedQuestionPoints}
           </p>
-        </div>
+        </div> */}
       </div>
 
       {/* Achievements */}
@@ -117,7 +105,7 @@ const RightSidebar = ({
 };
 
 RightSidebar.propTypes = {
-  progress: PropTypes.number.isRequired,
+  // progress: PropTypes.number.isRequired,
   query: PropTypes.string.isRequired,
   taskDescription: PropTypes.object.isRequired,
   currentQuestionPoints: PropTypes.number.isRequired,
@@ -128,8 +116,8 @@ RightSidebar.propTypes = {
   pointsData: PropTypes.object.isRequired,
   idealPoints: PropTypes.arrayOf(PropTypes.number).isRequired,
   errorHint: PropTypes.string,
-  hintsUsedForQuestion: PropTypes.number.isRequired,
-  setHintsUsedForQuestion: PropTypes.func.isRequired,
+  // hintsUsedForQuestion: PropTypes.number.isRequired,
+  // setHintsUsedForQuestion: PropTypes.func.isRequired,
 };
 
 export default RightSidebar;

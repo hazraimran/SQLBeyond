@@ -10,7 +10,6 @@ import GameProvider from "./components/Context/GameContext";
 function App() {
   return (
     <AuthProvider>
-      <GameProvider>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -20,7 +19,6 @@ function App() {
             <Route path="/SQLEditor" element={<SQLEditor />} />
           </Route>
         </Routes>
-      </GameProvider>
     </AuthProvider>
   );
 }

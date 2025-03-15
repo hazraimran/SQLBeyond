@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const axios = require("axios");
+const session = require('express-session');
 
 //import the account router 
 const userRouter = require('./routes/user');
@@ -41,6 +42,15 @@ app.use(express.json());
 // Express cookie-parser - cors was changed as well
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+  secret: "create a better secret",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7
+  }
+}));
 
 // MySQL Connection Pool
 const pool = mysql.createPool(MYSQL_URL);

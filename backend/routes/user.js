@@ -1,5 +1,4 @@
 const express = require('express');
-const session = require('express-session');
 const { connectToMongoDB } = require('../utils/mongodb');
 
 const router = express.Router();
@@ -7,14 +6,6 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-router.use(session({
-    secret: "create a better secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7
-    }
-}));
 
 router.get("/login", async (req, res) => {
     if (req.session.user) {
@@ -85,11 +76,6 @@ router.post("/register", async (req, res) => {
                 badges: []
             });
 
-            await gameCollection.insertOne({
-                username: username,
-                badges: []
-            });
-
             const userData = { user: { firstName: firstName, lastName: lastName, username: username, isOauth: false, badges: [] } };
             //store only the userID
             req.session.user = { username: username };
@@ -105,54 +91,54 @@ router.post("/register", async (req, res) => {
     }
 });
 
-router.post('/google-oauth-login', async (req, res) => {
-    try {
-        const { given_name, family_name, email } = req.body.user;
-        const db = await connectToMongoDB();
-        const collection = db.collection('users');
-        const gameCollection = db.collection('game');
+// router.post('/google-oauth-login', async (req, res) => {
+//     try {
+//         const { given_name, family_name, email } = req.body.user;
+//         const db = await connectToMongoDB();
+//         const collection = db.collection('users');
+//         const gameCollection = db.collection('game');
 
-        let userData;
+//         let userData;
 
-        const checkUser = await collection.findOne({ username: email });
-        // when adding to the database, just check if the user exists, if it doesn't we add it to the database, otherwise just return the data given by google
-        if (!checkUser) {
-            try {
-                await collection.insertOne({
-                    firstName: given_name,
-                    lastName: family_name,
-                    username: email,
-                    isOauth: true,
-                    badges: []
-                });
+//         const checkUser = await collection.findOne({ username: email });
+//         // when adding to the database, just check if the user exists, if it doesn't we add it to the database, otherwise just return the data given by google
+//         if (!checkUser) {
+//             try {
+//                 await collection.insertOne({
+//                     firstName: given_name,
+//                     lastName: family_name,
+//                     username: email,
+//                     isOauth: true,
+//                     badges: []
+//                 });
 
-                await gameCollection.insertOne({
-                    username: username,
-                    badges: []
-                });
+//                 await gameCollection.insertOne({
+//                     username: username,
+//                     badges: []
+//                 });
                 
-                userData = { user: { firstName: given_name, lastName: family_name, username: email, isOauth: true, badges: [] },  missingQuiz: true };
-            } catch (err) {
-                console.error("Failed to insert new user: ", err);
-                res.json({ status: "failed" });
-            }
-        }
-        else {
-            // console.log(checkUser);
-            if (!checkUser.quizData)
-                userData = { user: checkUser, missingQuiz: true };
-            else
-                userData = { user: checkUser };
-        }
+//                 userData = { user: { firstName: given_name, lastName: family_name, username: email, isOauth: true, badges: [] },  missingQuiz: true };
+//             } catch (err) {
+//                 console.error("Failed to insert new user: ", err);
+//                 res.json({ status: "failed" });
+//             }
+//         }
+//         else {
+//             // console.log(checkUser);
+//             if (!checkUser.quizData)
+//                 userData = { user: checkUser, missingQuiz: true };
+//             else
+//                 userData = { user: checkUser };
+//         }
 
-        //save only the userID
-        req.session.user = { username: email };
-        res.json(userData);
-    }
-    catch (err) {
-        console.error(err);
-    }
-})
+//         //save only the userID
+//         req.session.user = { username: email };
+//         res.json(userData);
+//     }
+//     catch (err) {
+//         console.error(err);
+//     }
+// })
 
 router.post("/logout", (req, res) => {
     req.session.destroy((err) => {
@@ -172,7 +158,7 @@ router.post("/quiz-grade", async (req, res) => {
     const db = await connectToMongoDB();
     const collection = db.collection('users');
 
-    console.log(req.session.user);
+    // console.log(req.session.user);
 
     try {
         await collection.updateOne({
