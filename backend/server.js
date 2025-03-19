@@ -4,11 +4,11 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const axios = require("axios");
-const session = require('express-session');
+const session = require("express-session");
 
-//import the account router 
-const userRouter = require('./routes/user');
-const gameRouter = require('./routes/game');
+//import the account router
+const userRouter = require("./routes/user");
+const gameRouter = require("./routes/game");
 
 const cookieParser = require("cookie-parser");
 const sqlParser = require("sql-parser"); // SQL Parser for syntax validation
@@ -26,7 +26,7 @@ if (!MYSQL_URL || !HUGGINGFACE_API_KEY) {
   process.exit(1);
 }
 
-const FRONTED_URL = process.env.FRONTED_URL || "http://localhost:5173"
+const FRONTED_URL = process.env.FRONTED_URL || "http://localhost:5173";
 
 // Express app setup
 const app = express();
@@ -43,14 +43,16 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
-  secret: "create a better secret",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7
-  }
-}));
+app.use(
+  session({
+    secret: "create a better secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  })
+);
 
 // MySQL Connection Pool
 const pool = mysql.createPool(MYSQL_URL);
@@ -104,12 +106,12 @@ app.post("/get-hint", (req, res) => {
   const missingColumns = checkForMissingItems(userQuery, columnNames);
 
   if (missingConcepts.length > 0 || missingColumns.length > 0) {
-    const hint = `Your query is missing the following: ${
+    const hint = `\nYour query is missing the following: ${
       missingConcepts.length > 0
-        ? `Keywords: ${missingConcepts.join(", ")}`
+        ? `\nKeywords: ${missingConcepts.join(", ")}`
         : ""
     } ${
-      missingColumns.length > 0 ? `Columns: ${missingColumns.join(", ")}` : ""
+      missingColumns.length > 0 ? `\nColumns: ${missingColumns.join(", ")}` : ""
     }`.trim();
     return res.json({
       success: true,
@@ -119,22 +121,22 @@ app.post("/get-hint", (req, res) => {
   }
 
   // Stage 2: Metaphorical Guidance.
-  if (hints.metaphor) {
-    return res.json({
-      success: true,
-      stage: "S2",
-      hint: hints.metaphor,
-    });
-  }
+  // if (hints.metaphor) {
+  //   return res.json({
+  //     success: true,
+  //     stage: "S2",
+  //     hint: hints.metaphor,
+  //   });
+  // }
 
   // Stage 3: English-Based Query Guidance.
-  if (hints.english) {
-    return res.json({
-      success: true,
-      stage: "S3",
-      hint: hints.english,
-    });
-  }
+  // if (hints.english) {
+  //   return res.json({
+  //     success: true,
+  //     stage: "S3",
+  //     hint: hints.english,
+  //   });
+  // }
 
   // Default case: Debugging hint.
   const hint =
