@@ -16,9 +16,9 @@ import { useGame } from "./Context/GameContext";
 import badgesData from "../data/badges";
 // For test only:
 // import questions from "../data/oldQuestions-backup";
-import questions from "../data/questions";
+import questions from "../data/questions-copy";
 
-import logToCSV from "../utils/logger";
+// import logToCSV from "../utils/logger";
 import evaluateBadges from "../utils/badgeEvaluator"; // <-- import the badge evaluator
 
 import "../styles/SQLEditor.css";
@@ -238,33 +238,33 @@ FROM table_name;`
         setErrorHint("");
         checkAnswer(data.results, userQuery);
 
-        logToCSV({
-          timestamp,
-          action: "Query Submitted",
-          query: userQuery,
-          result: JSON.stringify(data.results),
-          status: "Success",
-        });
+        // logToCSV({
+        //   timestamp,
+        //   action: "Query Submitted",
+        //   query: userQuery,
+        //   result: JSON.stringify(data.results),
+        //   status: "Success",
+        // });
       } else {
         setErrorHint("Your query has a syntax error or is invalid.");
-        logToCSV({
-          timestamp,
-          action: "Query Submitted",
-          query: userQuery,
-          result: "Invalid Query",
-          status: "Error",
-        });
+        // logToCSV({
+        //   timestamp,
+        //   action: "Query Submitted",
+        //   query: userQuery,
+        //   result: "Invalid Query",
+        //   status: "Error",
+        // });
       }
     } catch (error) {
       console.error("Error:", error);
       setErrorHint("An error occurred while connecting to the server.");
-      logToCSV({
-        timestamp,
-        action: "Query Submitted",
-        query: userQuery,
-        result: "Server Error",
-        status: "Error",
-      });
+      // logToCSV({
+      //   timestamp,
+      //   action: "Query Submitted",
+      //   query: userQuery,
+      //   result: "Server Error",
+      //   status: "Error",
+      // });
     }
   }
 
@@ -289,7 +289,8 @@ FROM table_name;`
         });
 
         // update total XP
-        gameMethods.updatePoints(gameData.points, earnedPoints, playerPoints);
+        gameMethods.updatePoints(gameData.points, earnedPoints);
+        gameMethods.updateGameDataObjects('playerPoints', earnedPoints);
 
         // check if new total XP is enough to level up
         const newTotalPoints = gameData.points + earnedPoints;
@@ -336,12 +337,17 @@ FROM table_name;`
   // ---------------------- Loading Questions ----------------------
   const loadQuestion = useCallback(async () => {
     // also reset hints here if we want to be extra sure
+    gameMethods.updateGameData("hintsUsedForQuestion", 0);
     setHintsUsedForQuestion(0);
     setButtonsDisabled(true);
 
     const questionList = questions[gameData.currentDifficulty];
+    // const remainingQuestions = questionList.filter(
+    //   (q) => !usedQuestions[gameData.currentDifficulty].includes(q.question)
+    // );
+
     const remainingQuestions = questionList.filter(
-      (q) => !usedQuestions[gameData.currentDifficulty].includes(q.question)
+      (q) => !gameData.usedQuestions[gameData.currentDifficulty].includes(q.question)
     );
 
     let selectedQuestion;
@@ -357,11 +363,14 @@ FROM table_name;`
           selectedQuestion.question,
         ],
       }));
+
+      gameMethods.updateGameDataObjects("usedQuestions", selectedQuestion.question);
     } else {
       setUsedQuestions((prev) => ({
         ...prev,
         [gameData.currentDifficulty]: [],
       }));
+      gameMethods.resetUsedQuestions();
       selectedQuestion =
         questionList[Math.floor(Math.random() * questionList.length)];
     }
@@ -369,6 +378,8 @@ FROM table_name;`
     if (selectedQuestion) {
       gameMethods.updateGameData("currentQuestion", selectedQuestion);
       setStartTime(Date.now());
+      console.log(selectedQuestion);
+      console.log(gameData.currentQuestion);
 
       const correctResult = await fetchCorrectAnswerResult(
         selectedQuestion.answer
@@ -393,7 +404,7 @@ FROM table_name;`
       }, 3000);
       return;
     }
-    loadQuestion();
+    // loadQuestion();
   }, [gameData.currentDifficulty]);
 
   useEffect(() => {
@@ -411,7 +422,20 @@ FROM table_name;`
   }, [hasExecuted, loadQuestion, name]);
 
   useEffect(() => {
+    const loadCurrentResult = async () => {
+      const correctResult = await fetchCorrectAnswerResult(
+        gameData.currentQuestion.answer
+      );
+      setExpectedOutput(correctResult ? correctResult.slice(0, 5) : []);
+      setCorrectAnswerResult(correctResult);
+    };
+
     if (user.badges) setBadges(user.badges);
+    if(gameData){
+      setMessage(gameData.currentQuestion.question);
+      setButtonsDisabled(false);
+      loadCurrentResult();
+    }
   }, []);
 
   // ---------------------- Badge Modal ----------------------

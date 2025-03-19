@@ -17,9 +17,7 @@ const LeftSidebar = ({
 
   // Safely compute adjustedPoints with optional chaining:
   // If gameData or currentQuestion is undefined, fallback to 0
-  const adjustedPoints =
-    (gameData?.currentQuestion?.points ?? 0) -
-    (gameData?.hintsUsedForQuestion ?? 0);
+  const adjustedPoints = (gameData?.currentQuestion?.points ?? 0) - (gameData?.hintsUsedForQuestion ?? 0);
 
   const handleToggle = (tableName, index) => {
     setExpandedTable(expandedTable === tableName ? null : tableName);

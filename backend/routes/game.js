@@ -75,7 +75,60 @@ router.post("/starter-game-data", async (req, res) => {
         console.error(err);
         res.json({ok: false});
     }    
-})
+});
+
+router.post("/update-game-data", async (req, res) => {
+    const { key, value } = req.body;
+    const db = await connectToMongoDB();
+    const collection = db.collection('game');
+
+    try {
+        await collection.updateOne(
+            { username: req.session.user.username },
+            { $set : { [`gameData.${key}`]: value} }
+        );
+        res.json({ok: true});
+    }
+    catch(err){
+        console.error(err);
+        res.json({ok: false});
+    }    
+});
+
+router.post("/update-game-data-object", async (req, res) => {
+    const { key, value, level } = req.body;
+    const db = await connectToMongoDB();
+    const collection = db.collection('game');
+
+    try {
+        await collection.updateOne(
+            { username: req.session.user.username },
+            { $addToSet : { [`gameData.${key}.${level}`]: value} }
+        );
+        res.json({ok: true});
+    }
+    catch(err){
+        console.error(err);
+        res.json({ok: false});
+    }    
+});
 
 
+router.post("/reset-game-data-object", async (req, res) => {
+    const { key, level } = req.body;
+    const db = await connectToMongoDB();
+    const collection = db.collection('game');
+
+    try {
+        await collection.updateOne(
+            { username: req.session.user.username },
+            { $set : { [`gameData.${key}.${level}`]: []} }
+        );
+        res.json({ok: true});
+    }
+    catch(err){
+        console.error(err);
+        res.json({ok: false});
+    }    
+});
 module.exports = router;

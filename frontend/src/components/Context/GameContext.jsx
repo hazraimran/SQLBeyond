@@ -25,7 +25,7 @@ const GameProvider = ({ children }) => {
     const setDataNewUser = async (username) => {
         const selectedQuestion = selectInitialQuestion();
 
-        const initialGameData = {
+        let initialGameData = {
             currentDifficulty: "easy",
             currentQuestion: selectedQuestion,
             points: 0,
@@ -33,7 +33,7 @@ const GameProvider = ({ children }) => {
             badges: [],
             retryCount: 0,
             usedQuestions: {
-                easy: [selectedQuestion],
+                easy: [selectedQuestion.question],
                 medium: [],
                 hard: [],
             },
@@ -47,6 +47,8 @@ const GameProvider = ({ children }) => {
 
         setGameData(initialGameData);
 
+
+
         try {
             const response = await axios.post(`${apiUrl}/game/starter-game-data`, {
                 initialGameData
@@ -58,14 +60,25 @@ const GameProvider = ({ children }) => {
         }
     }
 
-    const updateGameData = (key, value) => {
+    const updateGameData = async (key, value) => {
         setGameData((prev) => ({
             ...prev,
             [key]: value,
         }));
+
+        try {
+            const response = await axios.post(`${apiUrl}/game/update-game-data`, {
+                key,
+                value
+            }, { withCredentials: true });
+            return;
+        }
+        catch(err) {
+            console.error(err);
+        }
     };
 
-    const updateGameDataObjects = (key, value) => {
+    const updateGameDataObjects = async (key, value) => {
         setGameData((prev) => ({
             ...prev,
             [key]: {
@@ -73,9 +86,21 @@ const GameProvider = ({ children }) => {
                 [gameData.currentDifficulty]: [...prev[key][gameData.currentDifficulty], value]
             }
         }));
+
+        try {
+            const response = await axios.post(`${apiUrl}/game/update-game-data-object`, {
+                key,
+                value,
+                level: gameData.currentDifficulty
+            }, { withCredentials: true });
+            return;
+        }
+        catch(err) {
+            console.error(err);
+        }
     };
 
-    const resetUsedQuestions = () => {
+    const resetUsedQuestions = async () => {
         setGameData((prev) => ({
             ...prev,
             usedQuestions: {
@@ -83,6 +108,12 @@ const GameProvider = ({ children }) => {
                 [gameData.currentDifficulty]: []
             }
         }));
+
+        const response = await axios.post(`${apiUrl}/game/reset-game-data-object`, {
+            key,
+            level: gameData.currentDifficulty
+        }, { withCredentials: true });
+        return;
     }
 
     // for now playerPoints is passed as a parameter, but after it will be from the gameData
