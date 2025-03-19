@@ -212,6 +212,9 @@ FROM table_name;`
       } else {
         setResult([{ error: "Syntax error or invalid query." }]);
         setMessage("❌ Try again");
+        setTimeout(() => {
+          setMessage(`Current Task: ${gameData.currentQuestion.question}`);
+        }, 3000);
       }
     } catch (error) {
       console.error("Error:", error);
