@@ -25,7 +25,6 @@ const Editor = ({
             <button
               className="clear button"
               onClick={() => {
-                console.log("clear click")
                 setQuery("");
                 setContent("");
               }}
@@ -55,7 +54,6 @@ const Editor = ({
             <button
               className="submit button"
               onClick={() => {
-                console.log("sub clicked");
                 setQuery(content);
                 submitQuery(content); // Submit query for full comparison
               }}

@@ -25,7 +25,7 @@ function Register() {
       auth.register(formData);
     }
     catch(err){
-      console.log(err);
+      console.error(err);
     }
   };
 

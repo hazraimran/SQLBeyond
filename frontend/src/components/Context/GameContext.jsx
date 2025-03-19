@@ -10,6 +10,7 @@ const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 const GameProvider = ({ children }) => {
     const [dynamicIdealPoints, setDynamicIdealPoints] = useState([10, 50, 100]);
     const [hasExecuted, setHasExecuted] = useState(false);
+    const user = useAuth().user;
 
     // const [hintsUsedForQuestion, setHintsUsedForQuestion] = useState(0);
 
@@ -51,6 +52,7 @@ const GameProvider = ({ children }) => {
 
         try {
             const response = await axios.post(`${apiUrl}/game/starter-game-data`, {
+                username : user.username,
                 initialGameData
             }, { withCredentials: true });
             return;
@@ -68,6 +70,7 @@ const GameProvider = ({ children }) => {
 
         try {
             const response = await axios.post(`${apiUrl}/game/update-game-data`, {
+                username : user.username,
                 key,
                 value
             }, { withCredentials: true });
@@ -89,6 +92,7 @@ const GameProvider = ({ children }) => {
 
         try {
             const response = await axios.post(`${apiUrl}/game/update-game-data-object`, {
+                username : user.username,
                 key,
                 value,
                 level: gameData.currentDifficulty
@@ -110,6 +114,7 @@ const GameProvider = ({ children }) => {
         }));
 
         const response = await axios.post(`${apiUrl}/game/reset-game-data-object`, {
+            username : user.username,
             key,
             level: gameData.currentDifficulty
         }, { withCredentials: true });
@@ -137,16 +142,18 @@ const GameProvider = ({ children }) => {
         else {
             updateGameData("points", newPoints);
         }
+
+        
     };
 
     const fetchGameData = async () => {
         try {
-            const response = await axios.get(`${apiUrl}/game/load-data`, { withCredentials: true });
+            const response = await axios.get(`${apiUrl}/game/load-data/${user.username}`, { withCredentials: true });
             if(response.data.gameData)
                 setGameData(response.data.gameData.gameData);
         }
         catch (err) {
-            console.log(err);
+            console.error(err);
         }
         finally{
             setLoading(false);

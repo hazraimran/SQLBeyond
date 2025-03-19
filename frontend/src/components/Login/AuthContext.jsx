@@ -25,8 +25,6 @@ const AuthProvider = ({ children }) => {
 
             const data = response.data;
 
-            console.log(data);
-
             if (data.user) {
                 setUser(data.user);
                 setLoading(false);
@@ -40,8 +38,6 @@ const AuthProvider = ({ children }) => {
     }
 
     const login = async (formData) => {
-        console.log("backend url ", import.meta.env.VITE_API_URL);
-        // console.log(formData)
         try {
             const response = await axios.post(`${apiUrl}/account/login`, {
                 username: formData.username,
@@ -49,7 +45,7 @@ const AuthProvider = ({ children }) => {
             }, { withCredentials: true });
 
             const data = response.data;
-            // console.log("inside login: ", data.user);
+
             if (data.user) {
                 setUser(data.user);
                 setLoading(false);
@@ -72,12 +68,7 @@ const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            // console.log("trying to logout")
             await axios.post(`${apiUrl}/account/logout`, {}, { withCredentials: true });
-            // console.log(response.data);
-            // if(user.isOauth)
-            //     googleLogout();
-
             setUser(null);
             setLoading(true);
             navigate("/");
@@ -126,11 +117,9 @@ const AuthProvider = ({ children }) => {
 
 
     useEffect(() => {
-        // console.log(user);
         const loadUser = async () => {
             try {
                 const response = await axios.get(`${apiUrl}/account/login`, { withCredentials: true });
-                // console.log(response.data);
                 if (response.data) 
                     setUser(response.data.user);
                 else 
@@ -140,7 +129,6 @@ const AuthProvider = ({ children }) => {
                 setUser(null);
             }
             finally {
-                // console.log("finally to false");
                 setLoading(false);
             }
         }

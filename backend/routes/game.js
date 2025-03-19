@@ -3,12 +3,13 @@ const { connectToMongoDB } = require('../utils/mongodb');
 
 const router = express.Router();
 
-router.get("/load-data", async (req, res) => {
+router.get("/load-data/:username", async (req, res) => {
     const db = await connectToMongoDB();
     const collection = db.collection('game');
+    const username = req.params.username;
     
     try {
-        const gameData = await collection.findOne({ username: req.session.user.username });
+        const gameData = await collection.findOne({ username });
         if (gameData)
             return res.json({ gameData });
 
@@ -60,13 +61,13 @@ router.post("/current-level", async (req, res) => {
 })
 
 router.post("/starter-game-data", async (req, res) => {
-    const { initialGameData } = req.body;
+    const { username, initialGameData } = req.body;
     const db = await connectToMongoDB();
     const collection = db.collection('game');
 
     try {
         await collection.insertOne({
-            username: req.session.user.username,
+            username,
             gameData: initialGameData
         });
         res.json({ok: true});
@@ -78,13 +79,13 @@ router.post("/starter-game-data", async (req, res) => {
 });
 
 router.post("/update-game-data", async (req, res) => {
-    const { key, value } = req.body;
+    const { username, key, value } = req.body;
     const db = await connectToMongoDB();
     const collection = db.collection('game');
 
     try {
         await collection.updateOne(
-            { username: req.session.user.username },
+            { username },
             { $set : { [`gameData.${key}`]: value} }
         );
         res.json({ok: true});
@@ -96,13 +97,13 @@ router.post("/update-game-data", async (req, res) => {
 });
 
 router.post("/update-game-data-object", async (req, res) => {
-    const { key, value, level } = req.body;
+    const { username, key, value, level } = req.body;
     const db = await connectToMongoDB();
     const collection = db.collection('game');
 
     try {
         await collection.updateOne(
-            { username: req.session.user.username },
+            { username },
             { $addToSet : { [`gameData.${key}.${level}`]: value} }
         );
         res.json({ok: true});
@@ -115,13 +116,13 @@ router.post("/update-game-data-object", async (req, res) => {
 
 
 router.post("/reset-game-data-object", async (req, res) => {
-    const { key, level } = req.body;
+    const { username, key, level } = req.body;
     const db = await connectToMongoDB();
     const collection = db.collection('game');
 
     try {
         await collection.updateOne(
-            { username: req.session.user.username },
+            { username },
             { $set : { [`gameData.${key}.${level}`]: []} }
         );
         res.json({ok: true});

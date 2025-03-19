@@ -275,7 +275,7 @@ FROM table_name;`
 
       const questionDifficulty = gameData.currentQuestion.difficulty;
       let earnedPoints = correct ? gameData.currentQuestion.points : 0;
-      earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0);
+      earnedPoints = Math.max(earnedPoints - gameData.hintsUsedForQuestion, 0);
 
       if (correct) {
         // update local points
@@ -311,8 +311,6 @@ FROM table_name;`
         evaluateAndUnlockBadges();
 
         setTimeout(() => {
-          // reset hints for the next question
-          setHintsUsedForQuestion(0);
           setMessage("");
           loadQuestion();
         }, 3000);
@@ -378,8 +376,6 @@ FROM table_name;`
     if (selectedQuestion) {
       gameMethods.updateGameData("currentQuestion", selectedQuestion);
       setStartTime(Date.now());
-      console.log(selectedQuestion);
-      console.log(gameData.currentQuestion);
 
       const correctResult = await fetchCorrectAnswerResult(
         selectedQuestion.answer

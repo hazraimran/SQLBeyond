@@ -47,8 +47,12 @@ app.use(session({
   secret: "create a better secret",
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7
+    httpOnly: true,
+    secure: true,
+    sameSite: 'None',
+    maxAge: 1000 * 60 * 60 * 24 * 7
   }
 }));
 
@@ -104,13 +108,11 @@ app.post("/get-hint", (req, res) => {
   const missingColumns = checkForMissingItems(userQuery, columnNames);
 
   if (missingConcepts.length > 0 || missingColumns.length > 0) {
-    const hint = `Your query is missing the following: ${
-      missingConcepts.length > 0
+    const hint = `Your query is missing the following: ${missingConcepts.length > 0
         ? `Keywords: ${missingConcepts.join(", ")}`
         : ""
-    } ${
-      missingColumns.length > 0 ? `Columns: ${missingColumns.join(", ")}` : ""
-    }`.trim();
+      } ${missingColumns.length > 0 ? `Columns: ${missingColumns.join(", ")}` : ""
+      }`.trim();
     return res.json({
       success: true,
       stage: "S1",

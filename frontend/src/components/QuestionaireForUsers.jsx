@@ -157,8 +157,6 @@ function QuestionaireForUsers() {
       performanceByDifficulty: { easy, medium, hard },
     };
 
-    // console.log(quizData);
-
     try {
       await axios.post(`${apiUrl}/account/quiz-grade`, {
         quizData: quizData
@@ -184,9 +182,6 @@ function QuestionaireForUsers() {
       medium: Math.round(10 + mediumPerformance * 20),
       hard: Math.round(10 + hardPerformance * 30),
     };
-
-    // console.log({ easyPerformance, mediumPerformance, hardPerformance });
-    // console.log("Ideal Slope:", idealSlope);
 
     const userData = JSON.parse(localStorage.getItem("userData")) || {};
     localStorage.setItem(

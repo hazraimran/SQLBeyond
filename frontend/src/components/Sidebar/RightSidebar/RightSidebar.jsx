@@ -31,7 +31,7 @@ const RightSidebar = ({
       "hintsUsedForQuestion",
       gameData.hintsUsedForQuestion + 1
     );
-    console.log("Hint used! Points deducted.");
+    // console.log("Hint used! Points deducted.");
   };
 
   // const progressPercentage = Math.min((progress / 100) * 100, 100); // Cap at 100%

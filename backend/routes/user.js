@@ -38,12 +38,16 @@ router.post("/login", async (req, res) => {
             if (response) {
                 req.session.user = { username: username };
                 if (!user.quizData)
-                    res.send({ user: user, missingQuiz: true });
+                    req.session.save(()=>{  
+                        res.send({ user: user, missingQuiz: true });
+                    })    
                 else
                     res.send({ user: user });
             }
             else {
-                res.send({ msg: "Username and password don't match!" });
+                req.session.save(()=>{
+                    res.send({ msg: "Username and password don't match!" });
+                }) 
             }
         } catch (err) {
             console.error("Failed to check the password", err);
@@ -61,7 +65,6 @@ router.post("/register", async (req, res) => {
     try {
         const db = await connectToMongoDB();
         const collection = db.collection('users');
-        const gameCollection = db.collection('game');
 
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(password, salt);
@@ -79,7 +82,9 @@ router.post("/register", async (req, res) => {
             const userData = { user: { firstName: firstName, lastName: lastName, username: username, isOauth: false, badges: [] } };
             //store only the userID
             req.session.user = { username: username };
-            res.json(userData);
+            req.session.save(()=> {
+                res.json(userData);
+            })
         } catch (err) {
             console.error("Failed to insert new user: ", err);
             res.json({ status: "failed" });
