@@ -269,6 +269,73 @@ FROM table_name;`
   }
 
   // ---------------------- Answer Checking ----------------------
+  // const checkAnswer = useCallback(
+  //   (userResult, userQuery) => {
+  //     const correct = compareResultSets(userResult, correctAnswerResult);
+
+  //     const questionDifficulty = gameData.currentQuestion.difficulty;
+  //     let earnedPoints = correct ? gameData.currentQuestion.points : 0;
+  //     earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0);
+
+  //     if (correct) {
+  //       // update local points
+  //       setPlayerPoints((prevPoints) => {
+  //         const updatedPoints = { ...prevPoints };
+  //         updatedPoints[questionDifficulty] = [
+  //           ...updatedPoints[questionDifficulty],
+  //           earnedPoints,
+  //         ];
+  //         return updatedPoints;
+  //       });
+
+  //       // update total XP
+  //       // gameMethods.updatePoints(gameData.points, earnedPoints);
+  //       gameMethods.updateGameData("points", gameData.points + earnedPoints);
+
+  //       gameMethods.updateGameDataObjects("playerPoints", earnedPoints);
+
+  //       // check if new total XP is enough to level up
+  //       const newTotalPoints = gameData.points + earnedPoints;
+  //       if (newTotalPoints >= 100 && gameData.currentDifficulty === "easy") {
+  //         gameMethods.updateGameData("currentDifficulty", "medium");
+  //         setMessage("✨ You've leveled up to Medium! ✨");
+  //       } else if (
+  //         newTotalPoints >= 200 &&
+  //         gameData.currentDifficulty === "medium"
+  //       ) {
+  //         gameMethods.updateGameData("currentDifficulty", "hard");
+  //         setMessage("✨ You've leveled up to Hard! ✨");
+  //       }
+
+  //       updatePlayerStats(userQuery, hintsUsedForQuestion);
+
+  //       triggerConfetti();
+  //       evaluateAndUnlockBadges();
+
+  //       setTimeout(() => {
+  //         // reset hints for the next question
+  //         setHintsUsedForQuestion(0);
+  //         setMessage("");
+  //         loadQuestion();
+  //       }, 3000);
+  //     } else {
+  //       setRetryCount((prev) => prev + 1);
+  //       setMessage("❌ Try again");
+  //       setTimeout(() => {
+  //         setMessage(`Current Task: ${gameData.currentQuestion.question}`);
+  //       }, 3000);
+  //     }
+  //   },
+  //   [
+  //     correctAnswerResult,
+  //     gameData.currentQuestion,
+  //     gameData.currentDifficulty,
+  //     hintsUsedForQuestion,
+  //     gameData.points,
+  //     playerPoints,
+  //   ]
+  // );
+
   const checkAnswer = useCallback(
     (userResult, userQuery) => {
       const correct = compareResultSets(userResult, correctAnswerResult);
@@ -276,9 +343,10 @@ FROM table_name;`
       const questionDifficulty = gameData.currentQuestion.difficulty;
       let earnedPoints = correct ? gameData.currentQuestion.points : 0;
       earnedPoints = Math.max(earnedPoints - hintsUsedForQuestion, 0);
+      console.log(earnedPoints);
 
       if (correct) {
-        // update local points
+        // Update local points
         setPlayerPoints((prevPoints) => {
           const updatedPoints = { ...prevPoints };
           updatedPoints[questionDifficulty] = [
@@ -288,17 +356,21 @@ FROM table_name;`
           return updatedPoints;
         });
 
-        // update total XP
-        gameMethods.updatePoints(gameData.points, earnedPoints);
-        gameMethods.updateGameDataObjects('playerPoints', earnedPoints);
-
-        // check if new total XP is enough to level up
+        // 1) Compute new total
         const newTotalPoints = gameData.points + earnedPoints;
+
+        // 2) Update gameData.points to the new total
+        gameMethods.updateGameData("points", newTotalPoints);
+
+        // 3) Also update other gameData objects if needed
+        gameMethods.updateGameDataObjects("playerPoints", earnedPoints);
+
+        // 4) Use newTotalPoints for the level-up checks
         if (newTotalPoints >= 100 && gameData.currentDifficulty === "easy") {
           gameMethods.updateGameData("currentDifficulty", "medium");
           setMessage("✨ You've leveled up to Medium! ✨");
         } else if (
-          newTotalPoints >= 200 &&
+          newTotalPoints >= 220 &&
           gameData.currentDifficulty === "medium"
         ) {
           gameMethods.updateGameData("currentDifficulty", "hard");
@@ -311,7 +383,7 @@ FROM table_name;`
         evaluateAndUnlockBadges();
 
         setTimeout(() => {
-          // reset hints for the next question
+          // Reset hints for the next question
           setHintsUsedForQuestion(0);
           setMessage("");
           loadQuestion();
@@ -347,7 +419,8 @@ FROM table_name;`
     // );
 
     const remainingQuestions = questionList.filter(
-      (q) => !gameData.usedQuestions[gameData.currentDifficulty].includes(q.question)
+      (q) =>
+        !gameData.usedQuestions[gameData.currentDifficulty].includes(q.question)
     );
 
     let selectedQuestion;
@@ -364,7 +437,10 @@ FROM table_name;`
         ],
       }));
 
-      gameMethods.updateGameDataObjects("usedQuestions", selectedQuestion.question);
+      gameMethods.updateGameDataObjects(
+        "usedQuestions",
+        selectedQuestion.question
+      );
     } else {
       setUsedQuestions((prev) => ({
         ...prev,
@@ -431,7 +507,7 @@ FROM table_name;`
     };
 
     if (user.badges) setBadges(user.badges);
-    if(gameData){
+    if (gameData) {
       setMessage(gameData.currentQuestion.question);
       setButtonsDisabled(false);
       loadCurrentResult();
@@ -513,6 +589,7 @@ FROM table_name;`
           submitQuery={submitQuery}
           buttonsDisabled={buttonsDisabled}
           progress={gameData?.points || 0}
+          gameData={gameData}
         />
 
         {/* Result Section */}

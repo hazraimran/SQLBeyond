@@ -69,13 +69,6 @@ const quiz = {
   ],
 };
 
-// function mapInitialScoreToStartingPoint(score, maxScore) {
-//   if (score <= 0.25 * maxScore) return 0.3; // Slightly higher starting point
-//   else if (score <= 0.5 * maxScore) return 0.5; // Adjusted slope
-//   else if (score <= 0.75 * maxScore) return 0.7;
-//   return 0.9; // More refined slope
-// }
-
 function QuestionaireForUsers() {
   const navigate = useNavigate();
   const [activeQuestion, setActiveQuestion] = useState(0);
@@ -88,12 +81,15 @@ function QuestionaireForUsers() {
   });
 
   const { questions } = quiz;
-  // const maxScore = questions.length * quiz.perQuestionScore;
 
   const onClickNext = () => {
     setResult((prev) => {
       const currentQuestion = questions[activeQuestion];
-      const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+
+      // Fix: Trim spaces and make lowercase for accurate comparison
+      const isCorrect =
+        selectedAnswer.trim().toLowerCase() ===
+        currentQuestion.correctAnswer.trim().toLowerCase();
 
       return {
         ...prev,
@@ -129,21 +125,6 @@ function QuestionaireForUsers() {
       hard = { correct: 0, total: 0 },
     } = result;
 
-    // previous quizz data
-    // const quizData = {
-    //   userId: "user123", // Replace with dynamic user ID
-    //   questionDetails: questions.map((q) => ({
-    //     question: q.question,
-    //     correctAnswer: q.correctAnswer,
-    //     difficulty: q.difficulty,
-    //   })),
-    //   timeTaken: 120, // Replace with actual total time
-    //   score: result.score,
-    //   correctAnswers: result.correctAnswers,
-    //   wrongAnswers: result.wrongAnswers,
-    //   performanceByDifficulty: { easy, medium, hard },
-    // };
-
     const quizData = {
       questionDetails: questions.map((q) => ({
         question: q.question,
@@ -157,12 +138,14 @@ function QuestionaireForUsers() {
       performanceByDifficulty: { easy, medium, hard },
     };
 
-    // console.log(quizData);
-
     try {
-      await axios.post(`${apiUrl}/account/quiz-grade`, {
-        quizData: quizData
-    }, { withCredentials: true });
+      await axios.post(
+        `${apiUrl}/account/quiz-grade`,
+        {
+          quizData: quizData,
+        },
+        { withCredentials: true }
+      );
     } catch (err) {
       console.error("Error saving quiz summary:", err);
     }
@@ -184,9 +167,6 @@ function QuestionaireForUsers() {
       medium: Math.round(10 + mediumPerformance * 20),
       hard: Math.round(10 + hardPerformance * 30),
     };
-
-    // console.log({ easyPerformance, mediumPerformance, hardPerformance });
-    // console.log("Ideal Slope:", idealSlope);
 
     const userData = JSON.parse(localStorage.getItem("userData")) || {};
     localStorage.setItem(

@@ -11,21 +11,36 @@ const Editor = ({
   executeQuery,
   submitQuery,
   buttonsDisabled,
+  gameData, // Add gameData as a prop
 }) => {
   const [content, setContent] = useState(query);
+
+  // Define max XP based on difficulty level
+  const getMaxXP = () => {
+    switch (gameData.currentDifficulty) {
+      case "easy":
+        return 100;
+      case "medium":
+        return 220;
+      case "hard":
+        return 380;
+      default:
+        return 100; // Default fallback
+    }
+  };
 
   return (
     <div className="editor-container">
       <div className="editor-header">
         <div>
-          Current XP: {progress}/100
+          Current XP: {progress}/{getMaxXP()}
         </div>
         <div className="buttons">
           <div className="tooltip-container-editor">
             <button
               className="clear button"
               onClick={() => {
-                console.log("clear click")
+                console.log("clear click");
                 setQuery("");
                 setContent("");
               }}

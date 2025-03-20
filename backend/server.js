@@ -232,7 +232,7 @@ app.post("/generate-sql", async (req, res) => {
         },
       }
     );
-    console.log(response);
+    // console.log(response);
     // Extract only the text after "Hint: "
     const generatedText =
       response.data.generated_text || response.data[0]?.generated_text || "";
@@ -259,7 +259,7 @@ app.post("/personalized-hint", async (req, res) => {
   }
 
   const prompt = `Analyze the following incorrect SQL query and provide a hint to fix it or if its correct then encourage the user to submit (under 25 words). Only output the hint without any additional explanation or repetition. User Query: "${userQuery}" Correct Query: "${taskDescription.answer}" Hint:`;
-  console.log(prompt);
+  // console.log(prompt);
   try {
     const response = await axios.post(
       "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct",
@@ -278,7 +278,7 @@ app.post("/personalized-hint", async (req, res) => {
     // Split and extract the last part after "Hint:"
     const hint = generatedText.split("Hint:").pop().trim();
 
-    console.log(hint); // Output: "Query looks correct. Submit it!"
+    // console.log(hint); // Output: "Query looks correct. Submit it!"
     res.json({ success: true, response: hint }); // Send only the extracted hint text
   } catch (err) {
     console.error("Error interacting with Hugging Face:", err.message);
