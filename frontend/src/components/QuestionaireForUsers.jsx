@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/styles.css";
+import "../styles/QuestionaireForUsers.css";
 import axios from "axios";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
