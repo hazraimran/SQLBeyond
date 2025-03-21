@@ -172,6 +172,14 @@ node serverDataPush.js
 
 ## 📁 File Overview — What Each File Does
 
+### 🚀 Main Component Highlight
+
+The main component of the application is:
+
+| File | Description |
+|------|-------------|
+| `src/components/SQLEditor.jsx` | Central hub of the application. This is where SQL execution, query editing, and interaction with tables happen. It coordinates the editor, results, and database context. |
+
 ### 🔧 Root & Configuration Files
 
 | File | Description |
